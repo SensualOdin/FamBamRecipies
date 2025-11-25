@@ -54,6 +54,7 @@ export default function FamilyCookbook() {
           setUserProfile({
             name: profileWithStats.display_name || 'Chef',
             avatar: profileWithStats.avatar || '👨‍🍳',
+            avatarUrl: profileWithStats.avatar_url || null,
             bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
             level: profileWithStats.level || 1,
             experience: profileWithStats.experience || 0,
@@ -125,6 +126,7 @@ export default function FamilyCookbook() {
               ...prev,
               name: profile.display_name || prev.name,
               avatar: profile.avatar || prev.avatar,
+              avatarUrl: profile.avatar_url || prev.avatarUrl,
               bio: profile.bio || prev.bio,
             }));
           }
@@ -347,8 +349,8 @@ export default function FamilyCookbook() {
     // Optimistic update
     setRecipes(prev => [newRecipe, ...prev]);
     
-    // Save to Supabase
-    const savedRecipe = await createRecipe(newRecipe);
+    // Save to Supabase with user ID for tracking
+    const savedRecipe = await createRecipe(newRecipe, user?.id);
     
     // Record activity and refresh stats if user is logged in
     if (user) {
@@ -814,6 +816,14 @@ export default function FamilyCookbook() {
           onDelete={deleteRecipe}
           onMarkAsCooked={handleMarkAsCooked}
           user={user}
+          onUpdateRecipeImage={(recipeId, photoUrl) => {
+            // Update recipe in list
+            setRecipes(prev => prev.map(r => 
+              r.id === recipeId ? { ...r, image: photoUrl } : r
+            ));
+            // Update selected recipe
+            setSelectedRecipe(prev => prev ? { ...prev, image: photoUrl } : null);
+          }}
         />
       )}
       
@@ -847,6 +857,16 @@ export default function FamilyCookbook() {
           userProfile={userProfile}
           recipes={recipes}
           onSignOut={handleSignOut}
+          user={user}
+          onProfileUpdate={(updates) => {
+            setUserProfile(prev => ({
+              ...prev,
+              name: updates.name || prev.name,
+              bio: updates.bio || prev.bio,
+              avatar: updates.avatar || prev.avatar,
+              avatarUrl: updates.avatarUrl || prev.avatarUrl
+            }));
+          }}
         />
       )}
 

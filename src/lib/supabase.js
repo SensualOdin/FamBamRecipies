@@ -58,20 +58,36 @@ export async function fetchCategories() {
 }
 
 // Helper function to create a new recipe
-export async function createRecipe(recipe) {
+export async function createRecipe(recipe, userId = null) {
+  // Get the internal user ID if userId (auth_id) is provided
+  let internalUserId = null;
+  if (userId) {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_id', userId)
+      .single();
+    internalUserId = userData?.id || null;
+  }
+
   const { data, error } = await supabase
     .from('recipes')
     .insert([{
       title: recipe.title,
       description: recipe.description,
+      author_id: internalUserId,
       author_name: recipe.author,
       category: recipe.category,
       image: recipe.image,
       prep_time: recipe.prepTime,
       cook_time: recipe.cookTime,
       servings: recipe.servings,
+      difficulty: recipe.difficulty,
       ingredients: recipe.ingredients,
       instructions: recipe.instructions,
+      dietary: recipe.dietary,
+      tags: recipe.tags,
+      story: recipe.story,
       date_added: new Date().getFullYear().toString(),
     }])
     .select()
@@ -691,5 +707,160 @@ export async function extractRecipeFromImage(imageBase64) {
     console.error('Error extracting recipe:', err);
     return { error: err.message || 'Failed to extract recipe from image' };
   }
+}
+
+// Upload profile avatar
+export async function uploadAvatar(userId, file) {
+  if (!userId) return { error: 'User not logged in' };
+
+  // Get user's internal ID
+  const { data: userData } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', userId)
+    .single();
+
+  if (!userData) return { error: 'User not found' };
+
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${userData.id}.${fileExt}`;
+  const filePath = fileName;
+
+  // Upload to avatars bucket (will overwrite existing)
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: true // Overwrite if exists
+    });
+
+  if (uploadError) {
+    console.error('Error uploading avatar:', uploadError);
+    return { error: uploadError.message };
+  }
+
+  // Get public URL
+  const { data: urlData } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(filePath);
+
+  const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`; // Add timestamp to bust cache
+
+  // Update user profile with new avatar URL
+  const { error: updateError } = await supabase
+    .from('users')
+    .update({ avatar_url: avatarUrl })
+    .eq('id', userData.id);
+
+  if (updateError) {
+    console.error('Error updating user avatar:', updateError);
+    return { error: updateError.message };
+  }
+
+  return { avatarUrl, error: null };
+}
+
+// Update user profile (display name, bio, emoji avatar)
+export async function updateUserProfile(userId, updates) {
+  if (!userId) return { error: 'User not logged in' };
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', userId)
+    .single();
+
+  if (!userData) return { error: 'User not found' };
+
+  const { data, error } = await supabase
+    .from('users')
+    .update({
+      display_name: updates.displayName,
+      bio: updates.bio,
+      avatar: updates.avatar // emoji avatar
+    })
+    .eq('id', userData.id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating profile:', error);
+    return { error: error.message };
+  }
+
+  return { data, error: null };
+}
+
+// Upload recipe photo
+export async function uploadRecipePhoto(recipeId, file) {
+  if (!recipeId) return { error: 'Recipe ID required' };
+
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${recipeId}-${Date.now()}.${fileExt}`;
+  const filePath = `recipes/${fileName}`;
+
+  // Upload to recipe-uploads bucket
+  const { error: uploadError } = await supabase.storage
+    .from('recipe-uploads')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: true
+    });
+
+  if (uploadError) {
+    console.error('Error uploading recipe photo:', uploadError);
+    return { error: uploadError.message };
+  }
+
+  // Get public URL
+  const { data: urlData } = supabase.storage
+    .from('recipe-uploads')
+    .getPublicUrl(filePath);
+
+  const photoUrl = urlData.publicUrl;
+
+  // Update recipe with new photo URL
+  // First, get current photo_urls array
+  const { data: recipe } = await supabase
+    .from('recipes')
+    .select('photo_urls, image')
+    .eq('id', recipeId)
+    .single();
+
+  const currentPhotos = recipe?.photo_urls || [];
+  const updatedPhotos = [...currentPhotos, photoUrl];
+
+  // Update recipe - set as main image and add to photo_urls array
+  const { error: updateError } = await supabase
+    .from('recipes')
+    .update({ 
+      image: photoUrl, // Set as main image
+      photo_urls: updatedPhotos 
+    })
+    .eq('id', recipeId);
+
+  if (updateError) {
+    console.error('Error updating recipe photo:', updateError);
+    return { error: updateError.message };
+  }
+
+  return { photoUrl, error: null };
+}
+
+// Update recipe image (either emoji or photo URL)
+export async function updateRecipeImage(recipeId, image) {
+  if (!recipeId) return { error: 'Recipe ID required' };
+
+  const { error } = await supabase
+    .from('recipes')
+    .update({ image })
+    .eq('id', recipeId);
+
+  if (error) {
+    console.error('Error updating recipe image:', error);
+    return { error: error.message };
+  }
+
+  return { error: null };
 }
 

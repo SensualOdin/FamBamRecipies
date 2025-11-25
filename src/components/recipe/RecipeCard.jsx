@@ -63,7 +63,7 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
           
           {/* Photo or Emoji with sophisticated animation */}
           <div className="absolute inset-0 flex items-center justify-center">
-            {recipe.image && recipe.image.startsWith('data:') ? (
+            {recipe.image && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
               <img 
                 src={recipe.image} 
                 alt={recipe.title} 

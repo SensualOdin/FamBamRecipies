@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { uploadRecipePhoto } from '../../lib/supabase';
 
-const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsCooked, user }) => {
+const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsCooked, user, onUpdateRecipeImage }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showShareNotification, setShowShareNotification] = useState(false);
@@ -16,7 +17,38 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoUploadSuccess, setPhotoUploadSuccess] = useState(false);
   const timerInterval = useRef(null);
+  const photoInputRef = useRef(null);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !user) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB');
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    try {
+      const { photoUrl, error } = await uploadRecipePhoto(recipe.id, file);
+      if (error) {
+        console.error('Error uploading photo:', error);
+        alert('Failed to upload photo. Please try again.');
+      } else if (photoUrl && onUpdateRecipeImage) {
+        onUpdateRecipeImage(recipe.id, photoUrl);
+        setPhotoUploadSuccess(true);
+        setTimeout(() => setPhotoUploadSuccess(false), 3000);
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Failed to upload photo');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -327,10 +359,20 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
           </div>
         )}
 
+        {/* Photo Upload Success Notification */}
+        {photoUploadSuccess && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-fadeIn">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-bold">Photo uploaded successfully!</span>
+          </div>
+        )}
+
         {/* Header */}
-        <div className="relative h-64 bg-gradient-to-br from-blue-100 via-cyan-50 to-blue-200 flex items-center justify-center overflow-hidden">
+        <div className="relative h-64 bg-gradient-to-br from-blue-100 via-cyan-50 to-blue-200 flex items-center justify-center overflow-hidden group/header">
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-          {recipe.image && recipe.image.startsWith('data:') ? (
+          {recipe.image && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
             <img 
               src={recipe.image} 
               alt={recipe.title} 
@@ -338,6 +380,44 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
             />
           ) : (
             <span className="text-9xl animate-bounce-slow">{recipe.image}</span>
+          )}
+          
+          {/* Photo Upload Button */}
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handlePhotoUpload}
+            className="hidden"
+          />
+          {user && (
+            <button
+              onClick={() => photoInputRef.current?.click()}
+              disabled={isUploadingPhoto}
+              className="absolute bottom-4 right-4 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2.5 rounded-xl shadow-lg hover:bg-white hover:scale-105 transition-all opacity-0 group-hover/header:opacity-100"
+            >
+              {isUploadingPhoto ? (
+                <>
+                  <svg className="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">
+                    {recipe.image && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) 
+                      ? 'Change Photo' 
+                      : 'Add Photo'}
+                  </span>
+                </>
+              )}
+            </button>
           )}
           
           {/* Decorative elements */}

@@ -59,7 +59,7 @@ const MealPlannerModal = ({ onClose, recipes, mealPlan, setMealPlan }) => {
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
       <div className={`bg-white rounded-3xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden transition-all duration-500 ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-6 text-white flex justify-between items-center">
+        <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 p-6 text-white flex justify-between items-center">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -116,12 +116,12 @@ const MealPlannerModal = ({ onClose, recipes, mealPlan, setMealPlan }) => {
                     key={day}
                     onClick={() => handleDateClick(day)}
                     className={`
-                      border rounded-xl p-2 cursor-pointer transition-all hover:border-amber-400 hover:shadow-md
+                      border rounded-xl p-2 cursor-pointer transition-all hover:border-blue-400 hover:shadow-md
                       flex flex-col gap-1 overflow-hidden min-h-[80px]
-                      ${isToday ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100'}
+                      ${isToday ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-100'}
                     `}
                   >
-                    <div className={`text-sm font-medium mb-1 ${isToday ? 'text-amber-600' : 'text-gray-700'}`}>
+                    <div className={`text-sm font-medium mb-1 ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
                       {day}
                     </div>
                     <div className="flex-1 overflow-y-auto space-y-1">
@@ -154,7 +154,7 @@ const MealPlannerModal = ({ onClose, recipes, mealPlan, setMealPlan }) => {
                     <button
                       key={recipe.id}
                       onClick={() => handleAddMeal(recipe)}
-                      className="w-full p-3 bg-white rounded-xl border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all text-left flex items-center gap-3 group"
+                      className="w-full p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left flex items-center gap-3 group"
                     >
                       <span className="text-2xl group-hover:scale-110 transition-transform">{recipe.image}</span>
                       <div>

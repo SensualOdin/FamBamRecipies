@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
+const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsCooked, user }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showShareNotification, setShowShareNotification] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCookConfirm, setShowCookConfirm] = useState(false);
+  const [cookRating, setCookRating] = useState(0);
+  const [cookNotes, setCookNotes] = useState('');
+  const [isMarkingCooked, setIsMarkingCooked] = useState(false);
+  const [justCooked, setJustCooked] = useState(false);
   const [addedIngredients, setAddedIngredients] = useState([]);
   const [servingMultiplier, setServingMultiplier] = useState(1);
   const [timerMinutes, setTimerMinutes] = useState(0);
@@ -40,6 +45,26 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
     setTimerSeconds(0);
     setTimerRunning(false);
     if (timerInterval.current) clearInterval(timerInterval.current);
+  };
+
+  const handleMarkAsCooked = async () => {
+    if (!onMarkAsCooked) return;
+    
+    setIsMarkingCooked(true);
+    try {
+      await onMarkAsCooked(recipe.id, cookNotes || null, cookRating || null);
+      setJustCooked(true);
+      setShowCookConfirm(false);
+      setCookNotes('');
+      setCookRating(0);
+      
+      // Show success briefly
+      setTimeout(() => setJustCooked(false), 3000);
+    } catch (error) {
+      console.error('Error marking as cooked:', error);
+    } finally {
+      setIsMarkingCooked(false);
+    }
   };
 
   useEffect(() => {
@@ -203,8 +228,107 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
           </div>
         )}
 
+        {/* Mark as Cooked Confirmation */}
+        {showCookConfirm && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scaleIn">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                  <span className="text-2xl">🍳</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">Mark as Cooked!</h3>
+                  <p className="text-sm text-gray-500">Log your cooking achievement</p>
+                </div>
+              </div>
+              
+              {/* Rating */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">How did it turn out? (optional)</label>
+                <div className="flex gap-2 justify-center">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      onClick={() => setCookRating(star)}
+                      className={`text-3xl transition-all hover:scale-110 ${
+                        star <= cookRating ? 'opacity-100' : 'opacity-30 hover:opacity-60'
+                      }`}
+                    >
+                      ⭐
+                    </button>
+                  ))}
+                </div>
+                {cookRating > 0 && (
+                  <p className="text-center text-sm text-gray-500 mt-1">
+                    {cookRating === 1 && "Needs improvement"}
+                    {cookRating === 2 && "It was okay"}
+                    {cookRating === 3 && "Pretty good!"}
+                    {cookRating === 4 && "Really great!"}
+                    {cookRating === 5 && "Absolutely perfect! 🎉"}
+                  </p>
+                )}
+              </div>
+              
+              {/* Notes */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Any notes? (optional)</label>
+                <textarea
+                  value={cookNotes}
+                  onChange={(e) => setCookNotes(e.target.value)}
+                  placeholder="e.g., Added extra garlic, cooked 5 min longer..."
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none resize-none"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowCookConfirm(false);
+                    setCookRating(0);
+                    setCookNotes('');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleMarkAsCooked}
+                  disabled={isMarkingCooked}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+                >
+                  {isMarkingCooked ? (
+                    <>
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      🔥 I Cooked This!
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Just Cooked Success Notification */}
+        {justCooked && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-fadeIn">
+            <span className="text-2xl">🎉</span>
+            <div>
+              <p className="font-bold">Nice! You cooked this recipe!</p>
+              <p className="text-sm text-cyan-100">+5 XP earned</p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
-        <div className="relative h-64 bg-gradient-to-br from-amber-100 via-orange-50 to-amber-200 flex items-center justify-center overflow-hidden">
+        <div className="relative h-64 bg-gradient-to-br from-blue-100 via-cyan-50 to-blue-200 flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           {recipe.image && recipe.image.startsWith('data:') ? (
             <img 
@@ -217,7 +341,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
           )}
           
           {/* Decorative elements */}
-          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-amber-800 shadow-md">
+          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-blue-800 shadow-md">
             Since {recipe.dateAdded}
           </div>
         </div>
@@ -227,15 +351,15 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
           <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
             <div>
               <h2 className="font-serif text-3xl font-bold text-gray-800 mb-2">{recipe.title}</h2>
-              <p className="text-amber-600 font-medium">Recipe by {recipe.author}</p>
+              <p className="text-blue-600 font-medium">Recipe by {recipe.author}</p>
             </div>
             <div className="flex gap-4">
-              <div className="text-center px-4 py-2 bg-amber-50 rounded-xl">
-                <div className="text-amber-600 font-bold">{recipe.prepTime}</div>
+              <div className="text-center px-4 py-2 bg-blue-50 rounded-xl">
+                <div className="text-blue-600 font-bold">{recipe.prepTime}</div>
                 <div className="text-xs text-gray-500">Prep</div>
               </div>
-              <div className="text-center px-4 py-2 bg-orange-50 rounded-xl">
-                <div className="text-orange-600 font-bold">{recipe.cookTime}</div>
+              <div className="text-center px-4 py-2 bg-cyan-50 rounded-xl">
+                <div className="text-cyan-600 font-bold">{recipe.cookTime}</div>
                 <div className="text-xs text-gray-500">Cook</div>
               </div>
               <div className="text-center px-4 py-2 bg-red-50 rounded-xl">
@@ -245,7 +369,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
             </div>
           </div>
 
-          <p className="text-gray-600 mb-8 text-lg leading-relaxed italic border-l-4 border-amber-400 pl-4">
+          <p className="text-gray-600 mb-8 text-lg leading-relaxed italic border-l-4 border-blue-400 pl-4">
             "{recipe.description}"
           </p>
 
@@ -279,6 +403,22 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
               </svg>
               <span className="text-sm font-medium text-gray-700">Timer</span>
             </button>
+
+            {/* Mark as Cooked Button */}
+            {onMarkAsCooked && (
+              <button
+                onClick={() => setShowCookConfirm(true)}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-5 py-2 rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg shadow-blue-500/30 font-medium"
+              >
+                <span className="text-lg">🔥</span>
+                <span>I Cooked This!</span>
+                {recipe.timesCooked > 0 && (
+                  <span className="bg-white/20 px-2 py-0.5 rounded-lg text-xs">
+                    {recipe.timesCooked}
+                  </span>
+                )}
+              </button>
+            )}
 
             {showTimer && (
               <div className="w-full flex items-center gap-3 glass-morphism p-4 rounded-xl">
@@ -317,7 +457,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
                 className={`
                   px-6 py-3 rounded-xl font-medium capitalize transition-all duration-300
                   ${activeTab === tab 
-                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' 
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30' 
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
                 `}
               >
@@ -336,10 +476,10 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
                   return (
                     <div 
                       key={i}
-                      className="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-50 to-transparent rounded-lg group hover:from-amber-100 transition-colors"
+                      className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-transparent rounded-lg group hover:from-blue-100 transition-colors"
                       style={{ animationDelay: `${i * 50}ms` }}
                     >
-                      <div className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center text-white text-sm font-bold group-hover:scale-110 transition-transform">
+                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold group-hover:scale-110 transition-transform">
                         {i + 1}
                       </div>
                       <span className="flex-1 text-gray-700">{parseIngredient(ingredient)}</span>
@@ -388,9 +528,9 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
                 {recipe.instructions.map((step, i) => (
                   <div 
                     key={i}
-                    className="flex gap-4 p-4 bg-gradient-to-r from-orange-50 to-transparent rounded-xl group hover:from-orange-100 transition-colors"
+                    className="flex gap-4 p-4 bg-gradient-to-r from-cyan-50 to-transparent rounded-xl group hover:from-cyan-100 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold shrink-0 group-hover:scale-110 transition-transform shadow-md">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold shrink-0 group-hover:scale-110 transition-transform shadow-md">
                       {i + 1}
                     </div>
                     <p className="text-gray-700 pt-2">{step}</p>
@@ -404,7 +544,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete }) => {
               {recipe.notes && recipe.notes.length > 0 ? (
                 <div className="space-y-3">
                   {recipe.notes.map((note, i) => (
-                    <div key={i} className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 rounded-xl">
+                    <div key={i} className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-l-4 border-blue-400 rounded-xl">
                       <div className="flex items-start gap-3">
                         <svg className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />

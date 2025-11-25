@@ -9,7 +9,7 @@ import IngredientSubstitutionsModal from './components/modals/IngredientSubstitu
 import UserProfileModal from './components/modals/UserProfileModal';
 import MealPlannerModal from './components/modals/MealPlannerModal';
 import AuthModal from './components/modals/AuthModal';
-import { fetchRecipes, fetchCategories, createRecipe } from './lib/supabase';
+import { fetchRecipes, fetchCategories, createRecipe, getCurrentUser, getUserProfile, getUserProfileWithStats, signOut, onAuthStateChange, ensureUserProfile, recordUserActivity, toggleFavorite as toggleFavoriteDB, getUserFavorites, markRecipeAsCooked } from './lib/supabase';
 import { initialRecipes } from './data/initialRecipes';
 import { initialUserProfile } from './data/initialProfile';
 
@@ -45,15 +45,188 @@ export default function FamilyCookbook() {
   const [user, setUser] = useState(null); // null when logged out, user object when logged in
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  // Refresh stats when profile modal opens
+  useEffect(() => {
+    async function refreshStats() {
+      if (showProfile && user) {
+        const profileWithStats = await getUserProfileWithStats(user.id);
+        if (profileWithStats) {
+          setUserProfile({
+            name: profileWithStats.display_name || 'Chef',
+            avatar: profileWithStats.avatar || '👨‍🍳',
+            bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
+            level: profileWithStats.level || 1,
+            experience: profileWithStats.experience || 0,
+            experienceToNextLevel: profileWithStats.experience_to_next_level || 100,
+            totalPoints: profileWithStats.total_points || 0,
+            badges: profileWithStats.badges || [],
+            achievements: initialUserProfile.achievements.map(ach => ({
+              ...ach,
+              unlocked: profileWithStats.badges?.includes(ach.id) || false
+            })),
+            stats: {
+              recipesCooked: profileWithStats.stats?.recipesCooked || 0,
+              recipesCreated: profileWithStats.stats?.recipesCreated || 0,
+              commentsAdded: profileWithStats.stats?.commentsAdded || 0,
+              favoritesCount: profileWithStats.stats?.favoritesCount || 0,
+              daysActive: profileWithStats.stats?.daysActive || 1,
+              longestStreak: profileWithStats.stats?.longestStreak || 0
+            }
+          });
+        }
+      }
+    }
+    refreshStats();
+  }, [showProfile, user]);
+
+  // Check for existing session and set up auth listener
+  useEffect(() => {
+    async function checkSession() {
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        const profile = await ensureUserProfile(currentUser);
+        if (profile) {
+          // Get profile with real calculated stats
+          const profileWithStats = await getUserProfileWithStats(currentUser.id);
+          
+          setUser({
+            id: currentUser.id,
+            email: currentUser.email,
+            ...profile
+          });
+          
+          // Update userProfile with real data and stats
+          if (profileWithStats) {
+            setUserProfile({
+              name: profileWithStats.display_name || 'Chef',
+              avatar: profileWithStats.avatar || '👨‍🍳',
+              bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
+              level: profileWithStats.level || 1,
+              experience: profileWithStats.experience || 0,
+              experienceToNextLevel: profileWithStats.experience_to_next_level || 100,
+              totalPoints: profileWithStats.total_points || 0,
+              badges: profileWithStats.badges || [],
+              achievements: initialUserProfile.achievements.map(ach => ({
+                ...ach,
+                unlocked: profileWithStats.badges?.includes(ach.id) || false
+              })),
+              stats: {
+                recipesCooked: profileWithStats.stats?.recipesCooked || 0,
+                recipesCreated: profileWithStats.stats?.recipesCreated || 0,
+                commentsAdded: profileWithStats.stats?.commentsAdded || 0,
+                favoritesCount: profileWithStats.stats?.favoritesCount || 0,
+                daysActive: profileWithStats.stats?.daysActive || 1,
+                longestStreak: profileWithStats.stats?.longestStreak || 0
+              }
+            });
+          } else {
+            // Fallback to basic profile
+            setUserProfile(prev => ({
+              ...prev,
+              name: profile.display_name || prev.name,
+              avatar: profile.avatar || prev.avatar,
+              bio: profile.bio || prev.bio,
+            }));
+          }
+          
+          // Record activity
+          await recordUserActivity(currentUser.id, 'login');
+        } else {
+          setUser({
+            id: currentUser.id,
+            email: currentUser.email,
+            name: currentUser.user_metadata?.display_name || 'Chef'
+          });
+        }
+      }
+    }
+
+    checkSession();
+
+    // Listen to auth state changes
+    const { data: { subscription } } = onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const profile = await ensureUserProfile(session.user);
+        if (profile) {
+          // Get profile with real calculated stats
+          const profileWithStats = await getUserProfileWithStats(session.user.id);
+          
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            ...profile
+          });
+          
+          // Update userProfile with real data and stats
+          if (profileWithStats) {
+            setUserProfile({
+              name: profileWithStats.display_name || 'Chef',
+              avatar: profileWithStats.avatar || '👨‍🍳',
+              bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
+              level: profileWithStats.level || 1,
+              experience: profileWithStats.experience || 0,
+              experienceToNextLevel: profileWithStats.experience_to_next_level || 100,
+              totalPoints: profileWithStats.total_points || 0,
+              badges: profileWithStats.badges || [],
+              achievements: initialUserProfile.achievements.map(ach => ({
+                ...ach,
+                unlocked: profileWithStats.badges?.includes(ach.id) || false
+              })),
+              stats: {
+                recipesCooked: profileWithStats.stats?.recipesCooked || 0,
+                recipesCreated: profileWithStats.stats?.recipesCreated || 0,
+                commentsAdded: profileWithStats.stats?.commentsAdded || 0,
+                favoritesCount: profileWithStats.stats?.favoritesCount || 0,
+                daysActive: profileWithStats.stats?.daysActive || 1,
+                longestStreak: profileWithStats.stats?.longestStreak || 0
+              }
+            });
+          } else {
+            setUserProfile(prev => ({
+              ...prev,
+              name: profile.display_name || prev.name,
+              avatar: profile.avatar || prev.avatar,
+              bio: profile.bio || prev.bio,
+            }));
+          }
+          
+          // Record activity
+          await recordUserActivity(session.user.id, 'login');
+        } else {
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.display_name || 'Chef'
+          });
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setShowProfile(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   // Fetch data on mount
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
       try {
         // Try to fetch from Supabase first
+        let favoriteIds = [];
+        try {
+          favoriteIds = user ? await getUserFavorites(user.id) : [];
+        } catch (favError) {
+          console.error('Error loading favorites:', favError);
+          favoriteIds = [];
+        }
+
         const [recipesData, categoriesData] = await Promise.all([
           fetchRecipes(),
-          fetchCategories(),
+          fetchCategories()
         ]);
         
         if (recipesData && recipesData.length > 0) {
@@ -77,7 +250,7 @@ export default function FamilyCookbook() {
             rating: r.rating,
             reviews: r.review_count,
             timesCooked: r.times_cooked,
-            isFavorite: false // Favorites are user-specific, would need another fetch
+            isFavorite: Array.isArray(favoriteIds) && favoriteIds.includes(r.id)
           }));
           setRecipes(transformedRecipes);
         } else {
@@ -100,21 +273,73 @@ export default function FamilyCookbook() {
     }
     
     loadData();
-  }, []);
+  }, [user]);
 
   // Authentication handlers
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await signOut();
     setUser(null);
     setShowProfile(false);
   };
 
-  const handleSignIn = () => {
-    // For now, mock sign in - later this will connect to Supabase auth
-    setUser({
-      id: '1',
-      email: 'user@example.com',
-      name: userProfile.name
-    });
+  const handleSignIn = async (authUser) => {
+    // Ensure user profile exists (create if needed)
+    const profile = await ensureUserProfile(authUser);
+    
+    if (profile) {
+      // Get profile with real calculated stats
+      const profileWithStats = await getUserProfileWithStats(authUser.id);
+      
+      setUser({
+        id: authUser.id,
+        email: authUser.email,
+        ...profile
+      });
+      
+      // Update userProfile with real data and stats
+      if (profileWithStats) {
+        setUserProfile({
+          name: profileWithStats.display_name || 'Chef',
+          avatar: profileWithStats.avatar || '👨‍🍳',
+          bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
+          level: profileWithStats.level || 1,
+          experience: profileWithStats.experience || 0,
+          experienceToNextLevel: profileWithStats.experience_to_next_level || 100,
+          totalPoints: profileWithStats.total_points || 0,
+          badges: profileWithStats.badges || [],
+          achievements: initialUserProfile.achievements.map(ach => ({
+            ...ach,
+            unlocked: profileWithStats.badges?.includes(ach.id) || false
+          })),
+          stats: {
+            recipesCooked: profileWithStats.stats?.recipesCooked || 0,
+            recipesCreated: profileWithStats.stats?.recipesCreated || 0,
+            commentsAdded: profileWithStats.stats?.commentsAdded || 0,
+            favoritesCount: profileWithStats.stats?.favoritesCount || 0,
+            daysActive: profileWithStats.stats?.daysActive || 1,
+            longestStreak: profileWithStats.stats?.longestStreak || 0
+          }
+        });
+      } else {
+        setUserProfile(prev => ({
+          ...prev,
+          name: profile.display_name || prev.name,
+          avatar: profile.avatar || prev.avatar,
+          bio: profile.bio || prev.bio,
+        }));
+      }
+      
+      // Record activity
+      await recordUserActivity(authUser.id, 'login');
+    } else {
+      // Fallback if profile creation failed
+      setUser({
+        id: authUser.id,
+        email: authUser.email,
+        name: authUser.user_metadata?.display_name || 'Chef'
+      });
+    }
+    
     setShowAuthModal(false);
   };
 
@@ -123,22 +348,59 @@ export default function FamilyCookbook() {
     setRecipes(prev => [newRecipe, ...prev]);
     
     // Save to Supabase
-    await createRecipe(newRecipe);
+    const savedRecipe = await createRecipe(newRecipe);
+    
+    // Record activity and refresh stats if user is logged in
+    if (user) {
+      await recordUserActivity(user.id, 'recipe_created');
+      // Refresh user profile stats
+      const profileWithStats = await getUserProfileWithStats(user.id);
+      if (profileWithStats) {
+        setUserProfile(prev => ({
+          ...prev,
+          level: profileWithStats.level || prev.level,
+          experience: profileWithStats.experience || prev.experience,
+          experienceToNextLevel: profileWithStats.experience_to_next_level || prev.experienceToNextLevel,
+          totalPoints: profileWithStats.total_points || prev.totalPoints,
+          stats: {
+            ...prev.stats,
+            recipesCreated: profileWithStats.stats?.recipesCreated || prev.stats.recipesCreated
+          }
+        }));
+      }
+    }
   };
 
-  const toggleFavorite = (id) => {
-    setRecipes(prev => prev.map(recipe => 
-      recipe.id === id ? { ...recipe, isFavorite: !recipe.isFavorite } : recipe
+  const toggleFavorite = async (id) => {
+    const recipe = recipes.find(r => r.id === id);
+    const newFavoriteState = !recipe.isFavorite;
+    
+    // Optimistic update
+    setRecipes(prev => prev.map(r => 
+      r.id === id ? { ...r, isFavorite: newFavoriteState } : r
     ));
     
-    // Update stats
-    setUserProfile(prev => ({
-      ...prev,
-      stats: {
-        ...prev.stats,
-        favoritesCount: prev.stats.favoritesCount + (recipes.find(r => r.id === id).isFavorite ? -1 : 1)
+    // Save to database if user is logged in
+    if (user) {
+      await toggleFavoriteDB(user.id, id, newFavoriteState);
+      await recordUserActivity(user.id, 'favorite_toggled');
+      
+      // Refresh stats
+      const profileWithStats = await getUserProfileWithStats(user.id);
+      if (profileWithStats) {
+        setUserProfile(prev => ({
+          ...prev,
+          level: profileWithStats.level || prev.level,
+          experience: profileWithStats.experience || prev.experience,
+          experienceToNextLevel: profileWithStats.experience_to_next_level || prev.experienceToNextLevel,
+          totalPoints: profileWithStats.total_points || prev.totalPoints,
+          stats: {
+            ...prev.stats,
+            favoritesCount: profileWithStats.stats?.favoritesCount || prev.stats.favoritesCount
+          }
+        }));
       }
-    }));
+    }
   };
 
   const addToShoppingList = (item) => {
@@ -159,6 +421,50 @@ export default function FamilyCookbook() {
   const deleteRecipe = (id) => {
     setRecipes(prev => prev.filter(r => r.id !== id));
     setSelectedRecipe(null);
+  };
+
+  const handleMarkAsCooked = async (recipeId, notes = null, rating = null) => {
+    // Mark the recipe as cooked in the database
+    const { error } = await markRecipeAsCooked(user?.id, recipeId, notes, rating);
+    
+    if (error) {
+      console.error('Failed to mark recipe as cooked:', error);
+      return;
+    }
+
+    // Update the local recipe state to increment timesCooked
+    setRecipes(prev => prev.map(recipe => 
+      recipe.id === recipeId 
+        ? { ...recipe, timesCooked: (recipe.timesCooked || 0) + 1 }
+        : recipe
+    ));
+
+    // Also update the selected recipe if it's the one being cooked
+    if (selectedRecipe && selectedRecipe.id === recipeId) {
+      setSelectedRecipe(prev => ({
+        ...prev,
+        timesCooked: (prev.timesCooked || 0) + 1
+      }));
+    }
+
+    // Record user activity and refresh stats
+    if (user?.id) {
+      await recordUserActivity(user.id, 'cook_recipe');
+      
+      // Refresh user stats
+      const profileWithStats = await getUserProfileWithStats(user.id);
+      if (profileWithStats) {
+        setUserProfile(prev => ({
+          ...prev,
+          ...profileWithStats,
+          stats: profileWithStats.stats,
+          achievements: initialUserProfile.achievements.map(ach => ({
+            ...ach,
+            unlocked: profileWithStats.badges?.includes(ach.id) || false
+          })),
+        }));
+      }
+    }
   };
 
   const filteredRecipes = recipes.filter(recipe => {
@@ -211,13 +517,13 @@ export default function FamilyCookbook() {
             // Profile Button (when logged in)
             <button 
               onClick={() => setShowProfile(true)}
-              className="absolute top-6 right-6 flex items-center gap-3 glass-morphism px-4 py-2 rounded-full hover:bg-white/20 transition-all group"
+              className="absolute top-6 right-6 flex items-center gap-3 bg-white/90 backdrop-blur-md shadow-lg px-4 py-2 rounded-full hover:bg-white hover:shadow-xl transition-all group border border-white/50"
             >
               <div className="text-right hidden sm:block">
-                <div className="text-white font-bold text-sm">{userProfile.name}</div>
-                <div className="text-cyan-300 text-xs">Lvl {userProfile.level} Chef</div>
+                <div className="text-gray-800 font-bold text-sm">{userProfile.name}</div>
+                <div className="text-blue-600 text-xs font-medium">Lvl {userProfile.level} Chef</div>
               </div>
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform">
                 {userProfile.avatar}
               </div>
             </button>
@@ -372,7 +678,7 @@ export default function FamilyCookbook() {
               </button>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-amber-500/30 hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+                className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -506,6 +812,8 @@ export default function FamilyCookbook() {
           onClose={() => setSelectedRecipe(null)} 
           onAddToShoppingList={addToShoppingList}
           onDelete={deleteRecipe}
+          onMarkAsCooked={handleMarkAsCooked}
+          user={user}
         />
       )}
       

@@ -125,3 +125,502 @@ export async function addNote(recipeId, authorName, content) {
   return data;
 }
 
+// Authentication functions
+export async function signUp(email, password, displayName) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        display_name: displayName,
+      }
+    }
+  });
+
+  if (error) {
+    console.error('Error signing up:', error);
+    return { error };
+  }
+
+  // Create user profile in users table (only if user was created)
+  // Note: If email confirmation is required, this will run after confirmation
+  if (data.user) {
+    // Check if profile already exists
+    const { data: existingProfile } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_id', data.user.id)
+      .single();
+
+    if (!existingProfile) {
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert([{
+          auth_id: data.user.id,
+          email: email,
+          display_name: displayName,
+        }]);
+
+      if (profileError) {
+        console.error('Error creating user profile:', profileError);
+        // Don't fail the signup if profile creation fails - it can be created later
+      }
+    }
+  }
+
+  return { data, error: null };
+}
+
+export async function signIn(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    console.error('Error signing in:', error);
+    return { error };
+  }
+
+  return { data, error: null };
+}
+
+export async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error('Error signing out:', error);
+    return { error };
+  }
+  return { error: null };
+}
+
+export async function getCurrentUser() {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
+export async function getUserProfile(userId) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('auth_id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching user profile:', error);
+    return null;
+  }
+
+  return data;
+}
+
+// Ensure user profile exists, create if it doesn't
+export async function ensureUserProfile(authUser) {
+  let profile = await getUserProfile(authUser.id);
+  
+  if (!profile) {
+    const { data: newProfile, error } = await supabase
+      .from('users')
+      .insert([{
+        auth_id: authUser.id,
+        email: authUser.email,
+        display_name: authUser.user_metadata?.display_name || 'Chef',
+      }])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating user profile:', error);
+      return null;
+    }
+    
+    profile = newProfile;
+  }
+  
+  return profile;
+}
+
+// Listen to auth state changes
+export function onAuthStateChange(callback) {
+  return supabase.auth.onAuthStateChange((event, session) => {
+    callback(event, session);
+  });
+}
+
+// Calculate user stats from database
+export async function calculateUserStats(userId) {
+  if (!userId) return null;
+
+  try {
+    // Get user's internal ID from auth_id
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_id', userId)
+      .single();
+
+    if (userError || !userData) {
+      console.error('Error fetching user data for stats:', userError);
+      return null;
+    }
+
+    const internalUserId = userData.id;
+
+    // Calculate stats in parallel
+    const [
+      recipesCreatedRes,
+      commentsAddedRes,
+      favoritesCountRes,
+      userActivityRes,
+      achievementsRes,
+      recipesCookedRes
+    ] = await Promise.all([
+      // Recipes created by user
+      supabase
+        .from('recipes')
+        .select('id')
+        .eq('author_id', internalUserId),
+      
+      // Comments added by user
+      supabase
+        .from('recipe_comments')
+        .select('id')
+        .eq('user_id', internalUserId),
+      
+      // Favorites count
+      supabase
+        .from('user_favorites')
+        .select('id')
+        .eq('user_id', internalUserId),
+      
+      // User activity for streak calculation
+      supabase
+        .from('user_activity')
+        .select('activity_date')
+        .eq('user_id', internalUserId)
+        .order('activity_date', { ascending: false }),
+      
+      // Achievements
+      supabase
+        .from('user_achievements')
+        .select('achievement_id, unlocked_at')
+        .eq('user_id', internalUserId),
+      
+      // Recipes cooked by user
+      supabase
+        .from('recipe_cooks')
+        .select('id')
+        .eq('user_id', internalUserId)
+    ]);
+
+    // Calculate days active
+    const { data: userInfo } = await supabase
+      .from('users')
+      .select('created_at, last_active_date')
+      .eq('id', internalUserId)
+      .single();
+
+    const createdDate = userInfo?.created_at ? new Date(userInfo.created_at) : new Date();
+    const daysActive = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24)) + 1;
+
+    // Calculate longest streak from activity dates
+    let longestStreak = 0;
+    if (userActivityRes.data && userActivityRes.data.length > 0) {
+      try {
+        const dates = userActivityRes.data.map(a => new Date(a.activity_date).toDateString()).reverse();
+        let currentStreak = 1;
+        longestStreak = 1;
+        
+        for (let i = 1; i < dates.length; i++) {
+          const prevDate = new Date(dates[i - 1]);
+          const currDate = new Date(dates[i]);
+          const diffDays = Math.floor((prevDate - currDate) / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            currentStreak++;
+            longestStreak = Math.max(longestStreak, currentStreak);
+          } else {
+            currentStreak = 1;
+          }
+        }
+      } catch (streakError) {
+        console.error('Error calculating streak:', streakError);
+        longestStreak = 0;
+      }
+    }
+
+    // Calculate total points (simple formula: recipes * 10 + comments * 5 + favorites * 3 + cooked * 5)
+    const recipesCreated = (recipesCreatedRes.data?.length || 0);
+    const commentsAdded = (commentsAddedRes.data?.length || 0);
+    const favoritesCount = (favoritesCountRes.data?.length || 0);
+    const recipesCooked = (recipesCookedRes.data?.length || 0);
+    const totalPoints = (recipesCreated * 10) + (commentsAdded * 5) + (favoritesCount * 3) + (daysActive * 2) + (recipesCooked * 5);
+
+    // Calculate level and experience (simple progression: 100 XP per level)
+    const level = Math.floor(totalPoints / 100) + 1;
+    const experience = totalPoints % 100;
+    const experienceToNextLevel = 100;
+
+    // Get achievements
+    const achievements = achievementsRes.data || [];
+    const achievementIds = achievements.map(a => a.achievement_id);
+
+    return {
+      recipesCreated,
+      recipesCooked,
+      commentsAdded,
+      favoritesCount,
+      daysActive,
+      longestStreak,
+      totalPoints,
+      level,
+      experience,
+      experienceToNextLevel,
+      achievements: achievementIds
+    };
+  } catch (error) {
+    console.error('Error calculating user stats:', error);
+    return null;
+  }
+}
+
+// Record user activity (call this when user performs actions)
+export async function recordUserActivity(userId, activityType = 'general') {
+  if (!userId) return;
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', userId)
+    .single();
+
+  if (!userData) return;
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Upsert activity for today
+  await supabase
+    .from('user_activity')
+    .upsert({
+      user_id: userData.id,
+      activity_date: today,
+      activities: { [activityType]: true }
+    }, {
+      onConflict: 'user_id,activity_date'
+    });
+
+  // Update last_active_date
+  await supabase
+    .from('users')
+    .update({ last_active_date: today })
+    .eq('auth_id', userId);
+}
+
+// Get user profile with calculated stats
+export async function getUserProfileWithStats(userId) {
+  const profile = await getUserProfile(userId);
+  if (!profile) return null;
+
+  const stats = await calculateUserStats(userId);
+  if (!stats) return profile;
+
+  return {
+    ...profile,
+    level: stats.level,
+    experience: stats.experience,
+    experience_to_next_level: stats.experienceToNextLevel,
+    total_points: stats.totalPoints,
+    stats: {
+      recipesCreated: stats.recipesCreated,
+      recipesCooked: stats.recipesCooked,
+      commentsAdded: stats.commentsAdded,
+      favoritesCount: stats.favoritesCount,
+      daysActive: stats.daysActive,
+      longestStreak: stats.longestStreak
+    },
+    badges: stats.achievements || []
+  };
+}
+
+// Toggle favorite recipe
+export async function toggleFavorite(userId, recipeId, isFavorite) {
+  if (!userId) return { error: 'User not logged in' };
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', userId)
+    .single();
+
+  if (!userData) return { error: 'User profile not found' };
+
+  if (isFavorite) {
+    // Add favorite
+    const { error } = await supabase
+      .from('user_favorites')
+      .insert([{
+        user_id: userData.id,
+        recipe_id: recipeId
+      }]);
+
+    if (error) {
+      console.error('Error adding favorite:', error);
+      return { error };
+    }
+  } else {
+    // Remove favorite
+    const { error } = await supabase
+      .from('user_favorites')
+      .delete()
+      .eq('user_id', userData.id)
+      .eq('recipe_id', recipeId);
+
+    if (error) {
+      console.error('Error removing favorite:', error);
+      return { error };
+    }
+  }
+
+  return { error: null };
+}
+
+// Get user's favorite recipe IDs
+export async function getUserFavorites(userId) {
+  if (!userId) return [];
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', userId)
+    .single();
+
+  if (!userData) return [];
+
+  const { data, error } = await supabase
+    .from('user_favorites')
+    .select('recipe_id')
+    .eq('user_id', userData.id);
+
+  if (error) {
+    console.error('Error fetching favorites:', error);
+    return [];
+  }
+
+  return (data || []).map(f => f.recipe_id);
+}
+
+// Mark a recipe as cooked (increments times_cooked via trigger)
+export async function markRecipeAsCooked(userId, recipeId, notes = null, rating = null) {
+  // Get user's internal ID
+  let internalUserId = null;
+  if (userId) {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_id', userId)
+      .single();
+    internalUserId = userData?.id || null;
+  }
+
+  const { data, error } = await supabase
+    .from('recipe_cooks')
+    .insert([{
+      recipe_id: recipeId,
+      user_id: internalUserId,
+      notes: notes,
+      rating: rating
+    }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error marking recipe as cooked:', error);
+    return { error };
+  }
+
+  return { data, error: null };
+}
+
+// Get cook history for a recipe
+export async function getRecipeCookHistory(recipeId, limit = 10) {
+  const { data, error } = await supabase
+    .from('recipe_cooks')
+    .select(`
+      id,
+      cooked_at,
+      notes,
+      rating,
+      user_id,
+      users (display_name, avatar)
+    `)
+    .eq('recipe_id', recipeId)
+    .order('cooked_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching cook history:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+// Get user's cook history (recipes they've cooked)
+export async function getUserCookHistory(userId, limit = 20) {
+  if (!userId) return [];
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', userId)
+    .single();
+
+  if (!userData) return [];
+
+  const { data, error } = await supabase
+    .from('recipe_cooks')
+    .select(`
+      id,
+      cooked_at,
+      notes,
+      rating,
+      recipe_id,
+      recipes (id, title, image, category)
+    `)
+    .eq('user_id', userData.id)
+    .order('cooked_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching user cook history:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+// Get count of times a user has cooked recipes
+export async function getUserCookCount(userId) {
+  if (!userId) return 0;
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', userId)
+    .single();
+
+  if (!userData) return 0;
+
+  const { count, error } = await supabase
+    .from('recipe_cooks')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userData.id);
+
+  if (error) {
+    console.error('Error fetching user cook count:', error);
+    return 0;
+  }
+
+  return count || 0;
+}
+

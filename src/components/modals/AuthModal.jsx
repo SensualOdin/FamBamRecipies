@@ -1,20 +1,68 @@
 import React, { useState, useEffect } from 'react';
+import { signUp, signIn } from '../../lib/supabase';
 
-const AuthModal = ({ onClose, onSignIn }) => {
+const AuthModal = ({ onClose, onSignIn, onError }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setTimeout(() => setIsVisible(true), 50);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // For now, just mock sign in - later this will connect to Supabase auth
-    onSignIn();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      if (isSignUp) {
+        // Sign up
+        const { data, error: signUpError } = await signUp(email, password, name);
+        
+        if (signUpError) {
+          setError(signUpError.message || 'Failed to create account. Please try again.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Check if email confirmation is required
+        if (data.user && !data.session) {
+          setError('Please check your email to confirm your account before signing in.');
+          setIsLoading(false);
+          return;
+        }
+
+        // If we have a session, sign in was successful
+        if (data.session) {
+          onSignIn(data.user);
+          setIsVisible(false);
+          setTimeout(onClose, 300);
+        }
+      } else {
+        // Sign in
+        const { data, error: signInError } = await signIn(email, password);
+        
+        if (signInError) {
+          setError(signInError.message || 'Invalid email or password. Please try again.');
+          setIsLoading(false);
+          return;
+        }
+
+        if (data.user) {
+          onSignIn(data.user);
+          setIsVisible(false);
+          setTimeout(onClose, 300);
+        }
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -100,34 +148,42 @@ const AuthModal = ({ onClose, onSignIn }) => {
               />
             </div>
 
+            {error && (
+              <div className="p-3 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3.5 rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3.5 rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
-              {isSignUp ? 'Create Account' : 'Sign In'}
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {isSignUp ? 'Creating Account...' : 'Signing In...'}
+                </>
+              ) : (
+                isSignUp ? 'Create Account' : 'Sign In'
+              )}
             </button>
           </form>
 
           {/* Toggle Sign In / Sign Up */}
           <div className="mt-6 text-center">
             <button
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(null);
+              }}
               className="text-cyan-600 hover:text-cyan-700 font-medium transition-colors"
             >
               {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
             </button>
-          </div>
-
-          {/* Demo Notice */}
-          <div className="mt-6 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-              <p className="text-sm text-amber-800">
-                <strong>Demo Mode:</strong> Authentication will be connected to Supabase in a future update. For now, click Sign In to access the app.
-              </p>
-            </div>
           </div>
         </div>
       </div>

@@ -33,7 +33,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
       <div className={`bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[80vh] flex flex-col overflow-hidden transition-all duration-500 ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white flex justify-between items-center">
+        <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 p-6 text-white flex justify-between items-center">
           <div className="flex items-center gap-3">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -62,11 +62,11 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
               onChange={(e) => setNewItem(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
               placeholder="Add item..."
-              className="flex-1 px-4 py-2 rounded-xl border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+              className="flex-1 px-4 py-2 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
             />
             <button
               onClick={handleAddItem}
-              className="bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition-all font-medium shadow-lg shadow-green-500/30"
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all font-medium shadow-lg shadow-blue-500/30"
             >
               Add
             </button>
@@ -88,15 +88,15 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                 <div 
                   key={item.id}
                   className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                    item.checked ? 'bg-gray-100 opacity-60' : 'bg-white shadow-sm border border-gray-100 hover:border-green-200'
+                    item.checked ? 'bg-gray-100 opacity-60' : 'bg-white shadow-sm border border-gray-100 hover:border-blue-200'
                   }`}
                 >
                   <button
                     onClick={() => toggleItem(item.id)}
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                       item.checked 
-                        ? 'bg-green-500 border-green-500 text-white' 
-                        : 'border-gray-300 hover:border-green-500'
+                        ? 'bg-blue-500 border-blue-500 text-white' 
+                        : 'border-gray-300 hover:border-blue-500'
                     }`}
                   >
                     {item.checked && (

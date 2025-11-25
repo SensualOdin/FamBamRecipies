@@ -113,9 +113,9 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
         </button>
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+        <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 p-6 text-white">
           <h2 className="font-serif text-2xl font-bold">Add Family Recipe</h2>
-          <p className="text-amber-100 mt-1">Share your culinary traditions</p>
+          <p className="text-cyan-100 mt-1">Share your culinary traditions</p>
           
           {/* Progress Bar */}
           <div className="flex gap-2 mt-4">
@@ -126,7 +126,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
               />
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-xs text-amber-100">
+          <div className="flex justify-between mt-2 text-xs text-cyan-100">
             <span>Basic Info</span>
             <span>Details</span>
             <span>Ingredients</span>
@@ -146,7 +146,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                   type="text"
                   value={formData.title}
                   onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                   placeholder="e.g., Grandma's Secret Cookies"
                 />
               </div>
@@ -156,7 +156,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                   type="text"
                   value={formData.author}
                   onChange={e => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                   placeholder="e.g., Aunt Martha"
                 />
               </div>
@@ -165,7 +165,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                 <textarea
                   value={formData.description}
                   onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none resize-none h-24"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none resize-none h-24"
                   placeholder="Tell the story behind this recipe..."
                 />
               </div>
@@ -181,7 +181,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                   <select
                     value={formData.category}
                     onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                   >
                     {categories.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -193,7 +193,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                   <select
                     value={formData.difficulty}
                     onChange={e => setFormData(prev => ({ ...prev, difficulty: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                   >
                     <option value="Easy">Easy</option>
                     <option value="Medium">Medium</option>
@@ -209,7 +209,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                     type="text"
                     value={formData.prepTime}
                     onChange={e => setFormData(prev => ({ ...prev, prepTime: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                     placeholder="30 mins"
                   />
                 </div>
@@ -219,7 +219,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                     type="text"
                     value={formData.cookTime}
                     onChange={e => setFormData(prev => ({ ...prev, cookTime: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                     placeholder="1 hour"
                   />
                 </div>
@@ -229,7 +229,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                     type="number"
                     value={formData.servings}
                     onChange={e => setFormData(prev => ({ ...prev, servings: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                     placeholder="4"
                   />
                 </div>
@@ -265,7 +265,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                       onClick={() => setFormData(prev => ({ ...prev, image: emoji }))}
                       className={`w-12 h-12 text-2xl rounded-xl transition-all duration-200 ${
                         formData.image === emoji 
-                          ? 'bg-amber-100 ring-2 ring-amber-400 scale-110' 
+                          ? 'bg-blue-100 ring-2 ring-blue-400 scale-110' 
                           : 'bg-gray-50 hover:bg-gray-100'
                       }`}
                     >
@@ -283,14 +283,14 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Ingredients *</label>
               {formData.ingredients.map((ingredient, i) => (
                 <div key={i} className="flex gap-2 items-center group">
-                  <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 font-medium text-sm">
+                  <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-medium text-sm">
                     {i + 1}
                   </span>
                   <input
                     type="text"
                     value={ingredient}
                     onChange={e => updateListItem('ingredients', i, e.target.value)}
-                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
                     placeholder="e.g., 2 cups flour"
                   />
                   <button
@@ -307,7 +307,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
               <button
                 type="button"
                 onClick={() => addListItem('ingredients')}
-                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-all flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -323,13 +323,13 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Instructions *</label>
               {formData.instructions.map((instruction, i) => (
                 <div key={i} className="flex gap-2 items-start group">
-                  <span className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 font-medium text-sm mt-2">
+                  <span className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center text-cyan-600 font-medium text-sm mt-2">
                     {i + 1}
                   </span>
                   <textarea
                     value={instruction}
                     onChange={e => updateListItem('instructions', i, e.target.value)}
-                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none resize-none"
+                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none resize-none"
                     placeholder="Describe this step..."
                     rows={2}
                   />
@@ -347,7 +347,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
               <button
                 type="button"
                 onClick={() => addListItem('instructions')}
-                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-all flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -362,7 +362,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
             <div className="text-center py-8">
               <div className="text-8xl mb-4 animate-bounce">{formData.image}</div>
               <h3 className="font-serif text-2xl font-bold text-gray-800 mb-2">{formData.title || 'Your Recipe'}</h3>
-              <p className="text-amber-600 mb-4">by {formData.author || 'You'}</p>
+              <p className="text-blue-600 mb-4">by {formData.author || 'You'}</p>
               <div className="flex justify-center gap-4 text-sm text-gray-500 mb-6">
                 <span>📂 {formData.category}</span>
                 <span>⏱️ {formData.prepTime} prep</span>
@@ -400,7 +400,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
               disabled={!isStepValid()}
               className={`px-6 py-3 rounded-xl font-medium transition-all ${
                 isStepValid()
-                  ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/30'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >

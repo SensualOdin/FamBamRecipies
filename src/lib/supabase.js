@@ -624,3 +624,72 @@ export async function getUserCookCount(userId) {
   return count || 0;
 }
 
+// Upload image to Supabase Storage
+export async function uploadRecipeImage(file) {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+  const filePath = `uploads/${fileName}`;
+
+  const { data, error } = await supabase.storage
+    .from('recipe-uploads')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (error) {
+    console.error('Error uploading image:', error);
+    return { error };
+  }
+
+  // Get public URL
+  const { data: urlData } = supabase.storage
+    .from('recipe-uploads')
+    .getPublicUrl(filePath);
+
+  return { 
+    data: {
+      path: filePath,
+      publicUrl: urlData.publicUrl
+    },
+    error: null 
+  };
+}
+
+// Delete image from Supabase Storage
+export async function deleteRecipeImage(filePath) {
+  const { error } = await supabase.storage
+    .from('recipe-uploads')
+    .remove([filePath]);
+
+  if (error) {
+    console.error('Error deleting image:', error);
+    return { error };
+  }
+
+  return { error: null };
+}
+
+// Extract recipe from image using Edge Function
+export async function extractRecipeFromImage(imageBase64) {
+  try {
+    const { data, error } = await supabase.functions.invoke('extract-recipe-from-image', {
+      body: { imageBase64 }
+    });
+
+    if (error) {
+      console.error('Error calling extract function:', error);
+      return { error: error.message || 'Failed to extract recipe' };
+    }
+
+    if (data.error) {
+      return { error: data.error };
+    }
+
+    return { recipe: data.recipe, error: null };
+  } catch (err) {
+    console.error('Error extracting recipe:', err);
+    return { error: err.message || 'Failed to extract recipe from image' };
+  }
+}
+

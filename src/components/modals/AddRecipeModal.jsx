@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { extractRecipeFromImage } from '../../lib/supabase';
 
 const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // Start at step 0 (choose method)
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionError, setExtractionError] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploadedImagePreview, setUploadedImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
+  
   const [formData, setFormData] = useState({
     title: '',
     author: '',
@@ -16,7 +23,8 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
     image: '🍽️',
     difficulty: 'Easy',
     dietary: [],
-    tags: []
+    tags: [],
+    story: ''
   });
 
   const emojis = ['🍽️', '🥧', '🍖', '🍲', '🍰', '🥗', '🍝', '🍕', '🌮', '🍜', '🥘', '🍳', '🥞', '🧁', '🍪', '☕', '🥤', '🍹'];
@@ -63,6 +71,75 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
     }));
   };
 
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setUploadedImage(file);
+      setExtractionError(null);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleExtractRecipe = async () => {
+    if (!uploadedImage) return;
+    
+    setIsExtracting(true);
+    setExtractionError(null);
+    
+    try {
+      // Convert image to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(uploadedImage);
+      
+      reader.onloadend = async () => {
+        const base64 = reader.result.split(',')[1]; // Remove data:image/...;base64, prefix
+        
+        const { recipe, error } = await extractRecipeFromImage(base64);
+        
+        if (error) {
+          setExtractionError(error);
+          setIsExtracting(false);
+          return;
+        }
+        
+        if (recipe) {
+          // Populate form with extracted data
+          setFormData(prev => ({
+            ...prev,
+            title: recipe.title || prev.title,
+            author: recipe.author || prev.author,
+            category: recipe.category || prev.category,
+            prepTime: recipe.prepTime || prev.prepTime,
+            cookTime: recipe.cookTime || prev.cookTime,
+            servings: recipe.servings?.toString() || prev.servings,
+            description: recipe.description || prev.description,
+            ingredients: recipe.ingredients?.length > 0 ? recipe.ingredients : prev.ingredients,
+            instructions: recipe.instructions?.length > 0 ? recipe.instructions : prev.instructions,
+            difficulty: recipe.difficulty || prev.difficulty,
+            dietary: recipe.dietary || prev.dietary,
+            tags: recipe.tags || prev.tags,
+            story: recipe.story || prev.story
+          }));
+          
+          // Move to step 1 to review/edit
+          setStep(1);
+        }
+        
+        setIsExtracting(false);
+      };
+    } catch (err) {
+      console.error('Error extracting recipe:', err);
+      setExtractionError('Failed to process image. Please try again.');
+      setIsExtracting(false);
+    }
+  };
+
   const handleSubmit = () => {
     const newRecipe = {
       ...formData,
@@ -82,11 +159,21 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
   };
 
   const isStepValid = () => {
+    if (step === 0) return true; // Method selection step
     if (step === 1) return formData.title && formData.author && formData.description;
     if (step === 2) return formData.prepTime && formData.cookTime && formData.servings;
     if (step === 3) return formData.ingredients.some(i => i.trim());
     if (step === 4) return formData.instructions.some(i => i.trim());
     return true;
+  };
+
+  const getStepLabel = (s) => {
+    if (s === 0) return 'Method';
+    if (s === 1) return 'Basic Info';
+    if (s === 2) return 'Details';
+    if (s === 3) return 'Ingredients';
+    if (s === 4) return 'Steps';
+    return 'Finish';
   };
 
   return (
@@ -117,26 +204,161 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
           <h2 className="font-serif text-2xl font-bold">Add Family Recipe</h2>
           <p className="text-cyan-100 mt-1">Share your culinary traditions</p>
           
-          {/* Progress Bar */}
-          <div className="flex gap-2 mt-4">
-            {[1, 2, 3, 4, 5].map(s => (
-              <div 
-                key={s}
-                className={`h-2 flex-1 rounded-full transition-all duration-500 ${s <= step ? 'bg-white' : 'bg-white/30'}`}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between mt-2 text-xs text-cyan-100">
-            <span>Basic Info</span>
-            <span>Details</span>
-            <span>Ingredients</span>
-            <span>Steps</span>
-            <span>Finish</span>
-          </div>
+          {/* Progress Bar - Only show after step 0 */}
+          {step > 0 && (
+            <>
+              <div className="flex gap-2 mt-4">
+                {[1, 2, 3, 4, 5].map(s => (
+                  <div 
+                    key={s}
+                    className={`h-2 flex-1 rounded-full transition-all duration-500 ${s <= step ? 'bg-white' : 'bg-white/30'}`}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-between mt-2 text-xs text-cyan-100">
+                <span>Basic Info</span>
+                <span>Details</span>
+                <span>Ingredients</span>
+                <span>Steps</span>
+                <span>Finish</span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Form Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-16rem)]">
+          {/* Step 0: Choose Method */}
+          <div className={`transition-all duration-300 ${step === 0 ? 'opacity-100' : 'opacity-0 hidden'}`}>
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-2">How would you like to add your recipe?</h3>
+              <p className="text-gray-500">Choose a method to get started</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Manual Entry Option */}
+              <button
+                onClick={() => setStep(1)}
+                className="p-6 border-2 border-gray-200 rounded-2xl hover:border-blue-400 hover:bg-blue-50 transition-all group text-left"
+              >
+                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <h4 className="font-bold text-gray-800 mb-1">Type it manually</h4>
+                <p className="text-sm text-gray-500">Enter the recipe details step by step</p>
+              </button>
+              
+              {/* Upload Image Option */}
+              <div className="p-6 border-2 border-gray-200 rounded-2xl hover:border-cyan-400 hover:bg-cyan-50 transition-all group text-left">
+                <div className="w-16 h-16 bg-cyan-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h4 className="font-bold text-gray-800 mb-1">Upload a photo</h4>
+                <p className="text-sm text-gray-500 mb-4">Scan a recipe card, cookbook page, or handwritten note</p>
+                
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                
+                {!uploadedImagePreview ? (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full py-3 border-2 border-dashed border-cyan-300 rounded-xl text-cyan-600 hover:bg-cyan-100 transition-all flex items-center justify-center gap-2 font-medium"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Select Image
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Image Preview */}
+                    <div className="relative rounded-xl overflow-hidden border border-gray-200">
+                      <img 
+                        src={uploadedImagePreview} 
+                        alt="Recipe preview" 
+                        className="w-full h-40 object-cover"
+                      />
+                      <button
+                        onClick={() => {
+                          setUploadedImage(null);
+                          setUploadedImagePreview(null);
+                          setExtractionError(null);
+                        }}
+                        className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-all"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    {/* Error Message */}
+                    {extractionError && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>{extractionError}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Extract Button */}
+                    <button
+                      onClick={handleExtractRecipe}
+                      disabled={isExtracting}
+                      className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-medium hover:from-cyan-600 hover:to-blue-600 transition-all shadow-lg shadow-cyan-500/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isExtracting ? (
+                        <>
+                          <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span>Extracting recipe...</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                          <span>Extract Recipe with AI</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* AI Info Note */}
+            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                  <span className="text-xl">✨</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-800 text-sm">AI-Powered Extraction</h4>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Upload a photo of a recipe card, cookbook page, or even handwritten notes. 
+                    Our AI will extract the title, ingredients, instructions, and more automatically!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Step 1: Basic Info */}
           <div className={`transition-all duration-300 ${step === 1 ? 'opacity-100' : 'opacity-0 hidden'}`}>
             <div className="space-y-4">
@@ -383,18 +605,20 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
         {/* Footer Navigation */}
         <div className="p-6 border-t bg-gray-50 flex justify-between">
           <button
-            onClick={() => setStep(prev => Math.max(1, prev - 1))}
+            onClick={() => setStep(prev => Math.max(0, prev - 1))}
             className={`px-6 py-3 rounded-xl font-medium transition-all ${
-              step === 1 
+              step === 0 
                 ? 'text-gray-300 cursor-not-allowed' 
                 : 'text-gray-600 hover:bg-gray-200'
             }`}
-            disabled={step === 1}
+            disabled={step === 0}
           >
             ← Back
           </button>
           
-          {step < 5 ? (
+          {step === 0 ? (
+            <div /> // Empty div for spacing on step 0
+          ) : step < 5 ? (
             <button
               onClick={() => setStep(prev => Math.min(5, prev + 1))}
               disabled={!isStepValid()}

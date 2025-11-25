@@ -2,23 +2,12 @@ import React from 'react';
 
 const FloatingParticles = () => {
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {[...Array(20)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full opacity-20"
-          style={{
-            width: Math.random() * 10 + 5 + 'px',
-            height: Math.random() * 10 + 5 + 'px',
-            left: Math.random() * 100 + '%',
-            top: Math.random() * 100 + '%',
-            background: i % 2 === 0 ? '#8B4513' : '#DAA520',
-            animation: `float ${Math.random() * 10 + 15}s ease-in-out infinite`,
-            animationDelay: `-${Math.random() * 10}s`
-          }}
-        />
-      ))}
-    </div>
+    <>
+      {/* Detroit-inspired ambient light effects - Honolulu Blue and Silver */}
+      <div className="fixed top-0 left-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl pointer-events-none z-0 animate-pulse" style={{ animationDuration: '8s' }} />
+      <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-cyan-400/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse" style={{ animationDuration: '10s' }} />
+      <div className="fixed top-1/2 right-1/3 w-80 h-80 bg-slate-300/10 rounded-full blur-3xl pointer-events-none z-0 animate-pulse" style={{ animationDuration: '12s' }} />
+    </>
   );
 };
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { categories } from '../../data/categories';
 
-const AddRecipeModal = ({ onClose, onSave }) => {
+const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -14,10 +13,14 @@ const AddRecipeModal = ({ onClose, onSave }) => {
     description: '',
     ingredients: [''],
     instructions: [''],
-    image: '🍽️'
+    image: '🍽️',
+    difficulty: 'Easy',
+    dietary: [],
+    tags: []
   });
 
   const emojis = ['🍽️', '🥧', '🍖', '🍲', '🍰', '🥗', '🍝', '🍕', '🌮', '🍜', '🥘', '🍳', '🥞', '🧁', '🍪', '☕', '🥤', '🍹'];
+  const dietaryOptions = ["Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Keto", "Paleo", "Low-Carb"];
 
   useEffect(() => {
     setTimeout(() => setIsVisible(true), 10);
@@ -51,13 +54,28 @@ const AddRecipeModal = ({ onClose, onSave }) => {
     }
   };
 
+  const toggleDietary = (option) => {
+    setFormData(prev => ({
+      ...prev,
+      dietary: prev.dietary.includes(option)
+        ? prev.dietary.filter(d => d !== option)
+        : [...prev.dietary, option]
+    }));
+  };
+
   const handleSubmit = () => {
     const newRecipe = {
       ...formData,
       id: Date.now(),
       ingredients: formData.ingredients.filter(i => i.trim()),
       instructions: formData.instructions.filter(i => i.trim()),
-      dateAdded: new Date().getFullYear().toString()
+      dateAdded: new Date().getFullYear().toString(),
+      history: [{
+        action: 'created',
+        date: new Date().toISOString(),
+        changes: 'Recipe created'
+      }],
+      lastModified: new Date().toISOString()
     };
     onSave(newRecipe);
     handleClose();
@@ -157,18 +175,33 @@ const AddRecipeModal = ({ onClose, onSave }) => {
           {/* Step 2: Details */}
           <div className={`transition-all duration-300 ${step === 2 ? 'opacity-100' : 'opacity-0 hidden'}`}>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                <select
-                  value={formData.category}
-                  onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
-                >
-                  {categories.filter(c => c !== 'All').map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                  >
+                    {categories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                  <select
+                    value={formData.difficulty}
+                    onChange={e => setFormData(prev => ({ ...prev, difficulty: e.target.value }))}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition-all outline-none"
+                  >
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                  </select>
+                </div>
               </div>
+
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Prep Time *</label>
@@ -201,6 +234,27 @@ const AddRecipeModal = ({ onClose, onSave }) => {
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Dietary Tags</label>
+                <div className="flex flex-wrap gap-2">
+                  {dietaryOptions.map(option => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => toggleDietary(option)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                        formData.dietary.includes(option)
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Choose an Icon</label>
                 <div className="flex flex-wrap gap-2">

@@ -8,6 +8,7 @@ import UnitConverterModal from './components/modals/UnitConverterModal';
 import IngredientSubstitutionsModal from './components/modals/IngredientSubstitutionsModal';
 import UserProfileModal from './components/modals/UserProfileModal';
 import MealPlannerModal from './components/modals/MealPlannerModal';
+import AuthModal from './components/modals/AuthModal';
 import { fetchRecipes, fetchCategories, createRecipe } from './lib/supabase';
 import { initialRecipes } from './data/initialRecipes';
 import { initialUserProfile } from './data/initialProfile';
@@ -39,6 +40,10 @@ export default function FamilyCookbook() {
   const [mealPlan, setMealPlan] = useState({});
   const [showProfile, setShowProfile] = useState(false);
   const [userProfile, setUserProfile] = useState(initialUserProfile);
+  
+  // Authentication state
+  const [user, setUser] = useState(null); // null when logged out, user object when logged in
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Fetch data on mount
   useEffect(() => {
@@ -96,6 +101,22 @@ export default function FamilyCookbook() {
     
     loadData();
   }, []);
+
+  // Authentication handlers
+  const handleSignOut = () => {
+    setUser(null);
+    setShowProfile(false);
+  };
+
+  const handleSignIn = () => {
+    // For now, mock sign in - later this will connect to Supabase auth
+    setUser({
+      id: '1',
+      email: 'user@example.com',
+      name: userProfile.name
+    });
+    setShowAuthModal(false);
+  };
 
   const handleAddRecipe = async (newRecipe) => {
     // Optimistic update
@@ -185,26 +206,39 @@ export default function FamilyCookbook() {
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 py-20 sm:py-32">
-          {/* Profile Button */}
-          <button 
-            onClick={() => setShowProfile(true)}
-            className="absolute top-6 right-6 flex items-center gap-3 glass-morphism px-4 py-2 rounded-full hover:bg-white/20 transition-all group"
-          >
-            <div className="text-right hidden sm:block">
-              <div className="text-white font-bold text-sm">{userProfile.name}</div>
-              <div className="text-cyan-300 text-xs">Lvl {userProfile.level} Chef</div>
-            </div>
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform">
-              {userProfile.avatar}
-            </div>
-          </button>
+          {/* Authentication / Profile Button */}
+          {user ? (
+            // Profile Button (when logged in)
+            <button 
+              onClick={() => setShowProfile(true)}
+              className="absolute top-6 right-6 flex items-center gap-3 glass-morphism px-4 py-2 rounded-full hover:bg-white/20 transition-all group"
+            >
+              <div className="text-right hidden sm:block">
+                <div className="text-white font-bold text-sm">{userProfile.name}</div>
+                <div className="text-cyan-300 text-xs">Lvl {userProfile.level} Chef</div>
+              </div>
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform">
+                {userProfile.avatar}
+              </div>
+            </button>
+          ) : (
+            // Sign In / Sign Up Button (when logged out)
+            <button 
+              onClick={() => setShowAuthModal(true)}
+              className="absolute top-6 right-6 flex items-center gap-2 glass-morphism px-5 py-2.5 rounded-full hover:bg-white/20 transition-all font-semibold text-white"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Sign In / Sign Up
+            </button>
+          )}
 
           {/* Tools Menu */}
           <div className="absolute top-6 left-6 flex gap-2">
             <button
               onClick={() => setShowShoppingList(true)}
-              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative"
-              title="Shopping List"
+              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -214,33 +248,42 @@ export default function FamilyCookbook() {
                   {shoppingList.filter(i => !i.checked).length}
                 </span>
               )}
+              <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                Shopping List
+              </span>
             </button>
             <button
               onClick={() => setShowMealPlanner(true)}
-              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all"
-              title="Meal Planner"
+              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
+              <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                Meal Planner
+              </span>
             </button>
             <button
               onClick={() => setShowUnitConverter(true)}
-              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all"
-              title="Unit Converter"
+              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
+              <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                Unit Converter
+              </span>
             </button>
             <button
               onClick={() => setShowSubstitutions(true)}
-              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all"
-              title="Ingredient Substitutions"
+              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
               </svg>
+              <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                Ingredient Substitutions
+              </span>
             </button>
           </div>
 
@@ -495,15 +538,23 @@ export default function FamilyCookbook() {
           onClose={() => setShowProfile(false)} 
           userProfile={userProfile}
           recipes={recipes}
+          onSignOut={handleSignOut}
         />
       )}
 
       {showMealPlanner && (
-        <MealPlannerModal 
-          onClose={() => setShowMealPlanner(false)} 
+        <MealPlannerModal
+          onClose={() => setShowMealPlanner(false)}
           recipes={recipes}
           mealPlan={mealPlan}
           setMealPlan={setMealPlan}
+        />
+      )}
+
+      {showAuthModal && (
+        <AuthModal 
+          onClose={() => setShowAuthModal(false)} 
+          onSignIn={handleSignIn}
         />
       )}
     </div>

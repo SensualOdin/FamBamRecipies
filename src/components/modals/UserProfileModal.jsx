@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const UserProfileModal = ({ onClose, userProfile, recipes }) => {
+const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -23,6 +23,25 @@ const UserProfileModal = ({ onClose, userProfile, recipes }) => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-cyan-300 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
           </div>
+
+          {/* Sign Out Button */}
+          <button
+            onClick={() => {
+              if (window.confirm('Are you sure you want to sign out?')) {
+                setIsVisible(false);
+                setTimeout(() => {
+                  onSignOut();
+                  onClose();
+                }, 300);
+              }
+            }}
+            className="absolute top-6 left-6 px-5 py-2.5 bg-white/20 hover:bg-white/30 rounded-full flex items-center gap-2 transition-all hover:scale-105 z-10 font-medium"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </button>
 
           <button
             onClick={() => {

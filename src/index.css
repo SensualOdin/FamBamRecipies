@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    margin: 0.5in;
+    size: letter;
+  }
+
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Hide everything except the recipe modal */
+  body > div:not(:has(.recipe-print-content)) {
+    display: none !important;
+  }
+
+  /* Reset modal to full width for print */
+  .fixed.inset-0 {
+    position: static !important;
+    background: white !important;
+  }
+
+  /* Make modal content fill page */
+  .rounded-3xl {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+
+  /* Simplify header for print */
+  .relative.h-64 {
+    height: auto !important;
+    padding: 2rem !important;
+    background: linear-gradient(to right, #f59e0b, #ea580c) !important;
+  }
+
+  .text-9xl {
+    font-size: 4rem !important;
+  }
+
+  /* Optimize content layout */
+  .overflow-y-auto {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  /* Remove interactive elements */
+  button:not(.print\\:block) {
+    display: none !important;
+  }
+
+  /* Improve text readability */
+  .text-gray-600,
+  .text-gray-700 {
+    color: #000 !important;
+  }
+
+  /* Show all tab content */
+  .opacity-0.hidden {
+    opacity: 1 !important;
+    display: block !important;
+  }
+
+  /* Page break control */
+  .space-y-2 > li {
+    break-inside: avoid;
+  }
+
+  h2, h3 {
+    break-after: avoid;
+  }
+}

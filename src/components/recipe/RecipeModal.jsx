@@ -134,7 +134,15 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
       const rest = match[2];
       const numMatch = amount.match(/^([\d./]+)/);
       if (numMatch) {
-        let num = eval(numMatch[1]) * servingMultiplier;
+        // Parse fractions like "1/2" safely without eval
+        const numStr = numMatch[1];
+        let num;
+        if (numStr.includes('/')) {
+          const [numerator, denominator] = numStr.split('/').map(Number);
+          num = (numerator / denominator) * servingMultiplier;
+        } else {
+          num = parseFloat(numStr) * servingMultiplier;
+        }
         if (num % 1 !== 0) num = num.toFixed(2);
         return amount.replace(numMatch[1], num) + ' ' + rest;
       }

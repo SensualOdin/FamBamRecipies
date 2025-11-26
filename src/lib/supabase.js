@@ -141,6 +141,16 @@ export async function addNote(recipeId, authorName, content) {
   return data;
 }
 
+// Site URL for auth redirects (use production URL or fallback to current origin)
+const getSiteUrl = () => {
+  // In production, use the actual domain
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    return window.location.origin;
+  }
+  // Default to production URL
+  return 'https://www.gewinningrecipes.com';
+};
+
 // Authentication functions
 export async function signUp(email, password, displayName) {
   const { data, error } = await supabase.auth.signUp({
@@ -149,7 +159,8 @@ export async function signUp(email, password, displayName) {
     options: {
       data: {
         display_name: displayName,
-      }
+      },
+      emailRedirectTo: getSiteUrl(),
     }
   });
 

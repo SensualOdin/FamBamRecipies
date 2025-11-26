@@ -513,101 +513,102 @@ export default function FamilyCookbook() {
           }} />
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 py-20 sm:py-32">
-          {/* Authentication / Profile Button */}
-          {user ? (
-            // Profile Button (when logged in)
-            <button 
-              onClick={() => setShowProfile(true)}
-              className="absolute top-6 right-6 flex items-center gap-3 bg-white/90 backdrop-blur-md shadow-lg px-4 py-2 rounded-full hover:bg-white hover:shadow-xl transition-all group border border-white/50"
-            >
-              <div className="text-right hidden sm:block">
-                <div className="text-gray-800 font-bold text-sm">{userProfile.name}</div>
-                <div className="text-blue-600 text-xs font-medium">Lvl {userProfile.level} Chef</div>
-              </div>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform">
-                {userProfile.avatar}
-              </div>
-            </button>
-          ) : (
-            // Sign In / Sign Up Button (when logged out)
-            <button 
-              onClick={() => setShowAuthModal(true)}
-              className="absolute top-6 right-6 flex items-center gap-2 glass-morphism px-5 py-2.5 rounded-full hover:bg-white/20 transition-all font-semibold text-white"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              Sign In / Sign Up
-            </button>
-          )}
-
-          {/* Tools Menu */}
-          <div className="absolute top-6 left-6 flex gap-2">
-            <button
-              onClick={() => setShowShoppingList(true)}
-              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              {shoppingList.filter(i => !i.checked).length > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] flex items-center justify-center font-bold shadow-md">
-                  {shoppingList.filter(i => !i.checked).length}
+        <div className="relative max-w-7xl mx-auto px-3 sm:px-4 py-16 sm:py-24 md:py-32">
+          {/* Top Bar with Tools and Auth - Mobile Optimized */}
+          <div className="flex justify-between items-center mb-8 sm:mb-0 sm:absolute sm:top-6 sm:left-6 sm:right-6">
+            {/* Tools Menu */}
+            <div className="flex gap-1.5 sm:gap-2">
+              <button
+                onClick={() => setShowShoppingList(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                {shoppingList.filter(i => !i.checked).length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 rounded-full text-[9px] sm:text-[10px] flex items-center justify-center font-bold shadow-md">
+                    {shoppingList.filter(i => !i.checked).length}
+                  </span>
+                )}
+                <span className="hidden sm:block absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                  Shopping List
                 </span>
-              )}
-              <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                Shopping List
-              </span>
-            </button>
-            <button
-              onClick={() => setShowMealPlanner(true)}
-              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                Meal Planner
-              </span>
-            </button>
-            <button
-              onClick={() => setShowUnitConverter(true)}
-              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
-              <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                Unit Converter
-              </span>
-            </button>
-            <button
-              onClick={() => setShowSubstitutions(true)}
-              className="w-10 h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-              </svg>
-              <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                Ingredient Substitutions
-              </span>
-            </button>
+              </button>
+              <button
+                onClick={() => setShowMealPlanner(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="hidden sm:block absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                  Meal Planner
+                </span>
+              </button>
+              <button
+                onClick={() => setShowUnitConverter(true)}
+                className="hidden xs:flex w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full items-center justify-center text-white hover:bg-white/20 transition-all relative group"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                <span className="hidden sm:block absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                  Unit Converter
+                </span>
+              </button>
+              <button
+                onClick={() => setShowSubstitutions(true)}
+                className="hidden xs:flex w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full items-center justify-center text-white hover:bg-white/20 transition-all relative group"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+                <span className="hidden sm:block absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                  Ingredient Substitutions
+                </span>
+              </button>
+            </div>
+
+            {/* Authentication / Profile Button */}
+            {user ? (
+              <button 
+                onClick={() => setShowProfile(true)}
+                className="flex items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-md shadow-lg px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-white hover:shadow-xl transition-all group border border-white/50"
+              >
+                <div className="text-right hidden sm:block">
+                  <div className="text-gray-800 font-bold text-sm">{userProfile.name}</div>
+                  <div className="text-blue-600 text-xs font-medium">Lvl {userProfile.level} Chef</div>
+                </div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-base sm:text-lg shadow-lg group-hover:scale-110 transition-transform">
+                  {userProfile.avatar}
+                </div>
+              </button>
+            ) : (
+              <button 
+                onClick={() => setShowAuthModal(true)}
+                className="flex items-center gap-1.5 sm:gap-2 glass-morphism px-3 sm:px-5 py-2 sm:py-2.5 rounded-full hover:bg-white/20 transition-all font-semibold text-white text-sm sm:text-base"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span className="hidden xs:inline">Sign In</span>
+              </button>
+            )}
           </div>
 
           <div className={`text-center transform transition-all duration-1000 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h1 className="font-serif text-5xl sm:text-7xl font-bold text-white mb-6 tracking-tight text-shadow-premium">
+            <h1 className="font-serif text-3xl xs:text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6 tracking-tight text-shadow-premium">
               Our Family Cookbook
             </h1>
-            <p className="text-cyan-100 text-xl sm:text-2xl max-w-2xl mx-auto mb-10 font-light">
+            <p className="text-cyan-100 text-base sm:text-xl md:text-2xl max-w-2xl mx-auto mb-6 sm:mb-10 font-light px-2">
               Preserving traditions, one recipe at a time.
             </p>
             
             {/* Search Bar */}
-            <div className={`max-w-2xl mx-auto transform transition-all duration-500 ${isSearchFocused ? 'scale-105' : 'scale-100'}`}>
-              <div className={`relative bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 transition-all duration-300 ${isSearchFocused ? 'bg-white/20 ring-4 ring-cyan-400/30' : ''}`}>
+            <div className={`max-w-2xl mx-auto transform transition-all duration-500 ${isSearchFocused ? 'sm:scale-105' : 'scale-100'}`}>
+              <div className={`relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-2xl border border-white/20 transition-all duration-300 ${isSearchFocused ? 'bg-white/20 ring-2 sm:ring-4 ring-cyan-400/30' : ''}`}>
                 <svg 
-                  className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-cyan-200" 
+                  className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 text-cyan-200" 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -616,19 +617,19 @@ export default function FamilyCookbook() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search recipes, ingredients, or chefs..."
+                  placeholder="Search recipes..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
-                  className="w-full pl-14 pr-6 py-5 rounded-2xl bg-transparent text-white placeholder-cyan-100/60 text-lg outline-none font-medium"
+                  className="w-full pl-10 sm:pl-14 pr-4 sm:pr-6 py-3.5 sm:py-5 rounded-xl sm:rounded-2xl bg-transparent text-white placeholder-cyan-100/60 text-base sm:text-lg outline-none font-medium"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all"
+                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all"
                   >
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -640,22 +641,22 @@ export default function FamilyCookbook() {
       </header>
 
       {/* Main Content */}
-      <main className="relative max-w-7xl mx-auto px-4 py-12 -mt-10 z-20">
+      <main className="relative max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-12 -mt-6 sm:-mt-10 z-20">
         {/* Filters Bar */}
-        <div className={`bg-white rounded-3xl shadow-xl p-6 mb-10 transform transition-all duration-700 delay-500 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-          <div className="flex flex-col lg:flex-row justify-between gap-6">
-            {/* Categories */}
-            <div className="flex-1 overflow-x-auto pb-2 scrollbar-hide">
-              <div className="flex gap-2 min-w-max">
+        <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 mb-6 sm:mb-10 transform transition-all duration-700 delay-500 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+          <div className="flex flex-col gap-4 sm:gap-6">
+            {/* Categories - Horizontal scroll on mobile */}
+            <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+              <div className="flex gap-1.5 sm:gap-2 min-w-max">
                 {categories.map((category) => (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
                     className={`
-                      px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 whitespace-nowrap
+                      px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all duration-300 whitespace-nowrap
                       ${selectedCategory === category
-                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg scale-105'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:scale-105'
+                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95'
                       }
                     `}
                   >
@@ -665,40 +666,40 @@ export default function FamilyCookbook() {
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-3 shrink-0">
+            {/* Actions Row */}
+            <div className="flex gap-2 sm:gap-3 justify-between sm:justify-end">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`px-4 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 transition-all ${
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all ${
                   showFilters ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                 </svg>
-                Filters
+                <span>Filters</span>
               </button>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+                className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-1.5 sm:gap-2"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                Add Recipe
+                <span>Add Recipe</span>
               </button>
             </div>
           </div>
 
           {/* Extended Filters */}
           {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
-              <div>
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 animate-fadeIn">
+              <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Sort By</label>
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full p-3 bg-gray-50 rounded-xl text-sm font-medium text-gray-700 border border-gray-200 focus:border-blue-500 outline-none"
+                  className="w-full p-2.5 sm:p-3 bg-gray-50 rounded-lg sm:rounded-xl text-sm font-medium text-gray-700 border border-gray-200 focus:border-blue-500 outline-none"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -706,14 +707,14 @@ export default function FamilyCookbook() {
                   <option value="name">Name (A-Z)</option>
                 </select>
               </div>
-              <div>
+              <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Difficulty</label>
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2">
                   {['All', 'Easy', 'Medium', 'Hard'].map(diff => (
                     <button
                       key={diff}
                       onClick={() => setSelectedDifficulty(diff)}
-                      className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                      className={`flex-1 py-2 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${
                         selectedDifficulty === diff ? 'bg-blue-100 text-blue-700' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                       }`}
                     >
@@ -726,14 +727,15 @@ export default function FamilyCookbook() {
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Favorites</label>
                 <button
                   onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                  className={`w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                  className={`w-full py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all ${
                     showFavoritesOnly ? 'bg-red-100 text-red-600' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  <svg className={`w-5 h-5 ${showFavoritesOnly ? 'fill-current' : 'fill-none stroke-current'}`} viewBox="0 0 24 24" strokeWidth={2}>
+                  <svg className={`w-4 h-4 sm:w-5 sm:h-5 ${showFavoritesOnly ? 'fill-current' : 'fill-none stroke-current'}`} viewBox="0 0 24 24" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
-                  {showFavoritesOnly ? 'Showing Favorites' : 'Show Favorites Only'}
+                  <span className="hidden sm:inline">{showFavoritesOnly ? 'Showing Favorites' : 'Favorites Only'}</span>
+                  <span className="sm:hidden">❤️</span>
                 </button>
               </div>
               <div>
@@ -747,9 +749,9 @@ export default function FamilyCookbook() {
                     setShowFavoritesOnly(false);
                     setSortBy('newest');
                   }}
-                  className="w-full py-3 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-200 transition-all"
+                  className="w-full py-2.5 sm:py-3 bg-gray-100 text-gray-600 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold hover:bg-gray-200 transition-all"
                 >
-                  Reset All Filters
+                  Reset All
                 </button>
               </div>
             </div>
@@ -757,16 +759,15 @@ export default function FamilyCookbook() {
         </div>
 
         {/* Results Count */}
-        <div className={`mb-6 px-2 transform transition-all duration-500 delay-600 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-          <p className="text-gray-600 font-medium">
+        <div className={`mb-4 sm:mb-6 px-1 sm:px-2 transform transition-all duration-500 delay-600 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+          <p className="text-gray-600 font-medium text-sm sm:text-base">
             {filteredRecipes.length === 0 ? (
               <span>No recipes found</span>
             ) : (
               <span>
-                Showing <span className="text-blue-600 font-bold">{filteredRecipes.length}</span> 
+                <span className="text-blue-600 font-bold">{filteredRecipes.length}</span> 
                 {filteredRecipes.length === 1 ? ' recipe' : ' recipes'}
-                {selectedCategory !== 'All' && <span> in <span className="font-bold text-gray-800">{selectedCategory}</span></span>}
-                {searchQuery && <span> matching "<span className="font-bold text-gray-800">{searchQuery}</span>"</span>}
+                {selectedCategory !== 'All' && <span className="hidden sm:inline"> in <span className="font-bold text-gray-800">{selectedCategory}</span></span>}
               </span>
             )}
           </p>
@@ -774,12 +775,12 @@ export default function FamilyCookbook() {
 
         {/* Recipe Grid */}
         {isLoading ? (
-          <div className="text-center py-20">
-            <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-500 font-medium">Loading recipes...</p>
+          <div className="text-center py-12 sm:py-20">
+            <div className="animate-spin w-10 h-10 sm:w-12 sm:h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-500 font-medium text-sm sm:text-base">Loading recipes...</p>
           </div>
         ) : filteredRecipes.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {filteredRecipes.map((recipe, index) => (
               <RecipeCard 
                 key={recipe.id} 
@@ -793,13 +794,13 @@ export default function FamilyCookbook() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-3xl shadow-xl border border-gray-100">
-            <div className="text-7xl mb-6 animate-bounce">👨‍🍳</div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">No recipes found</h3>
-            <p className="text-gray-500 mb-8 max-w-md mx-auto">We couldn't find any recipes matching your criteria. Try adjusting your filters or add a new recipe!</p>
+          <div className="text-center py-12 sm:py-20 bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 mx-1">
+            <div className="text-5xl sm:text-7xl mb-4 sm:mb-6 animate-bounce">👨‍🍳</div>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">No recipes found</h3>
+            <p className="text-gray-500 mb-6 sm:mb-8 max-w-md mx-auto text-sm sm:text-base px-4">We couldn't find any recipes matching your criteria. Try adjusting your filters!</p>
             <button
               onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedDifficulty('All'); }}
-              className="px-8 py-3 bg-blue-100 text-blue-700 rounded-xl font-bold hover:bg-blue-200 transition-all"
+              className="px-6 sm:px-8 py-2.5 sm:py-3 bg-blue-100 text-blue-700 rounded-xl font-bold hover:bg-blue-200 transition-all text-sm sm:text-base"
             >
               Clear All Filters
             </button>

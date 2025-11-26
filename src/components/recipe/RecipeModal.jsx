@@ -165,22 +165,25 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
 
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? 'bg-black/60 backdrop-blur-sm' : 'bg-transparent'}`}
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 transition-all duration-300 ${isVisible ? 'bg-black/60 backdrop-blur-sm' : 'bg-transparent'}`}
       onClick={handleClose}
     >
       <div 
         className={`
-          relative bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl
+          relative bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl
           transform transition-all duration-500 ease-out
-          ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-8'}
+          ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 sm:scale-95 translate-y-8'}
         `}
         onClick={e => e.stopPropagation()}
       >
+        {/* Mobile Drag Handle */}
+        <div className="sm:hidden w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-1" />
+        
         {/* Action Buttons */}
-        <div className="absolute top-4 right-4 z-10 flex gap-2 print:hidden">
+        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10 flex gap-1.5 sm:gap-2 print:hidden">
           <button 
             onClick={handlePrint}
-            className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
+            className="hidden sm:flex w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
             title="Print Recipe"
           >
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -189,30 +192,30 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
           </button>
           <button 
             onClick={handleShare}
-            className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
+            className="w-9 h-9 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-95 sm:hover:bg-white sm:hover:scale-110 transition-all duration-200"
             title="Share Recipe"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
           </button>
           {onDelete && (
             <button 
               onClick={() => setShowDeleteConfirm(true)}
-              className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-red-50 hover:scale-110 transition-all duration-200"
+              className="w-9 h-9 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-95 sm:hover:bg-red-50 sm:hover:scale-110 transition-all duration-200"
               title="Delete Recipe"
             >
-              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
           )}
           <button 
             onClick={handleClose}
-            className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
+            className="w-9 h-9 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-95 sm:hover:bg-white sm:hover:scale-110 transition-all duration-200"
             title="Close"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -378,7 +381,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
         )}
 
         {/* Header */}
-        <div className="relative h-64 bg-gradient-to-br from-blue-100 via-cyan-50 to-blue-200 flex items-center justify-center overflow-hidden group/header">
+        <div className="relative h-44 sm:h-64 bg-gradient-to-br from-blue-100 via-cyan-50 to-blue-200 flex items-center justify-center overflow-hidden group/header">
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           {recipe.image && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
             <img 
@@ -387,7 +390,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
               className="absolute inset-0 w-full h-full object-cover"
             />
           ) : (
-            <span className="text-9xl animate-bounce-slow">{recipe.image}</span>
+            <span className="text-6xl sm:text-9xl animate-bounce-slow">{recipe.image}</span>
           )}
           
           {/* Photo Upload Button */}
@@ -402,25 +405,25 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
             <button
               onClick={() => photoInputRef.current?.click()}
               disabled={isUploadingPhoto}
-              className="absolute bottom-4 right-4 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2.5 rounded-xl shadow-lg hover:bg-white hover:scale-105 transition-all opacity-0 group-hover/header:opacity-100"
+              className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-10 flex items-center gap-1.5 sm:gap-2 bg-white/90 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg active:scale-95 sm:hover:bg-white sm:hover:scale-105 transition-all sm:opacity-0 sm:group-hover/header:opacity-100"
             >
               {isUploadingPhoto ? (
                 <>
-                  <svg className="animate-spin w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span className="text-sm font-medium text-gray-700">Uploading...</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-700">Uploading...</span>
                 </>
               ) : (
                 <>
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-xs sm:text-sm font-medium text-gray-700">
                     {recipe.image && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) 
-                      ? 'Change Photo' 
+                      ? 'Change' 
                       : 'Add Photo'}
                   </span>
                 </>
@@ -429,54 +432,54 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
           )}
           
           {/* Decorative elements */}
-          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-blue-800 shadow-md">
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white/90 backdrop-blur-sm px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium text-blue-800 shadow-md">
             Since {recipe.dateAdded}
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-8 overflow-y-auto max-h-[calc(90vh-16rem)]">
-          <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-            <div>
-              <h2 className="font-serif text-3xl font-bold text-gray-800 mb-2">{recipe.title}</h2>
-              <p className="text-blue-600 font-medium">Recipe by {recipe.author}</p>
+        <div className="p-4 sm:p-6 lg:p-8 overflow-y-auto max-h-[calc(95vh-12rem)] sm:max-h-[calc(90vh-16rem)]">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="flex-1 min-w-0">
+              <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">{recipe.title}</h2>
+              <p className="text-blue-600 font-medium text-sm sm:text-base">Recipe by {recipe.author}</p>
             </div>
-            <div className="flex gap-4">
-              <div className="text-center px-4 py-2 bg-blue-50 rounded-xl">
-                <div className="text-blue-600 font-bold">{recipe.prepTime}</div>
-                <div className="text-xs text-gray-500">Prep</div>
+            <div className="flex gap-2 sm:gap-4 overflow-x-auto pb-1 -mx-1 px-1">
+              <div className="text-center px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-50 rounded-lg sm:rounded-xl shrink-0">
+                <div className="text-blue-600 font-bold text-sm sm:text-base">{recipe.prepTime}</div>
+                <div className="text-[10px] sm:text-xs text-gray-500">Prep</div>
               </div>
-              <div className="text-center px-4 py-2 bg-cyan-50 rounded-xl">
-                <div className="text-cyan-600 font-bold">{recipe.cookTime}</div>
-                <div className="text-xs text-gray-500">Cook</div>
+              <div className="text-center px-3 py-1.5 sm:px-4 sm:py-2 bg-cyan-50 rounded-lg sm:rounded-xl shrink-0">
+                <div className="text-cyan-600 font-bold text-sm sm:text-base">{recipe.cookTime}</div>
+                <div className="text-[10px] sm:text-xs text-gray-500">Cook</div>
               </div>
-              <div className="text-center px-4 py-2 bg-red-50 rounded-xl">
-                <div className="text-red-600 font-bold">{recipe.servings}</div>
-                <div className="text-xs text-gray-500">Servings</div>
+              <div className="text-center px-3 py-1.5 sm:px-4 sm:py-2 bg-red-50 rounded-lg sm:rounded-xl shrink-0">
+                <div className="text-red-600 font-bold text-sm sm:text-base">{recipe.servings}</div>
+                <div className="text-[10px] sm:text-xs text-gray-500">Servings</div>
               </div>
             </div>
           </div>
 
-          <p className="text-gray-600 mb-8 text-lg leading-relaxed italic border-l-4 border-blue-400 pl-4">
+          <p className="text-gray-600 mb-5 sm:mb-8 text-sm sm:text-base lg:text-lg leading-relaxed italic border-l-4 border-blue-400 pl-3 sm:pl-4">
             "{recipe.description}"
           </p>
 
           {/* Serving Size Calculator & Timer */}
-          <div className="flex flex-wrap gap-3 mb-6">
-            <div className="flex items-center gap-2 glass-morphism px-4 py-2 rounded-xl">
-              <span className="text-sm font-medium text-gray-700">Servings:</span>
+          <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="flex items-center gap-1.5 sm:gap-2 glass-morphism px-3 py-2 sm:px-4 rounded-lg sm:rounded-xl">
+              <span className="text-xs sm:text-sm font-medium text-gray-700">Servings:</span>
               <button
                 onClick={() => setServingMultiplier(Math.max(0.5, servingMultiplier - 0.5))}
-                className="w-7 h-7 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-bold"
+                className="w-6 h-6 sm:w-7 sm:h-7 bg-blue-500 text-white rounded-lg active:scale-90 sm:hover:bg-blue-600 transition-all font-bold text-sm"
               >
                 −
               </button>
-              <span className="text-lg font-bold text-blue-600 min-w-[3rem] text-center">
+              <span className="text-base sm:text-lg font-bold text-blue-600 min-w-[2rem] sm:min-w-[3rem] text-center">
                 {adjustedServings}
               </span>
               <button
                 onClick={() => setServingMultiplier(servingMultiplier + 0.5)}
-                className="w-7 h-7 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-bold"
+                className="w-6 h-6 sm:w-7 sm:h-7 bg-blue-500 text-white rounded-lg active:scale-90 sm:hover:bg-blue-600 transition-all font-bold text-sm"
               >
                 +
               </button>
@@ -484,24 +487,25 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
 
             <button
               onClick={() => setShowTimer(!showTimer)}
-              className="flex items-center gap-2 glass-morphism px-4 py-2 rounded-xl hover:bg-white/80 transition-all"
+              className="flex items-center gap-1.5 sm:gap-2 glass-morphism px-3 py-2 sm:px-4 rounded-lg sm:rounded-xl active:scale-95 sm:hover:bg-white/80 transition-all"
             >
-              <svg className="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-sm font-medium text-gray-700">Timer</span>
+              <span className="text-xs sm:text-sm font-medium text-gray-700">Timer</span>
             </button>
 
             {/* Mark as Cooked Button */}
             {onMarkAsCooked && (
               <button
                 onClick={() => setShowCookConfirm(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-5 py-2 rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg shadow-blue-500/30 font-medium"
+                className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-3 sm:px-5 py-2 rounded-lg sm:rounded-xl active:scale-95 sm:hover:from-blue-600 sm:hover:to-cyan-600 transition-all shadow-lg shadow-blue-500/30 font-medium text-xs sm:text-base"
               >
-                <span className="text-lg">🔥</span>
-                <span>I Cooked This!</span>
+                <span className="text-base sm:text-lg">🔥</span>
+                <span className="hidden xs:inline">I Cooked This!</span>
+                <span className="xs:hidden">Cooked</span>
                 {recipe.timesCooked > 0 && (
-                  <span className="bg-white/20 px-2 py-0.5 rounded-lg text-xs">
+                  <span className="bg-white/20 px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs">
                     {recipe.timesCooked}
                   </span>
                 )}
@@ -509,68 +513,107 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
             )}
 
             {showTimer && (
-              <div className="w-full flex items-center gap-3 glass-morphism p-4 rounded-xl">
-                <div className="flex-1 flex items-center gap-2">
-                  <button onClick={() => startTimer(15)} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all text-sm font-medium">15m</button>
-                  <button onClick={() => startTimer(30)} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all text-sm font-medium">30m</button>
-                  <button onClick={() => startTimer(60)} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all text-sm font-medium">1h</button>
-                  <div className="flex-1 text-center">
-                    <span className="text-3xl font-bold text-gray-800 font-mono">
-                      {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
-                    </span>
-                  </div>
+              <div className="w-full flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 glass-morphism p-3 sm:p-4 rounded-lg sm:rounded-xl">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <button onClick={() => startTimer(15)} className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-lg active:scale-95 sm:hover:bg-blue-200 transition-all text-xs sm:text-sm font-medium">15m</button>
+                  <button onClick={() => startTimer(30)} className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-lg active:scale-95 sm:hover:bg-blue-200 transition-all text-xs sm:text-sm font-medium">30m</button>
+                  <button onClick={() => startTimer(60)} className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-lg active:scale-95 sm:hover:bg-blue-200 transition-all text-xs sm:text-sm font-medium">1h</button>
                 </div>
-                <button
-                  onClick={toggleTimer}
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-medium"
-                >
-                  {timerRunning ? 'Pause' : 'Start'}
-                </button>
-                <button
-                  onClick={resetTimer}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all font-medium"
-                >
-                  Reset
-                </button>
+                <div className="flex-1 text-center order-first w-full sm:w-auto sm:order-none">
+                  <span className="text-2xl sm:text-3xl font-bold text-gray-800 font-mono">
+                    {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
+                  </span>
+                </div>
+                <div className="flex gap-2 ml-auto">
+                  <button
+                    onClick={toggleTimer}
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-500 text-white rounded-lg active:scale-95 sm:hover:bg-green-600 transition-all font-medium text-xs sm:text-sm"
+                  >
+                    {timerRunning ? 'Pause' : 'Start'}
+                  </button>
+                  <button
+                    onClick={resetTimer}
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-500 text-white rounded-lg active:scale-95 sm:hover:bg-red-600 transition-all font-medium text-xs sm:text-sm"
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Tabs */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {['ingredients', 'instructions', 'notes', 'story', 'comments', 'history'].map(tab => (
+          {/* Tabs - Scrollable on mobile */}
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-4 sm:mb-6 scrollbar-hide">
+            <div className="flex gap-1.5 sm:gap-2 min-w-max pb-1">
+              {['ingredients', 'instructions', 'story'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`
+                    px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium capitalize transition-all duration-300 text-xs sm:text-base whitespace-nowrap
+                    ${activeTab === tab 
+                      ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30' 
+                      : 'bg-gray-100 text-gray-600 active:scale-95 sm:hover:bg-gray-200'}
+                  `}
+                >
+                  {tab}
+                </button>
+              ))}
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => setActiveTab('notes')}
                 className={`
-                  px-6 py-3 rounded-xl font-medium capitalize transition-all duration-300
-                  ${activeTab === tab 
+                  px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 text-xs sm:text-base whitespace-nowrap
+                  ${activeTab === 'notes' 
                     ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                    : 'bg-gray-100 text-gray-600 active:scale-95 sm:hover:bg-gray-200'}
                 `}
               >
-                {tab === 'notes' ? '📝 Notes & Tips' : tab === 'history' ? '📜 History' : tab}
+                <span className="hidden sm:inline">📝 Notes</span>
+                <span className="sm:hidden">Notes</span>
               </button>
-            ))}
+              <button
+                onClick={() => setActiveTab('comments')}
+                className={`
+                  px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 text-xs sm:text-base whitespace-nowrap
+                  ${activeTab === 'comments' 
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30' 
+                    : 'bg-gray-100 text-gray-600 active:scale-95 sm:hover:bg-gray-200'}
+                `}
+              >
+                Comments
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`
+                  px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 text-xs sm:text-base whitespace-nowrap
+                  ${activeTab === 'history' 
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30' 
+                    : 'bg-gray-100 text-gray-600 active:scale-95 sm:hover:bg-gray-200'}
+                `}
+              >
+                <span className="hidden sm:inline">📜 History</span>
+                <span className="sm:hidden">History</span>
+              </button>
+            </div>
           </div>
 
           {/* Tab Content */}
-          <div className="relative min-h-[200px]">
+          <div className="relative min-h-[150px] sm:min-h-[200px]">
             {/* Ingredients */}
             <div className={`transition-all duration-300 ${activeTab === 'ingredients' ? 'opacity-100' : 'opacity-0 absolute inset-0 pointer-events-none'}`}>
-              <div className="grid gap-3">
+              <div className="grid gap-2 sm:gap-3">
                 {recipe.ingredients.map((ingredient, i) => {
                   const isAdded = addedIngredients.includes(i);
                   return (
                     <div 
                       key={i}
-                      className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-transparent rounded-lg group hover:from-blue-100 transition-colors"
+                      className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gradient-to-r from-blue-50 to-transparent rounded-lg group sm:hover:from-blue-100 transition-colors"
                       style={{ animationDelay: `${i * 50}ms` }}
                     >
-                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold group-hover:scale-110 transition-transform">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs sm:text-sm font-bold group-hover:scale-110 transition-transform shrink-0">
                         {i + 1}
                       </div>
-                      <span className="flex-1 text-gray-700">{parseIngredient(ingredient)}</span>
+                      <span className="flex-1 text-gray-700 text-sm sm:text-base">{parseIngredient(ingredient)}</span>
                       {onAddToShoppingList && (
                         <button
                           onClick={() => {
@@ -580,26 +623,27 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
                               setAddedIngredients(prev => prev.filter(idx => idx !== i));
                             }, 2000);
                           }}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                          className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-all shrink-0 ${
                             isAdded 
                               ? 'bg-green-500 text-white' 
-                              : 'bg-blue-100 text-blue-700 hover:bg-blue-200 opacity-0 group-hover:opacity-100'
+                              : 'bg-blue-100 text-blue-700 active:scale-95 sm:hover:bg-blue-200 sm:opacity-0 sm:group-hover:opacity-100'
                           }`}
                           disabled={isAdded}
                         >
                           {isAdded ? (
                             <span className="flex items-center gap-1">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                               </svg>
-                              Added
+                              <span className="hidden xs:inline">Added</span>
+                              <span className="xs:hidden">✓</span>
                             </span>
                           ) : (
                             <span className="flex items-center gap-1">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                               </svg>
-                              List
+                              <span className="hidden xs:inline">List</span>
                             </span>
                           )}
                         </button>
@@ -612,16 +656,16 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
 
             {/* Instructions */}
             <div className={`transition-all duration-300 ${activeTab === 'instructions' ? 'opacity-100' : 'opacity-0 absolute inset-0 pointer-events-none'}`}>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {recipe.instructions.map((step, i) => (
                   <div 
                     key={i}
-                    className="flex gap-4 p-4 bg-gradient-to-r from-cyan-50 to-transparent rounded-xl group hover:from-cyan-100 transition-colors"
+                    className="flex gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-cyan-50 to-transparent rounded-lg sm:rounded-xl group sm:hover:from-cyan-100 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold shrink-0 group-hover:scale-110 transition-transform shadow-md">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-sm sm:text-base font-bold shrink-0 group-hover:scale-110 transition-transform shadow-md">
                       {i + 1}
                     </div>
-                    <p className="text-gray-700 pt-2">{step}</p>
+                    <p className="text-gray-700 text-sm sm:text-base pt-1 sm:pt-2">{step}</p>
                   </div>
                 ))}
               </div>

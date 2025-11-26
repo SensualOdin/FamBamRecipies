@@ -178,44 +178,47 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
 
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? 'bg-black/60 backdrop-blur-sm' : 'bg-transparent'}`}
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 transition-all duration-300 ${isVisible ? 'bg-black/60 backdrop-blur-sm' : 'bg-transparent'}`}
       onClick={handleClose}
     >
       <div 
         className={`
-          relative bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl
+          relative bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl
           transform transition-all duration-500 ease-out
-          ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-8'}
+          ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 sm:scale-95 translate-y-8'}
         `}
         onClick={e => e.stopPropagation()}
       >
+        {/* Mobile Drag Handle */}
+        <div className="sm:hidden w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-1" />
+        
         {/* Close Button */}
         <button 
           onClick={handleClose}
-          className="absolute top-4 right-4 z-10 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 hover:scale-110 transition-all duration-200"
+          className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10 w-9 h-9 sm:w-10 sm:h-10 bg-gray-100 rounded-full flex items-center justify-center active:bg-gray-200 sm:hover:bg-gray-200 active:scale-95 sm:hover:scale-110 transition-all duration-200"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 p-6 text-white">
-          <h2 className="font-serif text-2xl font-bold">Add Family Recipe</h2>
-          <p className="text-cyan-100 mt-1">Share your culinary traditions</p>
+        <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 p-4 sm:p-6 text-white">
+          <h2 className="font-serif text-lg sm:text-2xl font-bold">Add Family Recipe</h2>
+          <p className="text-cyan-100 mt-0.5 sm:mt-1 text-sm sm:text-base">Share your culinary traditions</p>
           
           {/* Progress Bar - Only show after step 0 */}
           {step > 0 && (
             <>
-              <div className="flex gap-2 mt-4">
+              <div className="flex gap-1 sm:gap-2 mt-3 sm:mt-4">
                 {[1, 2, 3, 4, 5].map(s => (
                   <div 
                     key={s}
-                    className={`h-2 flex-1 rounded-full transition-all duration-500 ${s <= step ? 'bg-white' : 'bg-white/30'}`}
+                    className={`h-1.5 sm:h-2 flex-1 rounded-full transition-all duration-500 ${s <= step ? 'bg-white' : 'bg-white/30'}`}
                   />
                 ))}
               </div>
-              <div className="flex justify-between mt-2 text-xs text-cyan-100">
+              <div className="hidden sm:flex justify-between mt-2 text-xs text-cyan-100">
                 <span>Basic Info</span>
                 <span>Details</span>
                 <span>Ingredients</span>
@@ -227,7 +230,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
         </div>
 
         {/* Form Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-16rem)]">
+        <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(95vh-14rem)] sm:max-h-[calc(90vh-16rem)]">
           {/* Step 0: Choose Method */}
           <div className={`transition-all duration-300 ${step === 0 ? 'opacity-100' : 'opacity-0 hidden'}`}>
             <div className="text-center mb-6">
@@ -396,14 +399,14 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
 
           {/* Step 2: Details */}
           <div className={`transition-all duration-300 ${step === 2 ? 'opacity-100' : 'opacity-0 hidden'}`}>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Category</label>
                   <select
                     value={formData.category}
                     onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm sm:text-base"
                   >
                     {categories.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -411,11 +414,11 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Difficulty</label>
                   <select
                     value={formData.difficulty}
                     onChange={e => setFormData(prev => ({ ...prev, difficulty: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm sm:text-base"
                   >
                     <option value="Easy">Easy</option>
                     <option value="Medium">Medium</option>
@@ -424,51 +427,51 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Prep Time *</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Prep *</label>
                   <input
                     type="text"
                     value={formData.prepTime}
                     onChange={e => setFormData(prev => ({ ...prev, prepTime: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-                    placeholder="30 mins"
+                    className="w-full px-2 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm sm:text-base"
+                    placeholder="30m"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Cook Time *</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Cook *</label>
                   <input
                     type="text"
                     value={formData.cookTime}
                     onChange={e => setFormData(prev => ({ ...prev, cookTime: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-                    placeholder="1 hour"
+                    className="w-full px-2 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm sm:text-base"
+                    placeholder="1hr"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Servings *</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Serves *</label>
                   <input
                     type="number"
                     value={formData.servings}
                     onChange={e => setFormData(prev => ({ ...prev, servings: e.target.value }))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                    className="w-full px-2 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm sm:text-base"
                     placeholder="4"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Dietary Tags</label>
-                <div className="flex flex-wrap gap-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Dietary Tags</label>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {dietaryOptions.map(option => (
                     <button
                       key={option}
                       type="button"
                       onClick={() => toggleDietary(option)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                      className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                         formData.dietary.includes(option)
                           ? 'bg-green-500 text-white'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          : 'bg-gray-100 text-gray-600 active:bg-gray-200 sm:hover:bg-gray-200'
                       }`}
                     >
                       {option}
@@ -478,17 +481,17 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Choose an Icon</label>
-                <div className="flex flex-wrap gap-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Choose an Icon</label>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {emojis.map(emoji => (
                     <button
                       key={emoji}
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, image: emoji }))}
-                      className={`w-12 h-12 text-2xl rounded-xl transition-all duration-200 ${
+                      className={`w-10 h-10 sm:w-12 sm:h-12 text-xl sm:text-2xl rounded-lg sm:rounded-xl transition-all duration-200 ${
                         formData.image === emoji 
                           ? 'bg-blue-100 ring-2 ring-blue-400 scale-110' 
-                          : 'bg-gray-50 hover:bg-gray-100'
+                          : 'bg-gray-50 active:bg-gray-100 sm:hover:bg-gray-100'
                       }`}
                     >
                       {emoji}
@@ -603,13 +606,13 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
         </div>
 
         {/* Footer Navigation */}
-        <div className="p-6 border-t bg-gray-50 flex justify-between">
+        <div className="p-3 sm:p-6 border-t bg-gray-50 flex justify-between gap-3">
           <button
             onClick={() => setStep(prev => Math.max(0, prev - 1))}
-            className={`px-6 py-3 rounded-xl font-medium transition-all ${
+            className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all text-sm sm:text-base ${
               step === 0 
                 ? 'text-gray-300 cursor-not-allowed' 
-                : 'text-gray-600 hover:bg-gray-200'
+                : 'text-gray-600 active:bg-gray-200 sm:hover:bg-gray-200'
             }`}
             disabled={step === 0}
           >
@@ -622,9 +625,9 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
             <button
               onClick={() => setStep(prev => Math.min(5, prev + 1))}
               disabled={!isStepValid()}
-              className={`px-6 py-3 rounded-xl font-medium transition-all ${
+              className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all text-sm sm:text-base ${
                 isStepValid()
-                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 shadow-lg shadow-blue-500/30'
+                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white active:from-blue-600 active:to-cyan-600 sm:hover:from-blue-600 sm:hover:to-cyan-600 shadow-lg shadow-blue-500/30'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
@@ -633,9 +636,9 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
           ) : (
             <button
               onClick={handleSubmit}
-              className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-medium hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-500/30 transition-all flex items-center gap-2"
+              className="px-5 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg sm:rounded-xl font-medium active:from-green-600 active:to-emerald-600 sm:hover:from-green-600 sm:hover:to-emerald-600 shadow-lg shadow-green-500/30 transition-all flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               Add Recipe

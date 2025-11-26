@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { categoryIcons } from '../../data/constants';
 
-const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingList, onAuthorClick }) => {
+const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingList, onAuthorClick, onEdit }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef(null);
@@ -24,6 +24,11 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
   const handleAuthorClick = (e) => {
     e.stopPropagation();
     onAuthorClick(recipe.author);
+  };
+
+  const handleEditClick = (e) => {
+    e.stopPropagation();
+    if (onEdit) onEdit(recipe);
   };
 
   return (
@@ -191,6 +196,19 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
               <span className="hidden xs:inline">Add to List</span>
               <span className="xs:hidden">List</span>
             </button>
+            
+            {/* Edit Button */}
+            {onEdit && (
+              <button
+                onClick={handleEditClick}
+                className="h-10 sm:h-12 w-10 sm:w-12 flex items-center justify-center bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-200 rounded-lg sm:rounded-xl text-amber-700 active:scale-95 sm:hover:from-amber-200 sm:hover:to-orange-200 sm:hover:border-amber-300 sm:hover:shadow-lg transition-all duration-300"
+                title="Edit Recipe"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Premium CTA Button */}

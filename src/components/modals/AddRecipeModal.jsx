@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { extractRecipeFromImage } from '../../lib/supabase';
 
-const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
+const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRecipe = null }) => {
+  const isEditMode = !!editingRecipe;
   const [isVisible, setIsVisible] = useState(false);
-  const [step, setStep] = useState(0); // Start at step 0 (choose method)
+  const [step, setStep] = useState(isEditMode ? 1 : 0); // Skip method selection when editing
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractionError, setExtractionError] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -11,20 +12,20 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
   const fileInputRef = useRef(null);
   
   const [formData, setFormData] = useState({
-    title: '',
-    author: '',
-    category: 'Main Dishes',
-    prepTime: '',
-    cookTime: '',
-    servings: '',
-    description: '',
-    ingredients: [''],
-    instructions: [''],
-    image: '🍽️',
-    difficulty: 'Easy',
-    dietary: [],
-    tags: [],
-    story: ''
+    title: editingRecipe?.title || '',
+    author: editingRecipe?.author || '',
+    category: editingRecipe?.category || 'Main Dishes',
+    prepTime: editingRecipe?.prepTime || '',
+    cookTime: editingRecipe?.cookTime || '',
+    servings: editingRecipe?.servings || '',
+    description: editingRecipe?.description || '',
+    ingredients: editingRecipe?.ingredients?.length > 0 ? editingRecipe.ingredients : [''],
+    instructions: editingRecipe?.instructions?.length > 0 ? editingRecipe.instructions : [''],
+    image: editingRecipe?.image || '🍽️',
+    difficulty: editingRecipe?.difficulty || 'Easy',
+    dietary: editingRecipe?.dietary || [],
+    tags: editingRecipe?.tags || [],
+    story: editingRecipe?.story || ''
   });
 
   const emojis = ['🍽️', '🥧', '🍖', '🍲', '🍰', '🥗', '🍝', '🍕', '🌮', '🍜', '🥘', '🍳', '🥞', '🧁', '🍪', '☕', '🥤', '🍹'];
@@ -141,20 +142,42 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
   };
 
   const handleSubmit = () => {
-    const newRecipe = {
+    const recipeData = {
       ...formData,
-      id: Date.now(),
       ingredients: formData.ingredients.filter(i => i.trim()),
       instructions: formData.instructions.filter(i => i.trim()),
-      dateAdded: new Date().getFullYear().toString(),
-      history: [{
-        action: 'created',
-        date: new Date().toISOString(),
-        changes: 'Recipe created'
-      }],
       lastModified: new Date().toISOString()
     };
-    onSave(newRecipe);
+
+    if (isEditMode) {
+      // Update existing recipe
+      const updatedRecipe = {
+        ...editingRecipe,
+        ...recipeData,
+        history: [
+          ...(editingRecipe.history || []),
+          {
+            action: 'updated',
+            date: new Date().toISOString(),
+            changes: 'Recipe updated'
+          }
+        ]
+      };
+      if (onUpdate) onUpdate(updatedRecipe);
+    } else {
+      // Create new recipe
+      const newRecipe = {
+        ...recipeData,
+        id: Date.now(),
+        dateAdded: new Date().getFullYear().toString(),
+        history: [{
+          action: 'created',
+          date: new Date().toISOString(),
+          changes: 'Recipe created'
+        }]
+      };
+      onSave(newRecipe);
+    }
     handleClose();
   };
 
@@ -203,9 +226,9 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
         </button>
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 p-4 sm:p-6 text-white">
-          <h2 className="font-serif text-lg sm:text-2xl font-bold">Add Family Recipe</h2>
-          <p className="text-cyan-100 mt-0.5 sm:mt-1 text-sm sm:text-base">Share your culinary traditions</p>
+        <div className={`${isEditMode ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600' : 'bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700'} p-4 sm:p-6 text-white`}>
+          <h2 className="font-serif text-lg sm:text-2xl font-bold">{isEditMode ? 'Edit Recipe' : 'Add Family Recipe'}</h2>
+          <p className={`${isEditMode ? 'text-amber-100' : 'text-cyan-100'} mt-0.5 sm:mt-1 text-sm sm:text-base`}>{isEditMode ? 'Update your recipe details' : 'Share your culinary traditions'}</p>
           
           {/* Progress Bar - Only show after step 0 */}
           {step > 0 && (
@@ -599,7 +622,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
                 <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="font-medium">Ready to add to the cookbook!</p>
+                <p className="font-medium">{isEditMode ? 'Ready to save your changes!' : 'Ready to add to the cookbook!'}</p>
               </div>
             </div>
           </div>
@@ -641,7 +664,7 @@ const AddRecipeModal = ({ onClose, onSave, categories = [] }) => {
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              Add Recipe
+              {isEditMode ? 'Save Changes' : 'Add Recipe'}
             </button>
           )}
         </div>

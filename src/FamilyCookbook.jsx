@@ -9,7 +9,7 @@ import IngredientSubstitutionsModal from './components/modals/IngredientSubstitu
 import UserProfileModal from './components/modals/UserProfileModal';
 import MealPlannerModal from './components/modals/MealPlannerModal';
 import AuthModal from './components/modals/AuthModal';
-import { fetchRecipes, fetchCategories, createRecipe, getCurrentUser, getUserProfile, getUserProfileWithStats, signOut, onAuthStateChange, ensureUserProfile, recordUserActivity, toggleFavorite as toggleFavoriteDB, getUserFavorites, markRecipeAsCooked } from './lib/supabase';
+import { fetchRecipes, fetchCategories, createRecipe, updateRecipe, getCurrentUser, getUserProfile, getUserProfileWithStats, signOut, onAuthStateChange, ensureUserProfile, recordUserActivity, toggleFavorite as toggleFavoriteDB, getUserFavorites, markRecipeAsCooked } from './lib/supabase';
 import { initialRecipes } from './data/initialRecipes';
 import { initialUserProfile } from './data/initialProfile';
 
@@ -20,6 +20,7 @@ export default function FamilyCookbook() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -370,6 +371,29 @@ export default function FamilyCookbook() {
           }
         }));
       }
+    }
+  };
+
+  const handleEditRecipe = (recipe) => {
+    setEditingRecipe(recipe);
+    setShowAddModal(true);
+  };
+
+  const handleUpdateRecipe = async (updatedRecipe) => {
+    // Optimistic update
+    setRecipes(prev => prev.map(r => 
+      r.id === updatedRecipe.id ? updatedRecipe : r
+    ));
+    
+    // Update in Supabase
+    await updateRecipe(updatedRecipe.id, updatedRecipe);
+    
+    // Clear editing state
+    setEditingRecipe(null);
+    
+    // Record activity if user is logged in
+    if (user) {
+      await recordUserActivity(user.id, 'recipe_updated');
     }
   };
 
@@ -790,6 +814,7 @@ export default function FamilyCookbook() {
                 onToggleFavorite={toggleFavorite}
                 onAddToShoppingList={addToShoppingList}
                 onAuthorClick={setSelectedAuthor}
+                onEdit={handleEditRecipe}
               />
             ))}
           </div>
@@ -830,9 +855,14 @@ export default function FamilyCookbook() {
       
       {showAddModal && (
         <AddRecipeModal 
-          onClose={() => setShowAddModal(false)} 
+          onClose={() => {
+            setShowAddModal(false);
+            setEditingRecipe(null);
+          }} 
           onSave={handleAddRecipe}
+          onUpdate={handleUpdateRecipe}
           categories={categories.filter(c => c !== 'All')}
+          editingRecipe={editingRecipe}
         />
       )}
 

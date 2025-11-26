@@ -57,6 +57,38 @@ export async function fetchCategories() {
   return data;
 }
 
+// Helper function to update an existing recipe
+export async function updateRecipe(recipeId, recipe) {
+  const { data, error } = await supabase
+    .from('recipes')
+    .update({
+      title: recipe.title,
+      description: recipe.description,
+      author_name: recipe.author,
+      category: recipe.category,
+      image: recipe.image,
+      prep_time: recipe.prepTime,
+      cook_time: recipe.cookTime,
+      servings: recipe.servings,
+      difficulty: recipe.difficulty,
+      ingredients: recipe.ingredients,
+      instructions: recipe.instructions,
+      dietary: recipe.dietary,
+      tags: recipe.tags,
+      story: recipe.story,
+    })
+    .eq('id', recipeId)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error updating recipe:', error);
+    return null;
+  }
+  
+  return data;
+}
+
 // Helper function to create a new recipe
 export async function createRecipe(recipe, userId = null) {
   // Get the internal user ID if userId (auth_id) is provided

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { extractRecipeFromImage } from '../../lib/supabase';
 
-const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRecipe = null }) => {
+const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRecipe = null, defaultAuthor = '' }) => {
   const isEditMode = !!editingRecipe;
   const [isVisible, setIsVisible] = useState(false);
   const [step, setStep] = useState(isEditMode ? 1 : 0); // Skip method selection when editing
@@ -13,7 +13,7 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
   
   const [formData, setFormData] = useState({
     title: editingRecipe?.title || '',
-    author: editingRecipe?.author || '',
+    author: editingRecipe?.author || defaultAuthor || '',
     category: editingRecipe?.category || 'Main Dishes',
     prepTime: editingRecipe?.prepTime || '',
     cookTime: editingRecipe?.cookTime || '',

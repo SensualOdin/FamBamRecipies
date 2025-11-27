@@ -347,11 +347,17 @@ export default function FamilyCookbook() {
   };
 
   const handleAddRecipe = async (newRecipe) => {
+    // If user is logged in, ensure their name is used as author
+    const recipeToSave = user ? {
+      ...newRecipe,
+      author: newRecipe.author || userProfile.name || 'Chef'
+    } : newRecipe;
+    
     // Optimistic update
-    setRecipes(prev => [newRecipe, ...prev]);
+    setRecipes(prev => [recipeToSave, ...prev]);
     
     // Save to Supabase with user ID for tracking
-    const savedRecipe = await createRecipe(newRecipe, user?.id);
+    const savedRecipe = await createRecipe(recipeToSave, user?.id);
     
     // Record activity and refresh stats if user is logged in
     if (user) {
@@ -863,6 +869,7 @@ export default function FamilyCookbook() {
           onUpdate={handleUpdateRecipe}
           categories={categories.filter(c => c !== 'All')}
           editingRecipe={editingRecipe}
+          defaultAuthor={user ? userProfile.name : ''}
         />
       )}
 

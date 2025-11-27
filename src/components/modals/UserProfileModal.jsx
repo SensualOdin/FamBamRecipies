@@ -415,7 +415,13 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                   {userRecipes.map(recipe => (
                     <div key={recipe.id} className="p-3 sm:p-4 bg-gradient-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl border-2 border-gray-200 active:border-blue-300 sm:hover:border-blue-300 sm:hover:shadow-lg transition-all">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                        <span className="text-2xl sm:text-4xl">{recipe.image}</span>
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center shrink-0">
+                          {recipe.image && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
+                            <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-2xl sm:text-3xl">{recipe.image || '🍽️'}</span>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-gray-800 text-sm sm:text-base truncate">{recipe.title}</h4>
                           <p className="text-xs sm:text-sm text-gray-500">{recipe.category}</p>
@@ -449,7 +455,13 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                   {favoriteRecipes.map(recipe => (
                     <div key={recipe.id} className="p-3 sm:p-4 bg-gradient-to-br from-red-50 to-pink-50 rounded-xl sm:rounded-2xl border-2 border-red-200 active:border-red-300 sm:hover:border-red-300 sm:hover:shadow-lg transition-all">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                        <span className="text-2xl sm:text-4xl">{recipe.image}</span>
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center shrink-0">
+                          {recipe.image && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
+                            <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-2xl sm:text-3xl">{recipe.image || '🍽️'}</span>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-bold text-gray-800 text-sm sm:text-base truncate">{recipe.title}</h4>
                           <p className="text-xs sm:text-sm text-gray-500 truncate">by {recipe.author}</p>

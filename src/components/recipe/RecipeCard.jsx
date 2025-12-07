@@ -38,23 +38,16 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`
-        group cursor-pointer relative overflow-hidden card-premium
-        rounded-3xl sm:rounded-4xl
+        group cursor-pointer relative overflow-hidden
+        rounded-2xl sm:rounded-3xl
         transform transition-all duration-700 ease-out
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}
-        hover:-translate-y-4 hover:scale-[1.02] active:scale-[0.98]
-        focus:outline-none focus:ring-4 focus:ring-primary-500/20
+        sm:hover:-translate-y-3 sm:hover:scale-[1.02] active:scale-[0.98]
       `}
-      style={{
-        transitionDelay: `${Math.min(index * 100, 500)}ms`,
-        animationDelay: `${Math.min(index * 50, 300)}ms`
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label={`View recipe for ${recipe.title}`}
+      style={{ transitionDelay: `${Math.min(index * 50, 300)}ms` }}
     >
-      {/* Premium glass morphism card background */}
-      <div className="absolute inset-0 glass-morphism shadow-premium group-hover:shadow-premium-xl transition-all duration-700" />
+      {/* Glass morphism card background */}
+      <div className="absolute inset-0 glass-morphism shadow-lg sm:shadow-xl group-hover:shadow-2xl transition-shadow duration-700" />
       
       {/* Gradient border effect - Detroit Blue */}
       <div className="absolute inset-0 rounded-2xl sm:rounded-3xl p-[2px] bg-gradient-to-br from-blue-400 via-cyan-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
@@ -112,10 +105,10 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
             <div className="relative">
               {isHovered && <div className="absolute inset-0 bg-blue-400 rounded-xl sm:rounded-2xl blur-lg opacity-60 animate-pulse" />}
               <div className="relative glass-morphism px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg">
-                <div className="text-xs sm:text-sm font-bold flex items-center gap-1.5">
-                  <span className="text-base leading-none">{categoryIcons[recipe.category] || '🍽️'}</span>
-                  <span className="hidden xs:inline-block gradient-text">{recipe.category}</span>
-                </div>
+                <span className="text-xs sm:text-sm font-bold gradient-text flex items-center gap-1">
+                  <span>{categoryIcons[recipe.category]}</span>
+                  <span className="hidden xs:inline">{recipe.category}</span>
+                </span>
               </div>
             </div>
           </div>
@@ -132,19 +125,18 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
         {/* Content with enhanced styling */}
         <div className="relative p-4 sm:p-5 lg:p-7 flex flex-col">
           {/* Title */}
-          <h3 className="font-serif text-heading-3 font-bold text-neutral-800 mb-2 sm:mb-3 group-hover:gradient-text transition-all duration-500 leading-tight line-clamp-2 min-h-[2.5rem] sm:min-h-[3.5rem] text-balance">
+          <h3 className="font-serif text-lg xs:text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 group-hover:gradient-text transition-all duration-500 leading-tight line-clamp-2 min-h-[2.5rem] sm:min-h-[3.5rem]">
             {recipe.title}
           </h3>
           
           {/* Tags */}
-          <div className="mb-2 sm:mb-4 min-h-[1.5rem] sm:min-h-[2rem] transform transition-all duration-300 group-hover:scale-105">
+          <div className="mb-2 sm:mb-4 min-h-[1.5rem] sm:min-h-[2rem]">
             {recipe.tags && recipe.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 sm:gap-2">
                 {recipe.tags.slice(0, 2).map((tag, i) => (
-                  <span
+                  <span 
                     key={i}
-                    className="px-2 py-1 bg-primary-50 text-primary-600 text-caption font-medium rounded-lg transition-all duration-300 hover:bg-primary-100 hover:scale-105"
-                    style={{ animationDelay: `${i * 100}ms` }}
+                    className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-blue-50 text-blue-600 text-[10px] sm:text-xs font-medium rounded-md sm:rounded-lg"
                   >
                     #{tag}
                   </span>
@@ -168,51 +160,51 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
           </button>
 
           {/* Meta Info */}
-          <div className="flex items-center gap-2 sm:gap-3 text-caption mb-4 transform transition-all duration-300 group-hover:scale-105">
-            <div className="flex items-center gap-1.5 glass-morphism px-3 py-2 rounded-xl hover:bg-white/50 transition-all duration-200">
-              <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm mb-3 sm:mb-4">
+            <div className="flex items-center gap-1 sm:gap-1.5 glass-morphism px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="font-medium text-neutral-700 whitespace-nowrap">{recipe.cookTime}</span>
+              <span className="font-medium text-gray-700 whitespace-nowrap text-[11px] sm:text-sm">{recipe.cookTime}</span>
             </div>
-            <div className="flex items-center gap-1.5 glass-morphism px-3 py-2 rounded-xl hover:bg-white/50 transition-all duration-200">
-              <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <div className="flex items-center gap-1 sm:gap-1.5 glass-morphism px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              <span className="font-medium text-neutral-700 whitespace-nowrap">{recipe.servings}</span>
+              <span className="font-medium text-gray-700 whitespace-nowrap text-[11px] sm:text-sm">{recipe.servings}</span>
             </div>
-            {/* Difficulty Badge */}
-            <div className={`ml-auto px-3 py-2 rounded-xl text-caption font-bold whitespace-nowrap shadow-sm transform transition-all duration-300 hover:scale-105 ${
-              recipe.difficulty === 'Easy' ? 'bg-success-100 text-success-700 shadow-success-100' :
-              recipe.difficulty === 'Medium' ? 'bg-warning-100 text-warning-700 shadow-warning-100' :
-              'bg-error-100 text-error-700 shadow-error-100'
+            {/* Difficulty Badge - Mobile Inline */}
+            <div className={`ml-auto px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold whitespace-nowrap ${
+              recipe.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
+              recipe.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+              'bg-red-100 text-red-700'
             }`}>
               {recipe.difficulty}
             </div>
           </div>
 
           {/* Action Buttons Row */}
-          <div className="flex items-center gap-3 mb-3 transform transition-all duration-300 group-hover:scale-105">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             {/* Shopping List Button */}
             <button
               onClick={handleShoppingListClick}
-              className="flex-1 h-12 flex items-center justify-center gap-2 px-4 bg-gradient-to-r from-success-100 to-success-200 border-2 border-success-300 rounded-2xl text-success-700 font-semibold text-sm active:scale-95 hover:from-success-200 hover:to-success-300 hover:border-success-400 hover:shadow-lg transition-all duration-300 focus-premium"
+              className="flex-1 h-10 sm:h-12 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-200 rounded-lg sm:rounded-xl text-green-700 font-semibold text-xs sm:text-sm active:scale-95 sm:hover:from-green-200 sm:hover:to-emerald-200 sm:hover:border-green-300 sm:hover:shadow-lg transition-all duration-300"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
-              <span>Add to List</span>
+              <span className="hidden xs:inline">Add to List</span>
+              <span className="xs:hidden">List</span>
             </button>
-
+            
             {/* Edit Button */}
             {onEdit && (
               <button
                 onClick={handleEditClick}
-                className="h-12 w-12 flex items-center justify-center bg-gradient-to-r from-warning-100 to-warning-200 border-2 border-warning-300 rounded-2xl text-warning-700 active:scale-95 hover:from-warning-200 hover:to-warning-300 hover:border-warning-400 hover:shadow-lg transition-all duration-300 focus-premium"
+                className="h-10 sm:h-12 w-10 sm:w-12 flex items-center justify-center bg-gradient-to-r from-amber-100 to-orange-100 border-2 border-amber-200 rounded-lg sm:rounded-xl text-amber-700 active:scale-95 sm:hover:from-amber-200 sm:hover:to-orange-200 sm:hover:border-amber-300 sm:hover:shadow-lg transition-all duration-300"
                 title="Edit Recipe"
-                aria-label="Edit recipe"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </button>
@@ -220,7 +212,7 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
           </div>
 
           {/* Premium CTA Button */}
-          <button className="w-full h-11 sm:h-14 relative overflow-hidden btn-premium text-white font-bold rounded-4xl transition-all duration-500 group-hover:scale-[1.02] active:scale-[0.97] focus-premium">
+          <button className="w-full h-11 sm:h-14 relative overflow-hidden bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 text-white font-bold rounded-xl sm:rounded-2xl shadow-lg sm:hover:shadow-2xl sm:hover:shadow-blue-500/50 transition-all duration-500 sm:hover:scale-[1.02] active:scale-[0.97]">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
             <div className="relative flex items-center justify-center gap-1.5 sm:gap-2 h-full">
               <span className="text-sm sm:text-base">View Recipe</span>

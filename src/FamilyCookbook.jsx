@@ -619,7 +619,7 @@ export default function FamilyCookbook() {
                 </svg>
                 <span className="sr-only">Ingredient Substitutions</span>
               </button>
-            </div>
+            </nav>
 
             {/* Authentication / Profile Button */}
             {user ? (

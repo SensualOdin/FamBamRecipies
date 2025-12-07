@@ -9,7 +9,7 @@ import IngredientSubstitutionsModal from './components/modals/IngredientSubstitu
 import UserProfileModal from './components/modals/UserProfileModal';
 import MealPlannerModal from './components/modals/MealPlannerModal';
 import AuthModal from './components/modals/AuthModal';
-import { fetchRecipes, fetchCategories, createRecipe, updateRecipe, getCurrentUser, getUserProfile, getUserProfileWithStats, signOut, onAuthStateChange, ensureUserProfile, recordUserActivity, toggleFavorite as toggleFavoriteDB, getUserFavorites, markRecipeAsCooked } from './lib/supabase';
+import { fetchRecipes, fetchCategories, createRecipe, updateRecipe, getCurrentUser, getUserProfile, getUserProfileWithStats, signOut, onAuthStateChange, ensureUserProfile, recordUserActivity, toggleFavorite as toggleFavoriteDB, getUserFavorites, markRecipeAsCooked, uploadRecipeImage } from './lib/supabase';
 import { initialRecipes } from './data/initialRecipes';
 import { initialUserProfile } from './data/initialProfile';
 
@@ -346,18 +346,31 @@ export default function FamilyCookbook() {
     setShowAuthModal(false);
   };
 
-  const handleAddRecipe = async (newRecipe) => {
+  const handleAddRecipe = async (newRecipe, photoFile = null) => {
     // If user is logged in, ensure their name is used as author
-    const recipeToSave = user ? {
+    let recipeToSave = user ? {
       ...newRecipe,
       author: newRecipe.author || userProfile.name || 'Chef'
     } : newRecipe;
     
-    // Optimistic update
+    // Optimistic update (with temporary preview if photo is data URL)
     setRecipes(prev => [recipeToSave, ...prev]);
     
     // Save to Supabase with user ID for tracking
     const savedRecipe = await createRecipe(recipeToSave, user?.id);
+    
+    // If there's a photo file to upload, upload it now that we have the recipe ID
+    if (photoFile && savedRecipe?.id) {
+      const { data: uploadData, error: uploadError } = await uploadRecipeImage(photoFile);
+      if (!uploadError && uploadData?.publicUrl) {
+        // Update the recipe with the uploaded photo URL
+        await updateRecipe(savedRecipe.id, { ...recipeToSave, image: uploadData.publicUrl });
+        // Update local state with the real URL
+        setRecipes(prev => prev.map(r => 
+          r.id === savedRecipe.id ? { ...r, image: uploadData.publicUrl } : r
+        ));
+      }
+    }
     
     // Record activity and refresh stats if user is logged in
     if (user) {
@@ -385,11 +398,23 @@ export default function FamilyCookbook() {
     setShowAddModal(true);
   };
 
-  const handleUpdateRecipe = async (updatedRecipe) => {
+  const handleUpdateRecipe = async (updatedRecipe, photoFile = null) => {
     // Optimistic update
     setRecipes(prev => prev.map(r => 
       r.id === updatedRecipe.id ? updatedRecipe : r
     ));
+    
+    // If there's a new photo file to upload
+    if (photoFile) {
+      const { data: uploadData, error: uploadError } = await uploadRecipeImage(photoFile);
+      if (!uploadError && uploadData?.publicUrl) {
+        updatedRecipe = { ...updatedRecipe, image: uploadData.publicUrl };
+        // Update local state with the real URL
+        setRecipes(prev => prev.map(r => 
+          r.id === updatedRecipe.id ? { ...r, image: uploadData.publicUrl } : r
+        ));
+      }
+    }
     
     // Update in Supabase
     await updateRecipe(updatedRecipe.id, updatedRecipe);

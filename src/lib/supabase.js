@@ -729,11 +729,15 @@ export async function deleteRecipeImage(filePath) {
   return { error: null };
 }
 
-// Extract recipe from image using Edge Function
-export async function extractRecipeFromImage(imageBase64) {
+// Extract recipe from image(s) using Edge Function
+// Accepts either a single base64 string or an array of base64 strings for multi-page recipes
+export async function extractRecipeFromImage(imagesBase64) {
   try {
+    // Normalize to array format for consistency
+    const images = Array.isArray(imagesBase64) ? imagesBase64 : [imagesBase64];
+    
     const { data, error } = await supabase.functions.invoke('extract-recipe-from-image', {
-      body: { imageBase64 }
+      body: { images }
     });
 
     if (error) {
@@ -748,7 +752,7 @@ export async function extractRecipeFromImage(imageBase64) {
     return { recipe: data.recipe, error: null };
   } catch (err) {
     console.error('Error extracting recipe:', err);
-    return { error: err.message || 'Failed to extract recipe from image' };
+    return { error: err.message || 'Failed to extract recipe from image(s)' };
   }
 }
 

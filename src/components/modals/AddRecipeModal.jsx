@@ -7,9 +7,15 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
   const [step, setStep] = useState(isEditMode ? 1 : 0); // Skip method selection when editing
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractionError, setExtractionError] = useState(null);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [uploadedImagePreview, setUploadedImagePreview] = useState(null);
+  const [uploadedImages, setUploadedImages] = useState([]); // Array of {file, preview} for AI extraction
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const fileInputRef = useRef(null);
+  
+  // Recipe photo state (for the finished dish photo)
+  const [recipePhotoFile, setRecipePhotoFile] = useState(null);
+  const [recipePhotoPreview, setRecipePhotoPreview] = useState(editingRecipe?.image?.startsWith('http') ? editingRecipe.image : null);
+  const [usePhotoAsImage, setUsePhotoAsImage] = useState(editingRecipe?.image?.startsWith('http') || false);
+  const recipePhotoInputRef = useRef(null);
   
   const [formData, setFormData] = useState({
     title: editingRecipe?.title || '',
@@ -73,77 +79,127 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
   };
 
   const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setExtractionError(null);
+      
+      // Process each file
+      const newImages = [];
+      let processed = 0;
+      
+      files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newImages[index] = {
+            file,
+            preview: reader.result
+          };
+          processed++;
+          
+          // When all files are processed, update state
+          if (processed === files.length) {
+            setUploadedImages(prev => [...prev, ...newImages]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeImage = (indexToRemove) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== indexToRemove));
+    if (currentImageIndex >= uploadedImages.length - 1 && currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
+  };
+
+  const clearAllImages = () => {
+    setUploadedImages([]);
+    setCurrentImageIndex(0);
+    setExtractionError(null);
+  };
+
+  // Handle recipe photo selection (for finished dish)
+  const handleRecipePhotoSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setUploadedImage(file);
-      setExtractionError(null);
+      setRecipePhotoFile(file);
+      setUsePhotoAsImage(true);
       
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImagePreview(reader.result);
+        setRecipePhotoPreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const removeRecipePhoto = () => {
+    setRecipePhotoFile(null);
+    setRecipePhotoPreview(null);
+    setUsePhotoAsImage(false);
+  };
+
   const handleExtractRecipe = async () => {
-    if (!uploadedImage) return;
+    if (uploadedImages.length === 0) return;
     
     setIsExtracting(true);
     setExtractionError(null);
     
     try {
-      // Convert image to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(uploadedImage);
+      // Convert all images to base64
+      const base64Images = uploadedImages.map(img => {
+        // The preview already has the base64 data
+        return img.preview.split(',')[1]; // Remove data:image/...;base64, prefix
+      });
       
-      reader.onloadend = async () => {
-        const base64 = reader.result.split(',')[1]; // Remove data:image/...;base64, prefix
-        
-        const { recipe, error } = await extractRecipeFromImage(base64);
-        
-        if (error) {
-          setExtractionError(error);
-          setIsExtracting(false);
-          return;
-        }
-        
-        if (recipe) {
-          // Populate form with extracted data
-          setFormData(prev => ({
-            ...prev,
-            title: recipe.title || prev.title,
-            author: recipe.author || prev.author,
-            category: recipe.category || prev.category,
-            prepTime: recipe.prepTime || prev.prepTime,
-            cookTime: recipe.cookTime || prev.cookTime,
-            servings: recipe.servings?.toString() || prev.servings,
-            description: recipe.description || prev.description,
-            ingredients: recipe.ingredients?.length > 0 ? recipe.ingredients : prev.ingredients,
-            instructions: recipe.instructions?.length > 0 ? recipe.instructions : prev.instructions,
-            difficulty: recipe.difficulty || prev.difficulty,
-            dietary: recipe.dietary || prev.dietary,
-            tags: recipe.tags || prev.tags,
-            story: recipe.story || prev.story
-          }));
-          
-          // Move to step 1 to review/edit
-          setStep(1);
-        }
-        
+      const { recipe, error } = await extractRecipeFromImage(base64Images);
+      
+      if (error) {
+        setExtractionError(error);
         setIsExtracting(false);
-      };
+        return;
+      }
+      
+      if (recipe) {
+        // Populate form with extracted data
+        setFormData(prev => ({
+          ...prev,
+          title: recipe.title || prev.title,
+          author: recipe.author || prev.author,
+          category: recipe.category || prev.category,
+          prepTime: recipe.prepTime || prev.prepTime,
+          cookTime: recipe.cookTime || prev.cookTime,
+          servings: recipe.servings?.toString() || prev.servings,
+          description: recipe.description || prev.description,
+          ingredients: recipe.ingredients?.length > 0 ? recipe.ingredients : prev.ingredients,
+          instructions: recipe.instructions?.length > 0 ? recipe.instructions : prev.instructions,
+          difficulty: recipe.difficulty || prev.difficulty,
+          dietary: recipe.dietary || prev.dietary,
+          tags: recipe.tags || prev.tags,
+          story: recipe.story || prev.story
+        }));
+        
+        // Move to step 1 to review/edit
+        setStep(1);
+      }
+      
+      setIsExtracting(false);
     } catch (err) {
       console.error('Error extracting recipe:', err);
-      setExtractionError('Failed to process image. Please try again.');
+      setExtractionError('Failed to process images. Please try again.');
       setIsExtracting(false);
     }
   };
 
   const handleSubmit = () => {
+    // Determine the image value - use photo preview URL if using photo, otherwise emoji
+    const imageValue = usePhotoAsImage && recipePhotoPreview ? recipePhotoPreview : formData.image;
+    
     const recipeData = {
       ...formData,
+      image: imageValue,
       ingredients: formData.ingredients.filter(i => i.trim()),
       instructions: formData.instructions.filter(i => i.trim()),
       lastModified: new Date().toISOString()
@@ -163,7 +219,8 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
           }
         ]
       };
-      if (onUpdate) onUpdate(updatedRecipe);
+      // Pass the photo file if there's a new one to upload
+      if (onUpdate) onUpdate(updatedRecipe, recipePhotoFile);
     } else {
       // Create new recipe
       const newRecipe = {
@@ -176,7 +233,8 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
           changes: 'Recipe created'
         }]
       };
-      onSave(newRecipe);
+      // Pass the photo file if there's one to upload
+      onSave(newRecipe, recipePhotoFile);
     }
     handleClose();
   };
@@ -293,9 +351,10 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
                   accept="image/jpeg,image/png,image/webp,image/heic"
                   onChange={handleImageSelect}
                   className="hidden"
+                  multiple
                 />
                 
-                {!uploadedImagePreview ? (
+                {uploadedImages.length === 0 ? (
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full py-3 border-2 border-dashed border-cyan-300 rounded-xl text-cyan-600 hover:bg-cyan-100 transition-all flex items-center justify-center gap-2 font-medium"
@@ -303,30 +362,86 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                     </svg>
-                    Select Image
+                    Select Images
                   </button>
                 ) : (
                   <div className="space-y-3">
-                    {/* Image Preview */}
+                    {/* Multiple Image Preview */}
                     <div className="relative rounded-xl overflow-hidden border border-gray-200">
                       <img 
-                        src={uploadedImagePreview} 
-                        alt="Recipe preview" 
+                        src={uploadedImages[currentImageIndex]?.preview} 
+                        alt={`Recipe page ${currentImageIndex + 1}`} 
                         className="w-full h-40 object-cover"
                       />
+                      
+                      {/* Image Navigation Arrows */}
+                      {uploadedImages.length > 1 && (
+                        <>
+                          <button
+                            onClick={() => setCurrentImageIndex(prev => (prev - 1 + uploadedImages.length) % uploadedImages.length)}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => setCurrentImageIndex(prev => (prev + 1) % uploadedImages.length)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                      
+                      {/* Remove Current Image */}
                       <button
-                        onClick={() => {
-                          setUploadedImage(null);
-                          setUploadedImagePreview(null);
-                          setExtractionError(null);
-                        }}
+                        onClick={() => removeImage(currentImageIndex)}
                         className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-all"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
+                      
+                      {/* Image Counter Badge */}
+                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 text-white text-xs rounded-lg font-medium">
+                        Page {currentImageIndex + 1} of {uploadedImages.length}
+                      </div>
                     </div>
+                    
+                    {/* Thumbnail Strip */}
+                    {uploadedImages.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto pb-1">
+                        {uploadedImages.map((img, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setCurrentImageIndex(idx)}
+                            className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
+                              idx === currentImageIndex ? 'border-cyan-500 ring-2 ring-cyan-200' : 'border-gray-200'
+                            }`}
+                          >
+                            <img src={img.preview} alt={`Page ${idx + 1}`} className="w-full h-full object-cover" />
+                            <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] text-center">
+                              {idx + 1}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Add More Images Button */}
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-cyan-400 hover:text-cyan-600 transition-all flex items-center justify-center gap-2 text-sm"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add More Pages
+                    </button>
                     
                     {/* Error Message */}
                     {extractionError && (
@@ -352,14 +467,14 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          <span>Extracting recipe...</span>
+                          <span>Extracting recipe from {uploadedImages.length} {uploadedImages.length === 1 ? 'image' : 'images'}...</span>
                         </>
                       ) : (
                         <>
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                           </svg>
-                          <span>Extract Recipe with AI</span>
+                          <span>Extract Recipe from {uploadedImages.length} {uploadedImages.length === 1 ? 'Image' : 'Images'}</span>
                         </>
                       )}
                     </button>
@@ -377,8 +492,9 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
                 <div>
                   <h4 className="font-semibold text-gray-800 text-sm">AI-Powered Extraction</h4>
                   <p className="text-xs text-gray-600 mt-1">
-                    Upload a photo of a recipe card, cookbook page, or even handwritten notes. 
-                    Our AI will extract the title, ingredients, instructions, and more automatically!
+                    Upload photos of a recipe card, cookbook pages, or even handwritten notes. 
+                    <span className="font-medium text-cyan-700"> Recipe spans multiple pages? No problem — add as many photos as you need!</span> 
+                    {' '}Our AI will combine all pages and extract the title, ingredients, instructions, and more automatically!
                   </p>
                 </div>
               </div>
@@ -503,24 +619,103 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
                 </div>
               </div>
 
+              {/* Recipe Image Section */}
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Choose an Icon</label>
-                <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                  {emojis.map(emoji => (
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Recipe Image</label>
+                
+                {/* Hidden file input for recipe photo */}
+                <input
+                  ref={recipePhotoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic"
+                  onChange={handleRecipePhotoSelect}
+                  className="hidden"
+                />
+                
+                {/* Photo Upload Option */}
+                <div className="mb-3">
+                  {recipePhotoPreview ? (
+                    <div className="relative rounded-xl overflow-hidden border-2 border-green-400 bg-green-50">
+                      <img 
+                        src={recipePhotoPreview} 
+                        alt="Recipe preview" 
+                        className="w-full h-32 sm:h-40 object-cover"
+                      />
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => recipePhotoInputRef.current?.click()}
+                          className="w-8 h-8 bg-white/90 text-gray-600 rounded-full flex items-center justify-center hover:bg-white transition-all shadow-md"
+                          title="Change photo"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={removeRecipePhoto}
+                          className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-all shadow-md"
+                          title="Remove photo"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="absolute bottom-2 left-2 px-2 py-1 bg-green-500 text-white text-xs rounded-lg font-medium flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Using photo
+                      </div>
+                    </div>
+                  ) : (
                     <button
-                      key={emoji}
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, image: emoji }))}
-                      className={`w-10 h-10 sm:w-12 sm:h-12 text-xl sm:text-2xl rounded-lg sm:rounded-xl transition-all duration-200 ${
-                        formData.image === emoji 
-                          ? 'bg-blue-100 ring-2 ring-blue-400 scale-110' 
-                          : 'bg-gray-50 active:bg-gray-100 sm:hover:bg-gray-100'
-                      }`}
+                      onClick={() => recipePhotoInputRef.current?.click()}
+                      className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-green-400 hover:text-green-600 hover:bg-green-50 transition-all flex flex-col items-center justify-center gap-2"
                     >
-                      {emoji}
+                      <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                      <span className="text-sm font-medium">Upload a photo of the finished dish</span>
+                      <span className="text-xs text-gray-400">Optional - show off your creation!</span>
                     </button>
-                  ))}
+                  )}
                 </div>
+
+                {/* Divider with "or" */}
+                {!recipePhotoPreview && (
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex-1 h-px bg-gray-200"></div>
+                    <span className="text-xs text-gray-400 font-medium">or choose an icon</span>
+                    <div className="flex-1 h-px bg-gray-200"></div>
+                  </div>
+                )}
+
+                {/* Emoji Selection - only show if no photo */}
+                {!recipePhotoPreview && (
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                    {emojis.map(emoji => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, image: emoji }))}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 text-xl sm:text-2xl rounded-lg sm:rounded-xl transition-all duration-200 ${
+                          formData.image === emoji && !usePhotoAsImage
+                            ? 'bg-blue-100 ring-2 ring-blue-400 scale-110' 
+                            : 'bg-gray-50 active:bg-gray-100 sm:hover:bg-gray-100'
+                        }`}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -608,10 +803,21 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
           {/* Step 5: Review */}
           <div className={`transition-all duration-300 ${step === 5 ? 'opacity-100' : 'opacity-0 hidden'}`}>
             <div className="text-center py-8">
-              <div className="text-8xl mb-4 animate-bounce">{formData.image}</div>
+              {/* Show photo or emoji */}
+              {recipePhotoPreview ? (
+                <div className="w-32 h-32 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg ring-4 ring-white">
+                  <img 
+                    src={recipePhotoPreview} 
+                    alt={formData.title || 'Recipe'} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="text-8xl mb-4 animate-bounce">{formData.image}</div>
+              )}
               <h3 className="font-serif text-2xl font-bold text-gray-800 mb-2">{formData.title || 'Your Recipe'}</h3>
               <p className="text-blue-600 mb-4">by {formData.author || 'You'}</p>
-              <div className="flex justify-center gap-4 text-sm text-gray-500 mb-6">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-sm text-gray-500 mb-6">
                 <span>📂 {formData.category}</span>
                 <span>⏱️ {formData.prepTime} prep</span>
                 <span>🍳 {formData.cookTime} cook</span>

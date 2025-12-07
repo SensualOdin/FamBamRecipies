@@ -9,6 +9,7 @@ import IngredientSubstitutionsModal from './components/modals/IngredientSubstitu
 import UserProfileModal from './components/modals/UserProfileModal';
 import MealPlannerModal from './components/modals/MealPlannerModal';
 import AuthModal from './components/modals/AuthModal';
+import SkeletonCard from './components/ui/SkeletonCard';
 import { fetchRecipes, fetchCategories, createRecipe, updateRecipe, getCurrentUser, getUserProfile, getUserProfileWithStats, signOut, onAuthStateChange, ensureUserProfile, recordUserActivity, toggleFavorite as toggleFavoriteDB, getUserFavorites, markRecipeAsCooked, uploadRecipeImage } from './lib/supabase';
 import { initialRecipes } from './data/initialRecipes';
 import { initialUserProfile } from './data/initialProfile';
@@ -555,16 +556,16 @@ export default function FamilyCookbook() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-slate-50 text-gray-800">
+    <div className="min-h-screen bg-premium-gradient bg-premium-mesh text-neutral-800">
       <FloatingParticles />
-      
+
       {/* Hero Header */}
       <header className={`relative overflow-hidden transition-all duration-1000 z-10 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
         <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-cyan-800 to-slate-900" />
-          <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/50 via-transparent to-cyan-600/30" />
-          <div className="absolute inset-0 opacity-30" style={{
-            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(0, 168, 224, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-secondary-800 to-neutral-900" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary-600/60 via-transparent to-secondary-600/40" />
+          <div className="absolute inset-0 opacity-40 bg-premium-mesh" style={{
+            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.4) 0%, transparent 50%)',
           }} />
         </div>
         
@@ -572,78 +573,76 @@ export default function FamilyCookbook() {
           {/* Top Bar with Tools and Auth - Mobile Optimized */}
           <div className="flex justify-between items-center mb-8 sm:mb-0 sm:absolute sm:top-6 sm:left-6 sm:right-6">
             {/* Tools Menu */}
-            <div className="flex gap-1.5 sm:gap-2">
+            <nav className="flex gap-1.5 sm:gap-2" role="navigation" aria-label="Quick tools">
               <button
                 onClick={() => setShowShoppingList(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
+                className="w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group focus-premium"
+                aria-label={`Shopping list ${shoppingList.filter(i => !i.checked).length > 0 ? `(${shoppingList.filter(i => !i.checked).length} items)` : '(empty)'}`}
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
                 {shoppingList.filter(i => !i.checked).length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 rounded-full text-[9px] sm:text-[10px] flex items-center justify-center font-bold shadow-md">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-error-500 rounded-full text-caption flex items-center justify-center font-bold shadow-md" aria-label={`${shoppingList.filter(i => !i.checked).length} unchecked items`}>
                     {shoppingList.filter(i => !i.checked).length}
                   </span>
                 )}
-                <span className="hidden sm:block absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                  Shopping List
-                </span>
+                <span className="sr-only">Shopping List</span>
               </button>
               <button
                 onClick={() => setShowMealPlanner(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group"
+                className="w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all relative group focus-premium"
+                aria-label="Meal planner"
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span className="hidden sm:block absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                  Meal Planner
-                </span>
+                <span className="sr-only">Meal Planner</span>
               </button>
               <button
                 onClick={() => setShowUnitConverter(true)}
-                className="hidden xs:flex w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full items-center justify-center text-white hover:bg-white/20 transition-all relative group"
+                className="hidden xs:flex w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full items-center justify-center text-white hover:bg-white/20 transition-all relative group focus-premium"
+                aria-label="Unit converter"
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
-                <span className="hidden sm:block absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                  Unit Converter
-                </span>
+                <span className="sr-only">Unit Converter</span>
               </button>
               <button
                 onClick={() => setShowSubstitutions(true)}
-                className="hidden xs:flex w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full items-center justify-center text-white hover:bg-white/20 transition-all relative group"
+                className="hidden xs:flex w-9 h-9 sm:w-10 sm:h-10 glass-morphism rounded-full items-center justify-center text-white hover:bg-white/20 transition-all relative group focus-premium"
+                aria-label="Ingredient substitutions"
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                 </svg>
-                <span className="hidden sm:block absolute top-full mt-2 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                  Ingredient Substitutions
-                </span>
+                <span className="sr-only">Ingredient Substitutions</span>
               </button>
             </div>
 
             {/* Authentication / Profile Button */}
             {user ? (
-              <button 
+              <button
                 onClick={() => setShowProfile(true)}
-                className="flex items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-md shadow-lg px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-white hover:shadow-xl transition-all group border border-white/50"
+                className="flex items-center gap-2 sm:gap-3 bg-white/90 backdrop-blur-md shadow-lg px-3 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-white hover:shadow-xl transition-all group border border-white/50 focus-premium"
+                aria-label={`View profile for ${userProfile.name}, level ${userProfile.level} chef`}
               >
                 <div className="text-right hidden sm:block">
-                  <div className="text-gray-800 font-bold text-sm">{userProfile.name}</div>
-                  <div className="text-blue-600 text-xs font-medium">Lvl {userProfile.level} Chef</div>
+                  <div className="text-neutral-800 font-bold text-sm">{userProfile.name}</div>
+                  <div className="text-primary-600 text-xs font-medium">Lvl {userProfile.level} Chef</div>
                 </div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-base sm:text-lg shadow-lg group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-base sm:text-lg shadow-lg group-hover:scale-110 transition-transform">
                   {userProfile.avatar}
                 </div>
               </button>
             ) : (
-              <button 
+              <button
                 onClick={() => setShowAuthModal(true)}
-                className="flex items-center gap-1.5 sm:gap-2 glass-morphism px-3 sm:px-5 py-2 sm:py-2.5 rounded-full hover:bg-white/20 transition-all font-semibold text-white text-sm sm:text-base"
+                className="flex items-center gap-1.5 sm:gap-2 glass-morphism px-3 sm:px-5 py-2 sm:py-2.5 rounded-full hover:bg-white/20 transition-all font-semibold text-white text-sm sm:text-base focus-premium"
+                aria-label="Sign in to your account"
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 <span className="hidden xs:inline">Sign In</span>
@@ -652,39 +651,47 @@ export default function FamilyCookbook() {
           </div>
 
           <div className={`text-center transform transition-all duration-1000 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h1 className="font-serif text-3xl xs:text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6 tracking-tight text-shadow-premium">
+            <h1 className="font-serif text-display font-bold text-white mb-4 sm:mb-6 text-shadow-premium">
               Our Family Cookbook
             </h1>
-            <p className="text-cyan-100 text-base sm:text-xl md:text-2xl max-w-2xl mx-auto mb-6 sm:mb-10 font-light px-2">
+            <p className="text-secondary-100 text-body-large max-w-2xl mx-auto mb-6 sm:mb-10 font-light px-2 text-balance">
               Preserving traditions, one recipe at a time.
             </p>
             
             {/* Search Bar */}
             <div className={`max-w-2xl mx-auto transform transition-all duration-500 ${isSearchFocused ? 'sm:scale-105' : 'scale-100'}`}>
-              <div className={`relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-2xl border border-white/20 transition-all duration-300 ${isSearchFocused ? 'bg-white/20 ring-2 sm:ring-4 ring-cyan-400/30' : ''}`}>
-                <svg 
-                  className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 text-cyan-200" 
-                  fill="none" 
-                  stroke="currentColor" 
+              <div className={`relative bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-2xl border border-white/20 transition-all duration-300 ${isSearchFocused ? 'bg-white/20 ring-2 sm:ring-4 ring-secondary-400/30' : ''}`}>
+                <label htmlFor="recipe-search" className="sr-only">Search recipes</label>
+                <svg
+                  className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 text-secondary-200"
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
+                  id="recipe-search"
                   type="text"
                   placeholder="Search recipes..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
-                  className="w-full pl-10 sm:pl-14 pr-4 sm:pr-6 py-3.5 sm:py-5 rounded-xl sm:rounded-2xl bg-transparent text-white placeholder-cyan-100/60 text-base sm:text-lg outline-none font-medium"
+                  className="w-full pl-10 sm:pl-14 pr-4 sm:pr-6 py-3.5 sm:py-5 rounded-xl sm:rounded-2xl bg-transparent text-white placeholder-secondary-100/60 text-base sm:text-lg outline-none font-medium focus-premium"
+                  aria-describedby="search-help"
                 />
+                <div id="search-help" className="sr-only">
+                  Search by recipe title, description, author, tags, or ingredients
+                </div>
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all"
+                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all focus-premium"
+                    aria-label="Clear search"
                   >
-                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -698,7 +705,7 @@ export default function FamilyCookbook() {
       {/* Main Content */}
       <main className="relative max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-12 -mt-6 sm:-mt-10 z-20">
         {/* Filters Bar */}
-        <div className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 mb-6 sm:mb-10 transform transition-all duration-700 delay-500 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+        <div className={`bg-white rounded-4xl shadow-premium p-4 sm:p-6 mb-6 sm:mb-10 transform transition-all duration-700 delay-500 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
           <div className="flex flex-col gap-4 sm:gap-6">
             {/* Categories - Horizontal scroll on mobile */}
             <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
@@ -708,10 +715,10 @@ export default function FamilyCookbook() {
                     key={category}
                     onClick={() => setSelectedCategory(category)}
                     className={`
-                      px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all duration-300 whitespace-nowrap
+                      px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm transition-all duration-300 whitespace-nowrap focus-premium
                       ${selectedCategory === category
-                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-95'
+                        ? 'bg-gradient-to-r from-primary-600 to-secondary-600 text-white shadow-premium'
+                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 active:scale-95 hover:shadow-premium'
                       }
                     `}
                   >
@@ -725,8 +732,8 @@ export default function FamilyCookbook() {
             <div className="flex gap-2 sm:gap-3 justify-between sm:justify-end">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all ${
-                  showFilters ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 transition-all focus-premium ${
+                  showFilters ? 'bg-primary-100 text-primary-700 shadow-premium' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 }`}
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -736,7 +743,7 @@ export default function FamilyCookbook() {
               </button>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/30 hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-1.5 sm:gap-2"
+                className="flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-2.5 btn-premium text-white rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 focus-premium"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -830,9 +837,10 @@ export default function FamilyCookbook() {
 
         {/* Recipe Grid */}
         {isLoading ? (
-          <div className="text-center py-12 sm:py-20">
-            <div className="animate-spin w-10 h-10 sm:w-12 sm:h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-500 font-medium text-sm sm:text-base">Loading recipes...</p>
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+            {Array.from({ length: 8 }, (_, i) => (
+              <SkeletonCard key={i} index={i} />
+            ))}
           </div>
         ) : filteredRecipes.length > 0 ? (
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
@@ -850,16 +858,21 @@ export default function FamilyCookbook() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 sm:py-20 bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 mx-1">
-            <div className="text-5xl sm:text-7xl mb-4 sm:mb-6 animate-bounce">👨‍🍳</div>
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">No recipes found</h3>
-            <p className="text-gray-500 mb-6 sm:mb-8 max-w-md mx-auto text-sm sm:text-base px-4">We couldn't find any recipes matching your criteria. Try adjusting your filters!</p>
-            <button
-              onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedDifficulty('All'); }}
-              className="px-6 sm:px-8 py-2.5 sm:py-3 bg-blue-100 text-blue-700 rounded-xl font-bold hover:bg-blue-200 transition-all text-sm sm:text-base"
-            >
-              Clear All Filters
-            </button>
+          <div className="text-center py-16 sm:py-24 bg-white rounded-4xl shadow-premium border border-neutral-100/50 mx-1 relative overflow-hidden">
+            <div className="absolute inset-0 bg-premium-dots opacity-5" />
+            <div className="relative">
+              <div className="text-6xl sm:text-8xl mb-6 animate-bounce-subtle">👨‍🍳</div>
+              <h3 className="text-heading-2 font-bold text-neutral-800 mb-4">No recipes found</h3>
+              <p className="text-neutral-600 mb-8 max-w-md mx-auto text-body px-4 text-balance">
+                We couldn't find any recipes matching your criteria. Try adjusting your filters!
+              </p>
+              <button
+                onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedDifficulty('All'); }}
+                className="px-8 py-4 btn-premium text-white rounded-2xl font-bold text-body hover:scale-105 transition-all duration-300 focus-premium"
+              >
+                Clear All Filters
+              </button>
+            </div>
           </div>
         )}
       </main>

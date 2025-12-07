@@ -112,10 +112,10 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
             <div className="relative">
               {isHovered && <div className="absolute inset-0 bg-blue-400 rounded-xl sm:rounded-2xl blur-lg opacity-60 animate-pulse" />}
               <div className="relative glass-morphism px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow-lg">
-                <span className="text-xs sm:text-sm font-bold gradient-text flex items-center gap-1">
-                  <span>{categoryIcons[recipe.category]}</span>
-                  <span className="hidden xs:inline">{recipe.category}</span>
-                </span>
+                <div className="text-xs sm:text-sm font-bold flex items-center gap-1.5">
+                  <span className="text-base leading-none">{categoryIcons[recipe.category] || '🍽️'}</span>
+                  <span className="hidden xs:inline-block gradient-text">{recipe.category}</span>
+                </div>
               </div>
             </div>
           </div>

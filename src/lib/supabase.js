@@ -743,30 +743,102 @@ export async function extractRecipeFromImage(imagesBase64) {
       return { error: 'Please sign in to use AI recipe extraction' };
     }
     
-    // Call the edge function directly with fetch for better control
-    const response = await fetch(`${supabaseUrl}/functions/v1/extract-recipe-from-image`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': supabaseAnonKey,
-        'Authorization': `Bearer ${session.access_token}`
-      },
-      body: JSON.stringify({ images })
-    });
+    // For multiple images, we need to process them sequentially and merge results
+    // For single image, use imageBase64 parameter (what the existing function expects)
+    if (images.length === 1) {
+      // Single image - use imageBase64 parameter
+      const response = await fetch(`${supabaseUrl}/functions/v1/extract-recipe-from-image`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ imageBase64: images[0] })
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Edge function error:', response.status, errorText);
-      return { error: `Failed to extract recipe: ${errorText}` };
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Edge function error:', response.status, errorText);
+        return { error: `Failed to extract recipe: ${errorText}` };
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        return { error: data.error };
+      }
+
+      return { recipe: data.recipe, error: null };
+    } else {
+      // Multiple images - process first image and append others' content
+      // For now, concatenate all images and send as first (the AI will see all pages)
+      // We'll send each image and merge the results
+      let allIngredients = [];
+      let allInstructions = [];
+      let baseRecipe = null;
+      
+      for (let i = 0; i < images.length; i++) {
+        const response = await fetch(`${supabaseUrl}/functions/v1/extract-recipe-from-image`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ imageBase64: images[i] })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Edge function error:', response.status, errorText);
+          continue; // Try next image
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+          console.error('Recipe extraction error:', data.error);
+          continue;
+        }
+
+        if (data.recipe) {
+          if (!baseRecipe) {
+            baseRecipe = data.recipe;
+            allIngredients = [...(data.recipe.ingredients || [])];
+            allInstructions = [...(data.recipe.instructions || [])];
+          } else {
+            // Merge ingredients and instructions from additional pages
+            const newIngredients = data.recipe.ingredients || [];
+            const newInstructions = data.recipe.instructions || [];
+            
+            // Add unique ingredients
+            newIngredients.forEach(ing => {
+              if (!allIngredients.some(existing => existing.toLowerCase() === ing.toLowerCase())) {
+                allIngredients.push(ing);
+              }
+            });
+            
+            // Add instructions (assume they continue from previous page)
+            allInstructions.push(...newInstructions);
+          }
+        }
+      }
+
+      if (!baseRecipe) {
+        return { error: 'Failed to extract recipe from any of the images' };
+      }
+
+      // Return merged recipe
+      return { 
+        recipe: {
+          ...baseRecipe,
+          ingredients: allIngredients,
+          instructions: allInstructions
+        }, 
+        error: null 
+      };
     }
-
-    const data = await response.json();
-
-    if (data.error) {
-      return { error: data.error };
-    }
-
-    return { recipe: data.recipe, error: null };
   } catch (err) {
     console.error('Error extracting recipe:', err);
     return { error: err.message || 'Failed to extract recipe from image(s)' };

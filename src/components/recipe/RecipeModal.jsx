@@ -170,17 +170,19 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
     >
       <div 
         className={`
-          relative bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden shadow-2xl
+          relative bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl
           transform transition-all duration-500 ease-out
           ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 sm:scale-95 translate-y-8'}
         `}
         onClick={e => e.stopPropagation()}
       >
-        {/* Mobile Drag Handle */}
-        <div className="sm:hidden w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 mb-1" />
-        
-        {/* Action Buttons */}
-        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10 flex gap-1.5 sm:gap-2 print:hidden">
+        {/* Sticky Header with Mobile Drag Handle and Action Buttons */}
+        <div className="sticky top-0 z-10 bg-gradient-to-b from-black/40 via-black/20 to-transparent print:hidden -mb-16 sm:-mb-20">
+          {/* Mobile Drag Handle */}
+          <div className="sm:hidden w-12 h-1.5 bg-white/60 rounded-full mx-auto pt-3 mt-3" />
+          
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-1.5 sm:gap-2 p-3 sm:p-4">
           <button 
             onClick={handlePrint}
             className="hidden sm:flex w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
@@ -219,11 +221,12 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+          </div>
         </div>
 
         {/* Share Notification */}
         {showShareNotification && (
-          <div className="absolute top-20 right-4 z-20 bg-green-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fadeIn">
+          <div className="fixed top-20 right-4 z-50 bg-green-500 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fadeIn">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
@@ -233,7 +236,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
 
         {/* Delete Confirmation */}
         {showDeleteConfirm && (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
             <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scaleIn">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
@@ -273,7 +276,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
 
         {/* Mark as Cooked Confirmation */}
         {showCookConfirm && (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
             <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scaleIn">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
@@ -361,7 +364,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
 
         {/* Just Cooked Success Notification */}
         {justCooked && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-fadeIn">
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-fadeIn">
             <span className="text-2xl">🎉</span>
             <div>
               <p className="font-bold">Nice! You cooked this recipe!</p>
@@ -372,7 +375,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
 
         {/* Photo Upload Success Notification */}
         {photoUploadSuccess && (
-          <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-fadeIn">
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-fadeIn">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
@@ -438,7 +441,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 lg:p-8 overflow-y-auto max-h-[calc(95vh-12rem)] sm:max-h-[calc(90vh-16rem)]">
+        <div className="p-4 sm:p-6 lg:p-8">
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div className="flex-1 min-w-0">
               <h2 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">{recipe.title}</h2>

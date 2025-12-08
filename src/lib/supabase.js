@@ -739,17 +739,28 @@ export async function extractRecipeFromImage(imagesBase64) {
     // Get the current session to include auth token
     const { data: { session } } = await supabase.auth.getSession();
     
-    const { data, error } = await supabase.functions.invoke('extract-recipe-from-image', {
-      body: { images },
-      headers: session?.access_token ? {
-        Authorization: `Bearer ${session.access_token}`
-      } : {}
+    if (!session?.access_token) {
+      return { error: 'Please sign in to use AI recipe extraction' };
+    }
+    
+    // Call the edge function directly with fetch for better control
+    const response = await fetch(`${supabaseUrl}/functions/v1/extract-recipe-from-image`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ images })
     });
 
-    if (error) {
-      console.error('Error calling extract function:', error);
-      return { error: error.message || 'Failed to extract recipe' };
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Edge function error:', response.status, errorText);
+      return { error: `Failed to extract recipe: ${errorText}` };
     }
+
+    const data = await response.json();
 
     if (data.error) {
       return { error: data.error };

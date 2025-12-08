@@ -9,6 +9,7 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
   const [extractionError, setExtractionError] = useState(null);
   const [uploadedImages, setUploadedImages] = useState([]); // Array of {file, preview} for AI extraction
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [tagInput, setTagInput] = useState('');
   const fileInputRef = useRef(null);
   
   // Recipe photo state (for the finished dish photo)
@@ -76,6 +77,31 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
         ? prev.dietary.filter(d => d !== option)
         : [...prev.dietary, option]
     }));
+  };
+
+  const addTag = () => {
+    const tag = tagInput.trim();
+    if (tag && !formData.tags.includes(tag)) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag]
+      }));
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(t => t !== tagToRemove)
+    }));
+  };
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
   };
 
   const handleImageSelect = (e) => {
@@ -619,6 +645,59 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
                 </div>
               </div>
 
+              {/* Custom Tags */}
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Custom Tags</label>
+                <p className="text-xs text-gray-500 mb-2">Add tags like "Comfort Food", "Quick Meal", "Holiday", etc.</p>
+                
+                {/* Existing Tags */}
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3">
+                    {formData.tags.map(tag => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs sm:text-sm font-medium"
+                      >
+                        #{tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="w-4 h-4 rounded-full hover:bg-blue-200 flex items-center justify-center transition-colors"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Add Tag Input */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={e => setTagInput(e.target.value)}
+                    onKeyDown={handleTagKeyDown}
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm sm:text-base"
+                    placeholder="Type a tag and press Enter"
+                  />
+                  <button
+                    type="button"
+                    onClick={addTag}
+                    disabled={!tagInput.trim()}
+                    className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium text-sm transition-all ${
+                      tagInput.trim()
+                        ? 'bg-blue-500 text-white active:bg-blue-600 sm:hover:bg-blue-600'
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+
               {/* Recipe Image Section */}
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Recipe Image</label>
@@ -817,12 +896,21 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
               )}
               <h3 className="font-serif text-2xl font-bold text-gray-800 mb-2">{formData.title || 'Your Recipe'}</h3>
               <p className="text-blue-600 mb-4">by {formData.author || 'You'}</p>
-              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-sm text-gray-500 mb-6">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-sm text-gray-500 mb-4">
                 <span>📂 {formData.category}</span>
                 <span>⏱️ {formData.prepTime} prep</span>
                 <span>🍳 {formData.cookTime} cook</span>
                 <span>👥 {formData.servings} servings</span>
               </div>
+              {formData.tags.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                  {formData.tags.map(tag => (
+                    <span key={tag} className="px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
               <p className="text-gray-600 italic max-w-md mx-auto">"{formData.description}"</p>
               <div className="mt-6 p-4 bg-green-50 rounded-xl text-green-700">
                 <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

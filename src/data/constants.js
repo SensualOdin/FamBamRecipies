@@ -31,6 +31,6 @@ export const dietaryOptions = [
 ];
 
 export const commonUnits = [
-  'cup', 'tbsp', 'tsp', 'oz', 'lb', 'g', 'kg', 'ml', 'l', 'pinch'
+  'cup', 'tbsp', 'tsp', 'fl oz', 'pint', 'quart', 'gallon', 'ml', 'l', 'g', 'kg', 'lb', 'pinch'
 ];
 

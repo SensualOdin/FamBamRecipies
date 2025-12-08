@@ -736,8 +736,14 @@ export async function extractRecipeFromImage(imagesBase64) {
     // Normalize to array format for consistency
     const images = Array.isArray(imagesBase64) ? imagesBase64 : [imagesBase64];
     
+    // Get the current session to include auth token
+    const { data: { session } } = await supabase.auth.getSession();
+    
     const { data, error } = await supabase.functions.invoke('extract-recipe-from-image', {
-      body: { images }
+      body: { images },
+      headers: session?.access_token ? {
+        Authorization: `Bearer ${session.access_token}`
+      } : {}
     });
 
     if (error) {

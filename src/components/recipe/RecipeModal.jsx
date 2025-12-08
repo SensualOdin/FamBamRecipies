@@ -177,12 +177,12 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
         onClick={e => e.stopPropagation()}
       >
         {/* Sticky Header with Mobile Drag Handle and Action Buttons */}
-        <div className="sticky top-0 z-10 bg-gradient-to-b from-black/40 via-black/20 to-transparent print:hidden -mb-16 sm:-mb-20">
+        <div className="sticky top-0 z-10 bg-gradient-to-b from-black/60 via-black/30 to-transparent sm:from-black/40 sm:via-black/20 print:hidden -mb-16 sm:-mb-20">
           {/* Mobile Drag Handle */}
-          <div className="sm:hidden w-12 h-1.5 bg-white/60 rounded-full mx-auto pt-3 mt-3" />
+          <div className="sm:hidden w-12 h-1.5 bg-white/80 rounded-full mx-auto pt-3 mt-3" />
           
           {/* Action Buttons */}
-          <div className="flex justify-end gap-1.5 sm:gap-2 p-3 sm:p-4">
+          <div className="flex justify-end gap-2 sm:gap-2 p-3 sm:p-4">
           <button 
             onClick={handlePrint}
             className="hidden sm:flex w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
@@ -194,30 +194,30 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
           </button>
           <button 
             onClick={handleShare}
-            className="w-9 h-9 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-95 sm:hover:bg-white sm:hover:scale-110 transition-all duration-200"
+            className="w-10 h-10 sm:w-10 sm:h-10 bg-white shadow-xl rounded-full flex items-center justify-center active:scale-95 sm:hover:bg-white sm:hover:scale-110 transition-all duration-200 border border-gray-200"
             title="Share Recipe"
           >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <svg className="w-5 h-5 sm:w-5 sm:h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
           </button>
           {onDelete && (
             <button 
               onClick={() => setShowDeleteConfirm(true)}
-              className="w-9 h-9 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-95 sm:hover:bg-red-50 sm:hover:scale-110 transition-all duration-200"
+              className="w-10 h-10 sm:w-10 sm:h-10 bg-white shadow-xl rounded-full flex items-center justify-center active:scale-95 sm:hover:bg-red-50 sm:hover:scale-110 transition-all duration-200 border border-gray-200"
               title="Delete Recipe"
             >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <svg className="w-5 h-5 sm:w-5 sm:h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
           )}
           <button 
             onClick={handleClose}
-            className="w-9 h-9 sm:w-10 sm:h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-95 sm:hover:bg-white sm:hover:scale-110 transition-all duration-200"
+            className="w-10 h-10 sm:w-10 sm:h-10 bg-white shadow-xl rounded-full flex items-center justify-center active:scale-95 sm:hover:bg-white sm:hover:scale-110 transition-all duration-200 border border-gray-200"
             title="Close"
           >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <svg className="w-5 h-5 sm:w-5 sm:h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

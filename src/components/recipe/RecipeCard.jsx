@@ -38,7 +38,7 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`
-        group cursor-pointer relative overflow-hidden
+        group cursor-pointer relative overflow-hidden h-full
         rounded-2xl sm:rounded-3xl
         transform transition-all duration-700 ease-out
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}
@@ -50,11 +50,11 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
       <div className="absolute inset-0 glass-morphism shadow-lg sm:shadow-xl group-hover:shadow-2xl transition-shadow duration-700" />
       
       {/* Gradient border effect - Detroit Blue */}
-      <div className="absolute inset-0 rounded-2xl sm:rounded-3xl p-[2px] bg-gradient-to-br from-blue-400 via-cyan-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+        <div className="absolute inset-0 rounded-2xl sm:rounded-3xl p-[2px] bg-gradient-to-br from-blue-400 via-cyan-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
         <div className="absolute inset-[2px] rounded-2xl sm:rounded-3xl bg-white" />
       </div>
 
-      <div className="relative">
+      <div className="relative h-full flex flex-col">
         {/* Image/Emoji Header with sophisticated gradient */}
         <div className="relative h-40 xs:h-44 sm:h-56 overflow-hidden">
           {/* Animated gradient background */}
@@ -123,14 +123,14 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
         </div>
 
         {/* Content with enhanced styling */}
-        <div className="relative p-4 sm:p-5 lg:p-7 flex flex-col">
-          {/* Title */}
-          <h3 className="font-serif text-lg xs:text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 group-hover:gradient-text transition-all duration-500 leading-tight line-clamp-2 min-h-[2.5rem] sm:min-h-[3.5rem]">
+        <div className="relative p-4 sm:p-5 lg:p-7 flex flex-col flex-1">
+          {/* Title - fixed height for 2 lines */}
+          <h3 className="font-serif text-lg xs:text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3 group-hover:gradient-text transition-all duration-500 leading-tight line-clamp-2 h-[2.75rem] xs:h-[3rem] sm:h-[3.75rem]">
             {recipe.title}
           </h3>
           
-          {/* Tags */}
-          <div className="mb-2 sm:mb-4 min-h-[1.5rem] sm:min-h-[2rem]">
+          {/* Tags - fixed height */}
+          <div className="mb-2 sm:mb-4 h-[1.5rem] sm:h-[1.75rem]">
             {recipe.tags && recipe.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 sm:gap-2">
                 {recipe.tags.slice(0, 2).map((tag, i) => (
@@ -145,8 +145,8 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
             )}
           </div>
           
-          {/* Description */}
-          <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 leading-relaxed">
+          {/* Description - fixed height for 2 lines */}
+          <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2 leading-relaxed h-[2.25rem] sm:h-[2.5rem]">
             {recipe.description}
           </p>
           
@@ -183,8 +183,8 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
             </div>
           </div>
 
-          {/* Action Buttons Row */}
-          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+          {/* Action Buttons Row - pushed to bottom */}
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 mt-auto">
             {/* Shopping List Button */}
             <button
               onClick={handleShoppingListClick}

@@ -21,38 +21,29 @@ const AuthModal = ({ onClose, onSignIn, onError }) => {
 
     try {
       if (isSignUp) {
-        // Sign up
         const { data, error: signUpError } = await signUp(email, password, name);
-        
         if (signUpError) {
           setError(signUpError.message || 'Failed to create account. Please try again.');
           setIsLoading(false);
           return;
         }
-
-        // Check if email confirmation is required
         if (data.user && !data.session) {
           setError('Please check your email to confirm your account before signing in.');
           setIsLoading(false);
           return;
         }
-
-        // If we have a session, sign in was successful
         if (data.session) {
           onSignIn(data.user);
           setIsVisible(false);
           setTimeout(onClose, 300);
         }
       } else {
-        // Sign in
         const { data, error: signInError } = await signIn(email, password);
-        
         if (signInError) {
           setError(signInError.message || 'Invalid email or password. Please try again.');
           setIsLoading(false);
           return;
         }
-
         if (data.user) {
           onSignIn(data.user);
           setIsVisible(false);
@@ -66,123 +57,101 @@ const AuthModal = ({ onClose, onSignIn, onError }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-      <div className={`bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transition-all duration-500 ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
-        {/* Header with gradient background */}
-        <div className="relative bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 p-8 text-white overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-300 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
-          </div>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? 'bg-slate-900/60 backdrop-blur-md' : 'bg-transparent'}`} onClick={onClose}>
+      <div 
+        className={`bg-white rounded-[40px] shadow-2xl max-w-md w-full overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="bg-slate-950 p-10 text-white text-center relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-detroit-500/20 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl" />
 
-          <button
-            onClick={() => {
-              setIsVisible(false);
-              setTimeout(onClose, 300);
-            }}
-            className="absolute top-6 right-6 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all hover:scale-110 z-10"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button onClick={onClose} className="absolute top-6 right-6 w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center transition-all border border-white/10">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
 
-          <div className="relative text-center">
-            <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-4xl shadow-2xl mx-auto mb-4">
-              👨‍🍳
+          <div className="relative z-10">
+            <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-4xl shadow-2xl mx-auto mb-6">
+              {isSignUp ? '👨‍🍳' : '🥘'}
             </div>
-            <h2 className="text-3xl font-bold mb-2">
+            <h2 className="text-3xl font-black tracking-tight mb-2">
               {isSignUp ? 'Join the Family' : 'Welcome Back'}
             </h2>
-            <p className="text-cyan-100">
-              {isSignUp ? 'Create your chef account' : 'Sign in to your account'}
+            <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">
+              {isSignUp ? 'Start Your Collection' : 'Your Kitchen Awaits'}
             </p>
           </div>
         </div>
 
-        {/* Form */}
-        <div className="p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="p-10">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {isSignUp && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
-                </label>
+              <div className="group">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block group-focus-within:text-detroit-500 transition-colors">Chef Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-cyan-500 focus:ring focus:ring-cyan-200 transition-all outline-none"
-                  placeholder="Your name"
+                  className="w-full bg-slate-50 border-2 border-transparent focus:border-detroit-500 focus:bg-white rounded-2xl px-6 py-4 font-bold outline-none transition-all"
+                  placeholder="George Winner"
                   required={isSignUp}
                 />
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
+            <div className="group">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block group-focus-within:text-detroit-500 transition-colors">Email Address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-cyan-500 focus:ring focus:ring-cyan-200 transition-all outline-none"
-                placeholder="your@email.com"
+                className="w-full bg-slate-50 border-2 border-transparent focus:border-detroit-500 focus:bg-white rounded-2xl px-6 py-4 font-bold outline-none transition-all"
+                placeholder="george@example.com"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
+            <div className="group">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block group-focus-within:text-detroit-500 transition-colors">Security Key</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-cyan-500 focus:ring focus:ring-cyan-200 transition-all outline-none"
+                className="w-full bg-slate-50 border-2 border-transparent focus:border-detroit-500 focus:bg-white rounded-2xl px-6 py-4 font-bold outline-none transition-all"
                 placeholder="••••••••"
                 required
               />
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm">
-                {error}
+              <div className="p-4 bg-rose-50 border-2 border-rose-100 rounded-2xl text-rose-600 text-xs font-bold leading-relaxed animate-fadeIn">
+                ⚠️ {error}
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3.5 rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+              className="w-full bg-slate-900 text-white py-5 rounded-[24px] font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95"
             >
               {isLoading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  {isSignUp ? 'Creating Account...' : 'Signing In...'}
-                </>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                isSignUp ? 'Create Account' : 'Sign In'
+                isSignUp ? 'Create Profile' : 'Enter Kitchen'
               )}
             </button>
           </form>
 
-          {/* Toggle Sign In / Sign Up */}
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <button
               onClick={() => {
                 setIsSignUp(!isSignUp);
                 setError(null);
               }}
-              className="text-cyan-600 hover:text-cyan-700 font-medium transition-colors"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-detroit-600 transition-colors"
             >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+              {isSignUp ? 'Already a Chef? Sign In' : "No account? Join the family"}
             </button>
           </div>
         </div>

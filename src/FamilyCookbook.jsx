@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Search, Plus, Heart, ShoppingCart, User, 
+  Home, Filter, UtensilsCrossed, Calendar, 
+  ArrowRight, Sparkles, BookOpen, Clock, 
+  ChefHat, Layers, Star, X
+} from 'lucide-react';
 import FloatingParticles from './components/layout/FloatingParticles';
 import RecipeCard from './components/recipe/RecipeCard';
 import RecipeModal from './components/recipe/RecipeModal';
@@ -589,6 +596,66 @@ export default function FamilyCookbook() {
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-detroit-100 selection:text-detroit-900">
       <FloatingParticles />
       
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 px-6 py-3 z-50 flex justify-between items-center shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+        <button 
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setSelectedCategory('All');
+            setShowFavoritesOnly(false);
+          }}
+          className={`flex flex-col items-center gap-1 transition-all ${!showFavoritesOnly && selectedCategory === 'All' ? 'text-detroit-600' : 'text-slate-400'}`}
+        >
+          <Home className="w-6 h-6" />
+          <span className="text-[10px] font-bold uppercase tracking-tighter">Home</span>
+        </button>
+        <button 
+          onClick={() => {
+            setShowFavoritesOnly(true);
+            setSelectedCategory('All');
+          }}
+          className={`flex flex-col items-center gap-1 transition-all ${showFavoritesOnly ? 'text-rose-500' : 'text-slate-400'}`}
+        >
+          <Heart className={`w-6 h-6 ${showFavoritesOnly ? 'fill-rose-500' : ''}`} />
+          <span className="text-[10px] font-bold uppercase tracking-tighter">Saved</span>
+        </button>
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="flex flex-col items-center -mt-8"
+        >
+          <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl shadow-slate-900/20 text-white">
+            <Plus className="w-8 h-8" strokeWidth={3} />
+          </div>
+        </button>
+        <button 
+          onClick={() => setShowShoppingList(true)}
+          className={`flex flex-col items-center gap-1 transition-all ${showShoppingList ? 'text-detroit-600' : 'text-slate-400'}`}
+        >
+          <div className="relative">
+            <ShoppingCart className="w-6 h-6" />
+            {shoppingList.filter(i => !i.checked).length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-detroit-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold">
+                {shoppingList.filter(i => !i.checked).length}
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-tighter">List</span>
+        </button>
+        <button 
+          onClick={() => user ? setShowProfile(true) : setShowAuthModal(true)}
+          className={`flex flex-col items-center gap-1 transition-all ${showProfile ? 'text-detroit-600' : 'text-slate-400'}`}
+        >
+          {user ? (
+            <div className="w-6 h-6 bg-detroit-100 rounded-full flex items-center justify-center text-xs">
+              {userProfile.avatar}
+            </div>
+          ) : (
+            <User className="w-6 h-6" />
+          )}
+          <span className="text-[10px] font-bold uppercase tracking-tighter">{user ? 'Me' : 'Join'}</span>
+        </button>
+      </div>
+
       {/* Hero Header */}
       <header className={`relative transition-all duration-1000 z-10 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
         <div className="absolute inset-0 -z-10 overflow-hidden">
@@ -601,10 +668,9 @@ export default function FamilyCookbook() {
         <div className="relative max-w-7xl mx-auto px-4 py-12 sm:py-20 md:py-28">
           {/* Top Navigation */}
           <nav className="flex justify-between items-center mb-12 sm:absolute sm:top-8 sm:left-6 sm:right-6">
-            {/* Branding/Logo could go here */}
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-gradient-to-br from-detroit-500 to-detroit-700 rounded-xl flex items-center justify-center shadow-lg shadow-detroit-500/20">
-                <span className="text-xl">🥘</span>
+                <ChefHat className="w-6 h-6 text-white" />
               </div>
               <span className="font-serif text-white font-bold text-xl tracking-tight hidden sm:block">FamBam</span>
             </div>
@@ -613,18 +679,16 @@ export default function FamilyCookbook() {
             <div className="flex items-center gap-2 sm:gap-4">
               <div className="hidden md:flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10">
                 {[
-                  { id: 'list', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z', onClick: () => setShowShoppingList(true), label: 'Shopping', count: shoppingList.filter(i => !i.checked).length },
-                  { id: 'plan', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', onClick: () => setShowMealPlanner(true), label: 'Planner' },
-                  { id: 'unit', icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4', onClick: () => setShowUnitConverter(true), label: 'Units' }
+                  { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: () => setShowShoppingList(true), label: 'Shopping', count: shoppingList.filter(i => !i.checked).length },
+                  { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: () => setShowMealPlanner(true), label: 'Planner' },
+                  { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: () => setShowUnitConverter(true), label: 'Units' }
                 ].map((tool) => (
                   <button
                     key={tool.id}
                     onClick={tool.onClick}
                     className="relative p-2.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={tool.icon} />
-                    </svg>
+                    {tool.icon}
                     {tool.count > 0 && (
                       <span className="absolute top-1 right-1 w-4 h-4 bg-detroit-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold">
                         {tool.count}
@@ -640,20 +704,20 @@ export default function FamilyCookbook() {
               {user ? (
                 <button 
                   onClick={() => setShowProfile(true)}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full transition-all group"
+                  className="flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 px-3 sm:px-4 py-1.5 rounded-full transition-all group"
                 >
                   <div className="text-right hidden sm:block">
                     <div className="text-white font-semibold text-xs">{userProfile.name}</div>
                     <div className="text-detroit-400 text-[10px] font-medium">Lvl {userProfile.level} Chef</div>
                   </div>
-                  <div className="w-8 h-8 bg-gradient-to-br from-detroit-400 to-detroit-600 rounded-full flex items-center justify-center text-sm shadow-inner">
-                    {userProfile.avatar}
+                  <div className="w-8 h-8 bg-gradient-to-br from-detroit-400 to-detroit-600 rounded-full flex items-center justify-center text-xs shadow-inner overflow-hidden">
+                    {userProfile.avatarUrl ? <img src={userProfile.avatarUrl} alt="" className="w-full h-full object-cover" /> : userProfile.avatar}
                   </div>
                 </button>
               ) : (
                 <button 
                   onClick={() => setShowAuthModal(true)}
-                  className="px-6 py-2 bg-white text-slate-900 rounded-full hover:bg-slate-100 transition-all font-semibold text-sm shadow-xl shadow-white/5"
+                  className="px-5 sm:px-6 py-2 bg-white text-slate-900 rounded-full hover:bg-slate-100 transition-all font-bold text-sm shadow-xl shadow-white/5"
                 >
                   Sign In
                 </button>
@@ -662,10 +726,10 @@ export default function FamilyCookbook() {
           </nav>
 
           <div className={`text-center max-w-4xl mx-auto transform transition-all duration-1000 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h1 className="font-serif text-4xl sm:text-6xl md:text-8xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+            <h1 className="font-serif text-4xl sm:text-6xl md:text-8xl font-extrabold text-white mb-6 tracking-tight leading-tight px-4">
               Our Family <span className="text-transparent bg-clip-text bg-gradient-to-r from-detroit-400 to-cyan-300">Cookbook</span>
             </h1>
-            <p className="text-slate-400 text-lg sm:text-xl md:text-2xl mb-12 font-light tracking-wide max-w-2xl mx-auto px-4">
+            <p className="text-slate-400 text-base sm:text-xl md:text-2xl mb-8 sm:mb-12 font-light tracking-wide max-w-2xl mx-auto px-6">
               Preserving our family's culinary traditions and creating new memories, one meal at a time.
             </p>
             
@@ -675,27 +739,23 @@ export default function FamilyCookbook() {
                 <div className="absolute inset-0 bg-gradient-to-r from-detroit-500/20 to-cyan-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative flex items-center bg-white/5 backdrop-blur-2xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
                   <div className="pl-6 text-slate-400">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <Search className="w-6 h-6" />
                   </div>
                   <input
                     type="text"
-                    placeholder="Search for a recipe, ingredient, or tag..."
+                    placeholder="Search for a recipe..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchFocused(true)}
                     onBlur={() => setIsSearchFocused(false)}
-                    className="w-full px-4 py-5 sm:py-6 bg-transparent text-white placeholder-slate-500 text-lg outline-none font-medium"
+                    className="w-full px-4 py-5 sm:py-6 bg-transparent text-white placeholder-slate-500 text-base sm:text-lg outline-none font-medium"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
                       className="mr-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
@@ -711,134 +771,148 @@ export default function FamilyCookbook() {
         <div className={`bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-6 sm:p-8 mb-12 transform transition-all duration-700 delay-500 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             {/* Categories Scroller */}
-            <div className="flex-1 overflow-x-auto scrollbar-hide -mx-2 px-2">
-              <div className="flex gap-2">
+            <div className="flex-1 overflow-x-auto scrollbar-hide -mx-2 px-2 pb-2">
+              <div className="flex gap-3">
                 {categories.map((category) => (
-                  <button
+                  <motion.button
                     key={category}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedCategory(category)}
                     className={`
-                      px-6 py-2.5 rounded-2xl font-semibold text-sm transition-all whitespace-nowrap
+                      px-6 py-3 rounded-2xl font-bold text-sm transition-all whitespace-nowrap flex items-center gap-2
                       ${selectedCategory === category
                         ? 'bg-detroit-600 text-white shadow-lg shadow-detroit-600/20 scale-105'
                         : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700 active:scale-95'
                       }
                     `}
                   >
-                    <span className="mr-2">{initialRecipes.find(r => r.category === category)?.image || '🍽️'}</span>
+                    <span className="text-lg">{initialRecipes.find(r => r.category === category)?.image || '🍽️'}</span>
                     {category}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
 
             {/* Quick Actions */}
             <div className="flex items-center gap-3">
-              <button
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-bold text-sm transition-all ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-sm transition-all ${
                   showFilters 
                     ? 'bg-detroit-50 text-detroit-700 border-2 border-detroit-100' 
                     : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:bg-slate-100'
                 }`}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
+                <Filter className="w-5 h-5" />
                 Filters
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-all"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-                </svg>
-                Add New Recipe
-              </button>
+                <Plus className="w-5 h-5" strokeWidth={3} />
+                <span className="hidden sm:inline">Add Recipe</span>
+                <span className="sm:hidden">Add New</span>
+              </motion.button>
             </div>
           </div>
 
           {/* Expanded Filters Panel */}
-          {showFilters && (
-            <div className="mt-8 pt-8 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
-              <div className="space-y-3">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sort Recipes</label>
-                <select 
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border-2 border-transparent rounded-2xl text-sm font-semibold text-slate-700 focus:border-detroit-500 focus:bg-white transition-all outline-none appearance-none"
-                >
-                  <option value="newest">Latest First</option>
-                  <option value="popular">Most Loved</option>
-                  <option value="name">Alphabetical</option>
-                </select>
-              </div>
+          <AnimatePresence>
+            {showFilters && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="mt-8 pt-8 border-t border-slate-100 overflow-hidden"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Sort Recipes</label>
+                    <div className="relative">
+                      <select 
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-sm font-bold text-slate-700 focus:border-detroit-500 focus:bg-white transition-all outline-none appearance-none"
+                      >
+                        <option value="newest">Latest First</option>
+                        <option value="popular">Most Loved</option>
+                        <option value="name">Alphabetical</option>
+                      </select>
+                      <ArrowRight className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 rotate-90 pointer-events-none" />
+                    </div>
+                  </div>
 
-              <div className="space-y-3">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Difficulty Level</label>
-                <div className="flex p-1 bg-slate-50 rounded-2xl">
-                  {['All', 'Easy', 'Hard'].map(diff => (
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Difficulty Level</label>
+                    <div className="flex p-1.5 bg-slate-50 rounded-2xl">
+                      {['All', 'Easy', 'Hard'].map(diff => (
+                        <button
+                          key={diff}
+                          onClick={() => setSelectedDifficulty(diff)}
+                          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                            selectedDifficulty === diff 
+                              ? 'bg-white text-detroit-600 shadow-sm' 
+                              : 'text-slate-500 hover:text-slate-700'
+                          }`}
+                        >
+                          {diff}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Saved Recipes</label>
                     <button
-                      key={diff}
-                      onClick={() => setSelectedDifficulty(diff)}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-                        selectedDifficulty === diff 
-                          ? 'bg-white text-detroit-600 shadow-sm' 
-                          : 'text-slate-500 hover:text-slate-700'
+                      onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                      className={`w-full py-4 px-5 rounded-2xl text-sm font-bold flex items-center justify-between transition-all ${
+                        showFavoritesOnly 
+                          ? 'bg-rose-50 text-rose-600 border-2 border-rose-100' 
+                          : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:bg-slate-100'
                       }`}
                     >
-                      {diff}
+                      <span className="flex items-center gap-2">
+                        <Heart className={`w-5 h-5 ${showFavoritesOnly ? 'fill-rose-500 text-rose-500' : ''}`} />
+                        Favorites
+                      </span>
+                      <div className={`w-10 h-6 rounded-full relative transition-colors ${showFavoritesOnly ? 'bg-rose-500' : 'bg-slate-300'}`}>
+                        <motion.div 
+                          animate={{ x: showFavoritesOnly ? 16 : 0 }}
+                          className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm" 
+                        />
+                      </div>
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Saved Recipes</label>
-                <button
-                  onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                  className={`w-full py-3 px-4 rounded-2xl text-sm font-bold flex items-center justify-between transition-all ${
-                    showFavoritesOnly 
-                      ? 'bg-rose-50 text-rose-600 border-2 border-rose-100' 
-                      : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <svg className={`w-5 h-5 ${showFavoritesOnly ? 'fill-rose-500' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    Favorites
-                  </span>
-                  <div className={`w-10 h-6 rounded-full relative transition-colors ${showFavoritesOnly ? 'bg-rose-500' : 'bg-slate-300'}`}>
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${showFavoritesOnly ? 'right-1' : 'left-1'}`} />
                   </div>
-                </button>
-              </div>
 
-              <div className="space-y-3 flex flex-col justify-end">
-                <button
-                  onClick={() => {
-                    setSelectedCategory('All');
-                    setSearchQuery('');
-                    setSelectedDifficulty('All');
-                    setShowFavoritesOnly(false);
-                    setSortBy('newest');
-                  }}
-                  className="w-full py-3 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
-                >
-                  Reset Filters
-                </button>
-              </div>
-            </div>
-          )}
+                  <div className="space-y-3 flex flex-col justify-end">
+                    <button
+                      onClick={() => {
+                        setSelectedCategory('All');
+                        setSearchQuery('');
+                        setSelectedDifficulty('All');
+                        setShowFavoritesOnly(false);
+                        setSortBy('newest');
+                      }}
+                      className="w-full py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Reset Filters
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Results Header */}
-        <div className="flex items-center justify-between mb-8 px-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 px-2">
           <div className="flex items-center gap-3">
-            <h2 className="font-serif text-2xl font-bold text-slate-900">
-              {selectedCategory === 'All' ? 'All Recipes' : selectedCategory}
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900">
+              {showFavoritesOnly ? 'Saved Recipes' : (selectedCategory === 'All' ? 'All Recipes' : selectedCategory)}
             </h2>
             <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-bold">
               {filteredRecipes.length}
@@ -846,26 +920,34 @@ export default function FamilyCookbook() {
           </div>
           
           {selectedAuthor && (
-            <div className="flex items-center gap-2 bg-detroit-50 text-detroit-700 px-4 py-2 rounded-xl border border-detroit-100">
-              <span className="text-xs font-bold uppercase tracking-widest">Author: {selectedAuthor}</span>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="flex items-center gap-2 bg-detroit-50 text-detroit-700 px-4 py-2 rounded-xl border border-detroit-100 self-start sm:self-auto"
+            >
+              <span className="text-[10px] font-bold uppercase tracking-widest">Author: {selectedAuthor}</span>
               <button onClick={() => setSelectedAuthor(null)} className="hover:text-detroit-900">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                <X className="w-4 h-4" />
               </button>
-            </div>
+            </motion.div>
           )}
         </div>
 
         {/* Main Grid */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-32 space-y-6">
-            <div className="relative w-20 h-20">
-              <div className="absolute inset-0 border-4 border-slate-100 rounded-full" />
-              <div className="absolute inset-0 border-4 border-detroit-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center py-32 space-y-8">
+            <div className="relative">
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="w-20 h-20 border-4 border-slate-100 border-t-detroit-500 rounded-full" 
+              />
+              <ChefHat className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-detroit-500" />
             </div>
-            <p className="text-slate-400 font-medium animate-pulse">Gathering family secrets...</p>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs animate-pulse">Gathering family secrets...</p>
           </div>
         ) : filteredRecipes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 pb-20">
             {filteredRecipes.map((recipe, index) => (
               <RecipeCard 
                 key={recipe.id} 
@@ -880,17 +962,21 @@ export default function FamilyCookbook() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-24 bg-white rounded-[40px] shadow-sm border border-slate-100 mx-1">
-            <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl">🥣</div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-20 bg-white rounded-[40px] shadow-sm border border-slate-100 mx-1 px-6"
+          >
+            <div className="w-20 h-20 bg-slate-50 rounded-[28px] flex items-center justify-center mx-auto mb-6 text-4xl">🥣</div>
             <h3 className="text-2xl font-bold text-slate-900 mb-3 font-serif">Kitchen's Empty!</h3>
-            <p className="text-slate-500 mb-8 max-w-sm mx-auto">We couldn't find any recipes matching your filters. Try something else or add a new favorite!</p>
+            <p className="text-slate-500 mb-8 max-w-sm mx-auto text-sm leading-relaxed">We couldn't find any recipes matching your filters. Try something else or add a new favorite!</p>
             <button
-              onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedDifficulty('All'); setShowFavoritesOnly(false); }}
-              className="px-8 py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all"
+              onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedDifficulty('All'); setShowFavoritesOnly(false); setSortBy('newest'); }}
+              className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10"
             >
               Clear All Filters
             </button>
-          </div>
+          </motion.div>
         )}
       </main>
 

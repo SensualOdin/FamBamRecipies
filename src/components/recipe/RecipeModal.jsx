@@ -4,7 +4,7 @@ import {
   X, Share2, Printer, Trash2, Clock, Users, Flame, 
   ChevronRight, Heart, Timer as TimerIcon, 
   ShoppingCart, BookOpen, MessageCircle, Info,
-  Plus, Minus, Utensils
+  Plus, Minus, Utensils, Star
 } from 'lucide-react';
 import { uploadRecipePhoto } from '../../lib/supabase';
 
@@ -33,9 +33,99 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
     return () => { document.body.style.overflow = 'auto'; };
   }, []);
 
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(onClose, 300);
+  const handleShare = () => {
+    const recipeUrl = `${window.location.origin}${window.location.pathname}?recipe=${recipe.id}`;
+    navigator.clipboard.writeText(recipeUrl);
+    setShowShareNotification(true);
+    setTimeout(() => setShowShareNotification(false), 3000);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const startTimer = (minutes) => {
+    setTimerMinutes(minutes);
+    setTimerSeconds(0);
+    setTimerRunning(true);
+    setShowTimer(true);
+  };
+
+  const toggleTimer = () => {
+    setTimerRunning(!timerRunning);
+  };
+
+  const resetTimer = () => {
+    setTimerMinutes(0);
+    setTimerSeconds(0);
+    setTimerRunning(false);
+    if (timerInterval.current) clearInterval(timerInterval.current);
+  };
+
+  const handleMarkAsCooked = async () => {
+    if (!onMarkAsCooked) return;
+    
+    setIsMarkingCooked(true);
+    try {
+      await onMarkAsCooked(recipe.id, cookNotes || null, cookRating || null);
+      setJustCooked(true);
+      setShowCookConfirm(false);
+      setCookNotes('');
+      setCookRating(0);
+      
+      // Show success briefly
+      setTimeout(() => setJustCooked(false), 3000);
+    } catch (error) {
+      console.error('Error marking as cooked:', error);
+    } finally {
+      setIsMarkingCooked(false);
+    }
+  };
+
+  useEffect(() => {
+    if (timerRunning) {
+      timerInterval.current = setInterval(() => {
+        setTimerSeconds(prev => {
+          if (prev > 0) return prev - 1;
+          if (timerMinutes > 0) {
+            setTimerMinutes(m => m - 1);
+            return 59;
+          }
+          // Timer complete
+          setTimerRunning(false);
+          return 0;
+        });
+      }, 1000);
+    } else {
+      if (timerInterval.current) clearInterval(timerInterval.current);
+    }
+    return () => {
+      if (timerInterval.current) clearInterval(timerInterval.current);
+    };
+  }, [timerRunning, timerMinutes]);
+
+  const adjustedServings = Math.round(recipe.servings * servingMultiplier);
+
+  const parseIngredient = (ingredient) => {
+    const match = ingredient.match(/^([\d./]+\s*(?:cups?|tbsp|tsp|lbs?|oz|g|kg|ml|l)?)\s+(.+)$/i);
+    if (match) {
+      const amount = match[1];
+      const rest = match[2];
+      const numMatch = amount.match(/^([\d./]+)/);
+      if (numMatch) {
+        const numStr = numMatch[1];
+        let num;
+        if (numStr.includes('/')) {
+          const [numerator, denominator] = numStr.split('/').map(Number);
+          num = (numerator / denominator) * servingMultiplier;
+        } else {
+          num = parseFloat(numStr) * servingMultiplier;
+        }
+        if (num % 1 !== 0) num = num.toFixed(2);
+        return amount.replace(numMatch[1], num) + ' ' + rest;
+      }
+    }
+    return ingredient;
   };
 
   if (!recipe) return null;
@@ -365,45 +455,43 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
               </div>
             </div>
           </div>
+
+          {/* Delete Confirm Modal (Simplified for brevity) */}
+          {showDeleteConfirm && (
+            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] flex items-center justify-center p-6 animate-fadeIn">
+              <div className="bg-white rounded-[40px] p-10 max-w-md w-full animate-scaleIn shadow-2xl">
+                <h3 className="text-2xl font-bold text-slate-900 mb-4">Delete Recipe?</h3>
+                <p className="text-slate-500 mb-8 leading-relaxed">This will permanently remove <span className="font-bold text-slate-900">{recipe.title}</span> from the family collection. This action cannot be undone.</p>
+                <div className="flex gap-4">
+                  <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-[24px] font-bold hover:bg-slate-200 transition-all">Cancel</button>
+                  <button onClick={() => { onDelete(recipe.id); onClose(); }} className="flex-1 py-4 bg-rose-500 text-white rounded-[24px] font-bold hover:bg-rose-600 transition-all shadow-xl shadow-rose-500/20">Delete Forever</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Cook Confirm Modal (Simplified for brevity) */}
+          {showCookConfirm && (
+            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] flex items-center justify-center p-6 animate-fadeIn">
+              <div className="bg-white rounded-[40px] p-10 max-w-md w-full animate-scaleIn shadow-2xl">
+                <div className="w-20 h-20 bg-detroit-100 rounded-[24px] flex items-center justify-center text-4xl mb-6 mx-auto">🔥</div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-4 text-center">How was it?</h3>
+                <div className="flex justify-center gap-3 mb-8">
+                  {[1, 2, 3, 4, 5].map(s => (
+                    <button key={s} onClick={() => setCookRating(s)} className={`text-3xl transition-transform hover:scale-125 ${s <= cookRating ? 'grayscale-0' : 'grayscale opacity-30'}`}>⭐</button>
+                  ))}
+                </div>
+                <textarea value={cookNotes} onChange={(e) => setCookNotes(e.target.value)} placeholder="Any notes for next time?" className="w-full p-5 bg-slate-50 rounded-[24px] border-2 border-transparent focus:border-detroit-500 outline-none transition-all resize-none mb-6" rows={3} />
+                <div className="flex gap-4">
+                  <button onClick={() => setShowCookConfirm(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-[24px] font-bold">Later</button>
+                  <button onClick={handleMarkAsCooked} className="flex-1 py-4 bg-detroit-500 text-white rounded-[24px] font-bold shadow-xl shadow-detroit-500/20">Finish!</button>
+                </div>
+              </div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>
-  );
-
-      {/* Delete Confirm Modal (Simplified for brevity) */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] flex items-center justify-center p-6 animate-fadeIn">
-          <div className="bg-white rounded-[40px] p-10 max-w-md w-full animate-scaleIn shadow-2xl">
-            <h3 className="text-2xl font-bold text-slate-900 mb-4">Delete Recipe?</h3>
-            <p className="text-slate-500 mb-8 leading-relaxed">This will permanently remove <span className="font-bold text-slate-900">{recipe.title}</span> from the family collection. This action cannot be undone.</p>
-            <div className="flex gap-4">
-              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-[24px] font-bold hover:bg-slate-200 transition-all">Cancel</button>
-              <button onClick={() => { onDelete(recipe.id); onClose(); }} className="flex-1 py-4 bg-rose-500 text-white rounded-[24px] font-bold hover:bg-rose-600 transition-all shadow-xl shadow-rose-500/20">Delete Forever</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cook Confirm Modal (Simplified for brevity) */}
-      {showCookConfirm && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] flex items-center justify-center p-6 animate-fadeIn">
-          <div className="bg-white rounded-[40px] p-10 max-w-md w-full animate-scaleIn shadow-2xl">
-            <div className="w-20 h-20 bg-detroit-100 rounded-[24px] flex items-center justify-center text-4xl mb-6 mx-auto">🔥</div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-4 text-center">How was it?</h3>
-            <div className="flex justify-center gap-3 mb-8">
-              {[1, 2, 3, 4, 5].map(s => (
-                <button key={s} onClick={() => setCookRating(s)} className={`text-3xl transition-transform hover:scale-125 ${s <= cookRating ? 'grayscale-0' : 'grayscale opacity-30'}`}>⭐</button>
-              ))}
-            </div>
-            <textarea value={cookNotes} onChange={(e) => setCookNotes(e.target.value)} placeholder="Any notes for next time?" className="w-full p-5 bg-slate-50 rounded-[24px] border-2 border-transparent focus:border-detroit-500 outline-none transition-all resize-none mb-6" rows={3} />
-            <div className="flex gap-4">
-              <button onClick={() => setShowCookConfirm(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-[24px] font-bold">Later</button>
-              <button onClick={handleMarkAsCooked} className="flex-1 py-4 bg-detroit-500 text-white rounded-[24px] font-bold shadow-xl shadow-detroit-500/20">Finish!</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
   );
 };
 

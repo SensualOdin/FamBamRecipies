@@ -237,7 +237,6 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
       </motion.div>
     </AnimatePresence>
   );
-  );
 };
 
 export default ShoppingListModal;

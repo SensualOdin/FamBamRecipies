@@ -214,7 +214,3 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
 };
 
 export default RecipeCard;
-  );
-};
-
-export default RecipeCard;

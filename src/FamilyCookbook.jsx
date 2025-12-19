@@ -19,6 +19,13 @@ import AuthModal from './components/modals/AuthModal';
 import { fetchRecipes, fetchCategories, createRecipe, updateRecipe, getCurrentUser, getUserProfile, getUserProfileWithStats, signOut, onAuthStateChange, ensureUserProfile, recordUserActivity, toggleFavorite as toggleFavoriteDB, getUserFavorites, markRecipeAsCooked, uploadRecipeImage } from './lib/supabase';
 import { initialRecipes } from './data/initialRecipes';
 import { initialUserProfile } from './data/initialProfile';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function FamilyCookbook() {
   const [recipes, setRecipes] = useState([]);
@@ -597,14 +604,14 @@ export default function FamilyCookbook() {
       <FloatingParticles />
       
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 px-6 py-3 z-50 flex justify-between items-center shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 px-6 pt-3 pb-safe z-50 flex justify-between items-center shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
         <button 
           onClick={() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setSelectedCategory('All');
             setShowFavoritesOnly(false);
           }}
-          className={`flex flex-col items-center gap-1 transition-all ${!showFavoritesOnly && selectedCategory === 'All' ? 'text-detroit-600' : 'text-slate-400'}`}
+          className={`flex flex-col items-center gap-1 transition-all min-w-[44px] min-h-[44px] justify-center ${!showFavoritesOnly && selectedCategory === 'All' ? 'text-detroit-600' : 'text-slate-400'}`}
         >
           <Home className="w-6 h-6" />
           <span className="text-[10px] font-bold uppercase tracking-tighter">Home</span>
@@ -614,22 +621,22 @@ export default function FamilyCookbook() {
             setShowFavoritesOnly(true);
             setSelectedCategory('All');
           }}
-          className={`flex flex-col items-center gap-1 transition-all ${showFavoritesOnly ? 'text-rose-500' : 'text-slate-400'}`}
+          className={`flex flex-col items-center gap-1 transition-all min-w-[44px] min-h-[44px] justify-center ${showFavoritesOnly ? 'text-rose-500' : 'text-slate-400'}`}
         >
           <Heart className={`w-6 h-6 ${showFavoritesOnly ? 'fill-rose-500' : ''}`} />
           <span className="text-[10px] font-bold uppercase tracking-tighter">Saved</span>
         </button>
         <button 
           onClick={() => setShowAddModal(true)}
-          className="flex flex-col items-center -mt-8"
+          className="flex flex-col items-center -mt-8 min-w-[56px] min-h-[56px]"
         >
-          <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl shadow-slate-900/20 text-white">
+          <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl shadow-slate-900/20 text-white active:scale-90 transition-transform">
             <Plus className="w-8 h-8" strokeWidth={3} />
           </div>
         </button>
         <button 
           onClick={() => setShowShoppingList(true)}
-          className={`flex flex-col items-center gap-1 transition-all ${showShoppingList ? 'text-detroit-600' : 'text-slate-400'}`}
+          className={`flex flex-col items-center gap-1 transition-all min-w-[44px] min-h-[44px] justify-center ${showShoppingList ? 'text-detroit-600' : 'text-slate-400'}`}
         >
           <div className="relative">
             <ShoppingCart className="w-6 h-6" />
@@ -643,7 +650,7 @@ export default function FamilyCookbook() {
         </button>
         <button 
           onClick={() => user ? setShowProfile(true) : setShowAuthModal(true)}
-          className={`flex flex-col items-center gap-1 transition-all ${showProfile ? 'text-detroit-600' : 'text-slate-400'}`}
+          className={`flex flex-col items-center gap-1 transition-all min-w-[44px] min-h-[44px] justify-center ${showProfile ? 'text-detroit-600' : 'text-slate-400'}`}
         >
           {user ? (
             <div className="w-6 h-6 bg-detroit-100 rounded-full flex items-center justify-center text-xs">
@@ -678,49 +685,58 @@ export default function FamilyCookbook() {
             {/* Tools & Auth */}
             <div className="flex items-center gap-2 sm:gap-4">
               <div className="hidden md:flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10">
-                {[
-                  { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: () => setShowShoppingList(true), label: 'Shopping', count: shoppingList.filter(i => !i.checked).length },
-                  { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: () => setShowMealPlanner(true), label: 'Planner' },
-                  { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: () => setShowUnitConverter(true), label: 'Units' }
-                ].map((tool) => (
-                  <button
-                    key={tool.id}
-                    onClick={tool.onClick}
-                    className="relative p-2.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group"
-                  >
-                    {tool.icon}
-                    {tool.count > 0 && (
-                      <span className="absolute top-1 right-1 w-4 h-4 bg-detroit-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold">
-                        {tool.count}
-                      </span>
-                    )}
-                    <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                      {tool.label}
-                    </span>
-                  </button>
-                ))}
+                <TooltipProvider>
+                  {[
+                    { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: () => setShowShoppingList(true), label: 'Shopping', count: shoppingList.filter(i => !i.checked).length },
+                    { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: () => setShowMealPlanner(true), label: 'Planner' },
+                    { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: () => setShowUnitConverter(true), label: 'Units' }
+                  ].map((tool) => (
+                    <Tooltip key={tool.id}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={tool.onClick}
+                          className="relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group"
+                        >
+                          {tool.icon}
+                          {tool.count > 0 && (
+                            <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 bg-detroit-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold border-none">
+                              {tool.count}
+                            </Badge>
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{tool.label}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                </TooltipProvider>
               </div>
 
               {user ? (
-                <button 
+                <Button 
+                  variant="ghost"
                   onClick={() => setShowProfile(true)}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 px-3 sm:px-4 py-1.5 rounded-full transition-all group"
+                  className="flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto"
                 >
                   <div className="text-right hidden sm:block">
                     <div className="text-white font-semibold text-xs">{userProfile.name}</div>
                     <div className="text-detroit-400 text-[10px] font-medium">Lvl {userProfile.level} Chef</div>
                   </div>
-                  <div className="w-8 h-8 bg-gradient-to-br from-detroit-400 to-detroit-600 rounded-full flex items-center justify-center text-xs shadow-inner overflow-hidden">
-                    {userProfile.avatarUrl ? <img src={userProfile.avatarUrl} alt="" className="w-full h-full object-cover" /> : userProfile.avatar}
-                  </div>
-                </button>
+                  <Avatar className="w-8 h-8 border-none shadow-inner">
+                    <AvatarImage src={userProfile.avatarUrl} />
+                    <AvatarFallback className="bg-gradient-to-br from-detroit-400 to-detroit-600 text-xs text-white">
+                      {userProfile.avatar}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
               ) : (
-                <button 
+                <Button 
                   onClick={() => setShowAuthModal(true)}
                   className="px-5 sm:px-6 py-2 bg-white text-slate-900 rounded-full hover:bg-slate-100 transition-all font-bold text-sm shadow-xl shadow-white/5"
                 >
                   Sign In
-                </button>
+                </Button>
               )}
             </div>
           </nav>
@@ -741,22 +757,24 @@ export default function FamilyCookbook() {
                   <div className="pl-6 text-slate-400">
                     <Search className="w-6 h-6" />
                   </div>
-                  <input
+                  <Input
                     type="text"
                     placeholder="Search for a recipe..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchFocused(true)}
                     onBlur={() => setIsSearchFocused(false)}
-                    className="w-full px-4 py-5 sm:py-6 bg-transparent text-white placeholder-slate-500 text-base sm:text-lg outline-none font-medium"
+                    className="w-full px-4 py-5 sm:py-6 bg-transparent text-white placeholder-slate-500 text-base sm:text-lg outline-none font-medium border-none h-auto focus-visible:ring-0"
                   />
                   {searchQuery && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setSearchQuery('')}
-                      className="mr-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all"
+                      className="mr-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all w-8 h-8"
                     >
                       <X className="w-4 h-4" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -770,52 +788,50 @@ export default function FamilyCookbook() {
         {/* Navigation & Controls Card */}
         <div className={`bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-6 sm:p-8 mb-12 transform transition-all duration-700 delay-500 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            {/* Categories Scroller */}
+            {/* Categories Tabs */}
             <div className="flex-1 overflow-x-auto scrollbar-hide -mx-2 px-2 pb-2">
-              <div className="flex gap-3">
-                {categories.map((category) => (
-                  <motion.button
-                    key={category}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`
-                      px-6 py-3 rounded-2xl font-bold text-sm transition-all whitespace-nowrap flex items-center gap-2
-                      ${selectedCategory === category
-                        ? 'bg-detroit-600 text-white shadow-lg shadow-detroit-600/20 scale-105'
-                        : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700 active:scale-95'
-                      }
-                    `}
-                  >
-                    <span className="text-lg">{initialRecipes.find(r => r.category === category)?.image || '🍽️'}</span>
-                    {category}
-                  </motion.button>
-                ))}
-              </div>
+              <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+                <TabsList className="bg-transparent h-auto p-0 gap-3">
+                  {categories.map((category) => (
+                    <TabsTrigger
+                      key={category}
+                      value={category}
+                      className={`
+                        px-6 py-3 rounded-2xl font-bold text-sm transition-all whitespace-nowrap flex items-center gap-2 border border-transparent
+                        data-[state=active]:bg-detroit-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-detroit-600/20 data-[state=active]:scale-105
+                        bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700
+                      `}
+                    >
+                      <span className="text-lg">{initialRecipes.find(r => r.category === category)?.image || '🍽️'}</span>
+                      {category}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
             </div>
 
             {/* Quick Actions */}
             <div className="flex items-center gap-3">
-              <motion.button
-                whileTap={{ scale: 0.95 }}
+              <Button
+                variant="ghost"
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-bold text-sm transition-all ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-6 rounded-2xl font-bold text-sm transition-all h-auto ${
                   showFilters 
-                    ? 'bg-detroit-50 text-detroit-700 border-2 border-detroit-100' 
+                    ? 'bg-detroit-50 text-detroit-700 border-2 border-detroit-100 hover:bg-detroit-100 hover:text-detroit-800' 
                     : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:bg-slate-100'
                 }`}
               >
                 <Filter className="w-5 h-5" />
                 Filters
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
+              </Button>
+              <Button
                 onClick={() => setShowAddModal(true)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-all"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-6 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-all h-auto"
               >
                 <Plus className="w-5 h-5" strokeWidth={3} />
                 <span className="hidden sm:inline">Add Recipe</span>
                 <span className="sm:hidden">Add New</span>
-              </motion.button>
+              </Button>
             </div>
           </div>
 
@@ -831,46 +847,46 @@ export default function FamilyCookbook() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="space-y-3">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Sort Recipes</label>
-                    <div className="relative">
-                      <select 
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl text-sm font-bold text-slate-700 focus:border-detroit-500 focus:bg-white transition-all outline-none appearance-none"
-                      >
-                        <option value="newest">Latest First</option>
-                        <option value="popular">Most Loved</option>
-                        <option value="name">Alphabetical</option>
-                      </select>
-                      <ArrowRight className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 rotate-90 pointer-events-none" />
-                    </div>
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-full px-5 py-7 bg-slate-50 border-2 border-transparent rounded-2xl text-sm font-bold text-slate-700 focus:border-detroit-500 focus:bg-white transition-all outline-none">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">Latest First</SelectItem>
+                        <SelectItem value="popular">Most Loved</SelectItem>
+                        <SelectItem value="name">Alphabetical</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-3">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Difficulty Level</label>
                     <div className="flex p-1.5 bg-slate-50 rounded-2xl">
                       {['All', 'Easy', 'Hard'].map(diff => (
-                        <button
+                        <Button
                           key={diff}
+                          variant="ghost"
                           onClick={() => setSelectedDifficulty(diff)}
-                          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all h-auto ${
                             selectedDifficulty === diff 
-                              ? 'bg-white text-detroit-600 shadow-sm' 
-                              : 'text-slate-500 hover:text-slate-700'
+                              ? 'bg-white text-detroit-600 shadow-sm hover:bg-white hover:text-detroit-600' 
+                              : 'text-slate-500 hover:text-slate-700 hover:bg-transparent'
                           }`}
                         >
                           {diff}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Saved Recipes</label>
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                      className={`w-full py-4 px-5 rounded-2xl text-sm font-bold flex items-center justify-between transition-all ${
+                      className={`w-full py-7 px-5 rounded-2xl text-sm font-bold flex items-center justify-between transition-all h-auto ${
                         showFavoritesOnly 
-                          ? 'bg-rose-50 text-rose-600 border-2 border-rose-100' 
+                          ? 'bg-rose-50 text-rose-600 border-2 border-rose-100 hover:bg-rose-100 hover:text-rose-700' 
                           : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:bg-slate-100'
                       }`}
                     >
@@ -884,11 +900,11 @@ export default function FamilyCookbook() {
                           className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm" 
                         />
                       </div>
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="space-y-3 flex flex-col justify-end">
-                    <button
+                    <Button
                       onClick={() => {
                         setSelectedCategory('All');
                         setSearchQuery('');
@@ -896,11 +912,11 @@ export default function FamilyCookbook() {
                         setShowFavoritesOnly(false);
                         setSortBy('newest');
                       }}
-                      className="w-full py-4 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
+                      className="w-full py-7 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2 h-auto"
                     >
                       <Sparkles className="w-4 h-4" />
                       Reset Filters
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </motion.div>
@@ -914,21 +930,23 @@ export default function FamilyCookbook() {
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900">
               {showFavoritesOnly ? 'Saved Recipes' : (selectedCategory === 'All' ? 'All Recipes' : selectedCategory)}
             </h2>
-            <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-bold">
+            <Badge variant="secondary" className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-bold border-none">
               {filteredRecipes.length}
-            </span>
+            </Badge>
           </div>
           
           {selectedAuthor && (
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="flex items-center gap-2 bg-detroit-50 text-detroit-700 px-4 py-2 rounded-xl border border-detroit-100 self-start sm:self-auto"
+              className="flex items-center gap-2 self-start sm:self-auto"
             >
-              <span className="text-[10px] font-bold uppercase tracking-widest">Author: {selectedAuthor}</span>
-              <button onClick={() => setSelectedAuthor(null)} className="hover:text-detroit-900">
-                <X className="w-4 h-4" />
-              </button>
+              <Badge variant="outline" className="flex items-center gap-2 bg-detroit-50 text-detroit-700 px-4 py-2 rounded-xl border-detroit-100">
+                <span className="text-[10px] font-bold uppercase tracking-widest">Author: {selectedAuthor}</span>
+                <button onClick={() => setSelectedAuthor(null)} className="hover:text-detroit-900">
+                  <X className="w-4 h-4" />
+                </button>
+              </Badge>
             </motion.div>
           )}
         </div>
@@ -970,12 +988,12 @@ export default function FamilyCookbook() {
             <div className="w-20 h-20 bg-slate-50 rounded-[28px] flex items-center justify-center mx-auto mb-6 text-4xl">🥣</div>
             <h3 className="text-2xl font-bold text-slate-900 mb-3 font-serif">Kitchen's Empty!</h3>
             <p className="text-slate-500 mb-8 max-w-sm mx-auto text-sm leading-relaxed">We couldn't find any recipes matching your filters. Try something else or add a new favorite!</p>
-            <button
+            <Button
               onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedDifficulty('All'); setShowFavoritesOnly(false); setSortBy('newest'); }}
-              className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10"
+              className="px-8 py-6 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 h-auto"
             >
               Clear All Filters
-            </button>
+            </Button>
           </motion.div>
         )}
       </main>

@@ -111,16 +111,16 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
             </Badge>
           </div>
 
-          {/* Floating Author (Mobile only) */}
-          <div className="absolute bottom-4 left-4 z-20 md:hidden">
+          {/* Floating Author */}
+          <div className="absolute bottom-4 left-4 z-20">
             <Button 
               variant="ghost" 
               size="sm"
               onClick={handleAuthorClick} 
-              className="bg-white/90 backdrop-blur-md pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-lg h-auto"
+              className="bg-white/90 backdrop-blur-md pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-lg h-auto border-none hover:bg-white"
             >
               <Avatar className="w-6 h-6 border-none">
-                <AvatarFallback className="bg-detroit-500 text-[10px] text-white font-bold">
+                <AvatarFallback className="bg-detroit-500 text-[10px] text-white font-bold flex items-center justify-center">
                   {recipe.author?.charAt(0) || 'C'}
                 </AvatarFallback>
               </Avatar>
@@ -169,61 +169,46 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-between gap-2 pt-2">
-            {/* Author - Desktop */}
-            <Button 
-              variant="ghost"
-              onClick={handleAuthorClick}
-              className="hidden md:flex items-center gap-2 group/author p-0 h-auto hover:bg-transparent shrink-0 min-w-0 overflow-hidden"
-            >
-              <Avatar className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] group-hover/author:bg-detroit-100 group-hover/author:text-detroit-600 transition-colors shrink-0">
-                <AvatarFallback className="bg-transparent">{recipe.author?.charAt(0) || 'C'}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col items-start min-w-0">
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter leading-none">Chef</span>
-                <span className="text-[11px] font-bold text-slate-700 group-hover/author:text-detroit-600 truncate max-w-[50px] lg:max-w-[70px]">{recipe.author}</span>
-              </div>
-            </Button>
-
-          <div className="flex items-center gap-1 sm:gap-1.5 flex-1 justify-end min-w-0">
-            <TooltipProvider>
-              {onEdit && (
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <div className="flex items-center gap-1 sm:gap-1.5">
+              <TooltipProvider>
+                {onEdit && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleEditClick}
+                        className="w-8 h-8 sm:w-10 sm:h-10 text-slate-400 hover:text-detroit-600 hover:bg-detroit-50 rounded-xl shrink-0 border-none"
+                      >
+                        <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit Recipe</TooltipContent>
+                  </Tooltip>
+                )}
+                
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={handleEditClick}
-                      className="w-8 h-8 sm:w-9 sm:h-9 text-slate-400 hover:text-detroit-600 hover:bg-detroit-50 rounded-xl shrink-0"
+                      onClick={handleShoppingListClick}
+                      className="w-8 h-8 sm:w-10 sm:h-10 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl shrink-0 border-none"
                     >
-                      <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Edit Recipe</TooltipContent>
+                  <TooltipContent>Add to Shopping List</TooltipContent>
                 </Tooltip>
-              )}
-              
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleShoppingListClick}
-                    className="w-8 h-8 sm:w-9 sm:h-9 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl shrink-0"
-                  >
-                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Add to Shopping List</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+              </TooltipProvider>
+            </div>
 
             <Button 
-              className="bg-slate-900 text-white px-3 sm:px-4 lg:px-5 h-9 sm:h-11 rounded-xl sm:rounded-2xl font-bold text-[10px] sm:text-xs hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 shrink-0 whitespace-nowrap"
+              className="bg-slate-900 text-white px-4 sm:px-6 h-9 sm:h-11 rounded-xl sm:rounded-2xl font-bold text-[10px] sm:text-xs hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 shrink-0 whitespace-nowrap border-none"
             >
               Cook Now
             </Button>
-          </div>
           </div>
 
           {/* Times Cooked Overlay */}

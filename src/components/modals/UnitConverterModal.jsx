@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { commonUnits } from '../../data/constants';
+import { ChevronLeft, X } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const UnitConverterModal = ({ onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -7,6 +9,24 @@ const UnitConverterModal = ({ onClose }) => {
   const [fromUnit, setFromUnit] = useState('cup');
   const [toUnit, setToUnit] = useState('ml');
   const [result, setResult] = useState('');
+
+  // Handle browser back button to close modal
+  useEffect(() => {
+    const handlePopState = () => {
+      setIsVisible(false);
+      setTimeout(onClose, 150);
+    };
+
+    window.history.pushState({ modal: 'unit-converter' }, '');
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (window.history.state?.modal === 'unit-converter') {
+        window.history.back();
+      }
+    };
+  }, [onClose]);
 
   useEffect(() => {
     setTimeout(() => setIsVisible(true), 50);
@@ -47,18 +67,25 @@ const UnitConverterModal = ({ onClose }) => {
       >
         <div className="bg-slate-950 p-8 text-white">
           <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-              </div>
-              <div>
-                <h2 className="text-2xl font-black tracking-tight">Converter</h2>
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Precision Cooking</p>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onClose}
+                className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 shrink-0"
+              >
+                <ChevronLeft className="w-6 h-6 text-white" />
+              </Button>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black tracking-tight leading-tight">Converter</h2>
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest leading-none mt-1">Precision Cooking</p>
+                </div>
               </div>
             </div>
-            <button onClick={onClose} className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center transition-all border border-white/10">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
           </div>
 
           <div className="bg-white/5 rounded-3xl p-8 text-center border border-white/10">

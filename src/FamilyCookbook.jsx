@@ -689,12 +689,12 @@ export default function FamilyCookbook() {
 
             {/* Tools & Auth */}
             <div className="flex items-center gap-2 sm:gap-4">
-              <div className="hidden md:flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10">
+              <div className="flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10">
                 <TooltipProvider>
                   {[
-                    { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: () => setShowShoppingList(true), label: 'Shopping', count: shoppingListCount },
-                    { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: () => setShowMealPlanner(true), label: 'Planner' },
-                    { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: () => setShowUnitConverter(true), label: 'Units' }
+                    { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: () => setShowShoppingList(true), label: 'Shopping', count: shoppingListCount, mobile: false },
+                    { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: () => setShowMealPlanner(true), label: 'Planner', mobile: true },
+                    { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: () => setShowUnitConverter(true), label: 'Units', mobile: true }
                   ].map((tool) => (
                     <Tooltip key={tool.id}>
                       <TooltipTrigger asChild>
@@ -702,7 +702,7 @@ export default function FamilyCookbook() {
                           variant="ghost"
                           size="icon"
                           onClick={tool.onClick}
-                          className="relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group"
+                          className={`relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
                         >
                           {tool.icon}
                           {tool.count > 0 && (

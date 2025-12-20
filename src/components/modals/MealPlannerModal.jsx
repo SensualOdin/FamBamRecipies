@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ChevronLeft, X } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const MealPlannerModal = ({ onClose, recipes, mealPlan, setMealPlan }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -6,6 +8,24 @@ const MealPlannerModal = ({ onClose, recipes, mealPlan, setMealPlan }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showRecipePicker, setShowRecipePicker] = useState(false);
   const [showCalendarExport, setShowCalendarExport] = useState(null);
+
+  // Handle browser back button to close modal
+  useEffect(() => {
+    const handlePopState = () => {
+      setIsVisible(false);
+      setTimeout(onClose, 150);
+    };
+
+    window.history.pushState({ modal: 'meal-planner' }, '');
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (window.history.state?.modal === 'meal-planner') {
+        window.history.back();
+      }
+    };
+  }, [onClose]);
 
   useEffect(() => {
     setTimeout(() => setIsVisible(true), 50);
@@ -102,26 +122,42 @@ END:VCALENDAR`;
       >
         <div className="flex flex-col lg:flex-row h-full">
           {/* Main Calendar View */}
-          <div className="flex-1 flex flex-col p-8 sm:p-10">
+          <div className="flex-1 flex flex-col p-8 sm:p-10 bg-white">
             <div className="flex justify-between items-center mb-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-detroit-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-detroit-500/20">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-black tracking-tight text-slate-900">Meal Planner</h2>
-                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Organize Your Family Menu</p>
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={onClose}
+                  className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-100 shrink-0"
+                >
+                  <ChevronLeft className="w-6 h-6 text-slate-600" />
+                </Button>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-detroit-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-detroit-500/20">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black tracking-tight text-slate-900 leading-tight">Meal Planner</h2>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest leading-none mt-1">Organize Your Family Menu</p>
+                  </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-2xl">
+              <div className="hidden sm:flex items-center gap-2 bg-slate-50 p-1 rounded-2xl">
                 <button onClick={handlePrevMonth} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-slate-400 hover:text-slate-900"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg></button>
                 <span className="px-4 font-black text-sm uppercase tracking-tighter text-slate-700 min-w-[120px] text-center">{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
                 <button onClick={handleNextMonth} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-slate-400 hover:text-slate-900"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg></button>
               </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-3 mb-4">
+              <div className="flex sm:hidden items-center justify-between gap-2 bg-slate-50 p-1 rounded-2xl mb-6">
+                <button onClick={handlePrevMonth} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-slate-400 hover:text-slate-900"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg></button>
+                <span className="px-4 font-black text-sm uppercase tracking-tighter text-slate-700 text-center">{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
+                <button onClick={handleNextMonth} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-slate-400 hover:text-slate-900"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg></button>
+              </div>
+
+              <div className="grid grid-cols-7 gap-3 mb-4">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
                 <div key={d} className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">{d}</div>
               ))}

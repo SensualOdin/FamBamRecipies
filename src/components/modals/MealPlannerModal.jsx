@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { ChevronLeft, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
@@ -117,12 +117,12 @@ END:VCALENDAR`;
   return (
     <div className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 transition-all duration-300 ${isVisible ? 'bg-slate-900/60 backdrop-blur-md' : 'bg-transparent'}`} onClick={onClose}>
       <div 
-        className={`bg-white rounded-t-[40px] sm:rounded-[48px] shadow-2xl w-full sm:max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100 translate-y-0' : 'sm:scale-95 opacity-0 translate-y-32'}`}
+        className={`bg-white rounded-t-[40px] sm:rounded-[48px] shadow-2xl w-full sm:max-w-5xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100 translate-y-0' : 'sm:scale-95 opacity-0 translate-y-32'}`}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex flex-col lg:flex-row h-full">
+        <div className="flex flex-col lg:flex-row h-full bg-white">
           {/* Main Calendar View */}
-          <div className="flex-1 flex flex-col p-8 sm:p-10 bg-white">
+          <div className="flex-1 flex flex-col p-8 sm:p-10 pt-safe bg-white">
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-3">
                 <Button 
@@ -320,4 +320,4 @@ END:VCALENDAR`;
   );
 };
 
-export default MealPlannerModal;
+export default memo(MealPlannerModal);

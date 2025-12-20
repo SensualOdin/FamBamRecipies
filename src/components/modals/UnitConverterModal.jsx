@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { commonUnits } from '../../data/constants';
 import { ChevronLeft, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -60,12 +60,12 @@ const UnitConverterModal = ({ onClose }) => {
   };
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? 'bg-slate-900/60 backdrop-blur-md' : 'bg-transparent'}`} onClick={onClose}>
+    <div className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 transition-all duration-300 ${isVisible ? 'bg-slate-900/60 backdrop-blur-md' : 'bg-transparent'}`} onClick={onClose}>
       <div 
-        className={`bg-white rounded-[40px] shadow-2xl max-w-md w-full overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+        className={`bg-white rounded-t-[40px] sm:rounded-[40px] shadow-2xl max-w-md w-full h-[80vh] sm:h-auto overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-32'}`}
         onClick={e => e.stopPropagation()}
       >
-        <div className="bg-slate-950 p-8 text-white">
+        <div className="bg-slate-950 p-8 pt-safe text-white">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
               <Button 
@@ -147,4 +147,4 @@ const UnitConverterModal = ({ onClose }) => {
   );
 };
 
-export default UnitConverterModal;
+export default memo(UnitConverterModal);

@@ -218,9 +218,9 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl gap-0">
+      <DialogContent className="p-0 sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl gap-0 bg-white top-[auto] bottom-0 translate-y-0 translate-x-[-50%]">
         {/* Header with Progress */}
-        <div className={`p-8 sm:p-10 text-white transition-colors duration-500 ${isEditMode ? 'bg-slate-900' : 'bg-detroit-600'}`}>
+        <div className={`p-8 sm:p-10 pt-safe text-white transition-colors duration-500 ${isEditMode ? 'bg-slate-900' : 'bg-detroit-600'}`}>
           <div className="flex justify-between items-start mb-8">
             <div>
               <DialogTitle className="font-serif text-3xl font-extrabold mb-2 text-white">

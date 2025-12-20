@@ -100,7 +100,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-4xl h-[95vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl flex flex-col gap-0 bg-white">
+      <DialogContent className="p-0 sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl flex flex-col gap-0 bg-white top-[auto] bottom-0 translate-y-0 translate-x-[-50%]">
         <DialogHeader className="sr-only">
           <DialogTitle>User Profile</DialogTitle>
           <DialogDescription>View and edit your family cookbook profile</DialogDescription>
@@ -108,7 +108,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
         
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           {/* Header with gradient background */}
-          <div className="relative bg-slate-950 p-8 sm:p-12 text-white overflow-hidden">
+          <div className="relative bg-slate-950 p-8 sm:p-12 pt-safe text-white overflow-hidden">
             {/* Animated background elements */}
             <div className="absolute inset-0">
               <div className="absolute -top-24 -right-24 w-96 h-96 bg-detroit-600/20 rounded-full blur-[120px]" />

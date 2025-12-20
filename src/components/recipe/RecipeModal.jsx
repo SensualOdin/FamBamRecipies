@@ -143,9 +143,9 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-4xl h-[95vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl flex flex-col gap-0">
+      <DialogContent className="p-0 sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl flex flex-col gap-0 bg-white top-[auto] bottom-0 translate-y-0 translate-x-[-50%]">
         {/* Sticky Actions Overlay */}
-        <div className="absolute top-0 left-0 right-0 z-30 pointer-events-none flex justify-between items-start p-6">
+        <div className="absolute top-0 left-0 right-0 z-30 pointer-events-none flex justify-between items-start p-6 pt-safe">
           <Button 
             variant="secondary"
             size="icon"

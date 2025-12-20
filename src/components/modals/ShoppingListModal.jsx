@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ShoppingBag, Share2, Plus, Trash2, 
@@ -106,9 +106,9 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-md h-[95vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border-none rounded-t-[40px] sm:rounded-[40px] shadow-2xl gap-0 bg-white">
+      <DialogContent className="p-0 sm:max-w-md h-[92vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border-none rounded-t-[40px] sm:rounded-[40px] shadow-2xl gap-0 bg-white top-[auto] bottom-0 translate-y-0 translate-x-[-50%]">
         {/* Header */}
-        <div className="bg-slate-950 p-6 sm:p-8 text-white shrink-0">
+        <div className="bg-slate-950 p-6 sm:p-8 pt-safe text-white shrink-0">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
               <Button 
@@ -276,4 +276,4 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
   );
 };
 
-export default ShoppingListModal;
+export default memo(ShoppingListModal);

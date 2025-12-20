@@ -130,73 +130,73 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
         </div>
 
         {/* Content Section */}
-        <CardContent className="p-6 flex flex-col flex-1">
+        <CardContent className="p-4 sm:p-6 flex flex-col flex-1">
           <div className="flex-1">
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mb-3">
               {recipe.tags?.slice(0, 2).map((tag, i) => (
-                <Badge key={i} variant="outline" className="text-[10px] font-bold text-detroit-600 bg-detroit-50 px-2 py-0.5 rounded-md uppercase tracking-wide border-none">
+                <Badge key={i} variant="outline" className="text-[10px] font-bold text-detroit-600 bg-detroit-50 px-2 py-0.5 rounded-md uppercase tracking-wide border-none whitespace-nowrap">
                   #{tag}
                 </Badge>
               ))}
             </div>
 
             {/* Title */}
-            <h3 className="font-serif text-xl font-bold text-slate-900 mb-2 leading-tight group-hover:text-detroit-600 transition-colors line-clamp-2">
+            <h3 className="font-serif text-lg sm:text-xl font-bold text-slate-900 mb-2 leading-tight group-hover:text-detroit-600 transition-colors line-clamp-2">
               {recipe.title}
             </h3>
 
             {/* Description */}
-            <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed mb-4">
+            <p className="text-slate-500 text-xs sm:text-sm line-clamp-2 leading-relaxed mb-4">
               {recipe.description}
             </p>
 
             {/* Meta Info Bar */}
-            <div className="flex items-center gap-4 py-4 border-y border-slate-50 mb-4">
-              <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-3 sm:gap-4 py-4 border-y border-slate-50 mb-4">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <div className="p-1.5 bg-slate-50 rounded-lg text-slate-400">
                   <Clock className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-xs font-bold text-slate-600">{recipe.cookTime}</span>
+                <span className="text-[10px] sm:text-xs font-bold text-slate-600 whitespace-nowrap">{recipe.cookTime}</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <div className="p-1.5 bg-slate-50 rounded-lg text-slate-400">
                   <Users className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-xs font-bold text-slate-600">{recipe.servings} serving</span>
+                <span className="text-[10px] sm:text-xs font-bold text-slate-600 whitespace-nowrap">{recipe.servings} serving</span>
               </div>
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-between gap-3 pt-2">
+          <div className="flex items-center justify-between gap-2 pt-2">
             {/* Author - Desktop */}
             <Button 
               variant="ghost"
               onClick={handleAuthorClick}
-              className="hidden md:flex items-center gap-2 group/author p-0 h-auto hover:bg-transparent"
+              className="hidden md:flex items-center gap-2 group/author p-0 h-auto hover:bg-transparent shrink-0 min-w-0 overflow-hidden"
             >
-              <Avatar className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs group-hover/author:bg-detroit-100 group-hover/author:text-detroit-600 transition-colors">
-                <AvatarFallback>{recipe.author?.charAt(0) || 'C'}</AvatarFallback>
+              <Avatar className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] group-hover/author:bg-detroit-100 group-hover/author:text-detroit-600 transition-colors shrink-0">
+                <AvatarFallback className="bg-transparent">{recipe.author?.charAt(0) || 'C'}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-start min-w-0">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Chef</span>
-                <span className="text-xs font-bold text-slate-700 group-hover/author:text-detroit-600 truncate max-w-[80px]">{recipe.author}</span>
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter leading-none">Chef</span>
+                <span className="text-[11px] font-bold text-slate-700 group-hover/author:text-detroit-600 truncate max-w-[50px] lg:max-w-[70px]">{recipe.author}</span>
               </div>
             </Button>
 
-          <div className="flex items-center gap-2 flex-1 justify-end">
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-1 justify-end min-w-0">
             <TooltipProvider>
               {onEdit && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
-                      size="iconMobile"
+                      size="icon"
                       onClick={handleEditClick}
-                      className="text-slate-400 hover:text-detroit-600 hover:bg-detroit-50 rounded-xl"
+                      className="w-8 h-8 sm:w-9 sm:h-9 text-slate-400 hover:text-detroit-600 hover:bg-detroit-50 rounded-xl shrink-0"
                     >
-                      <Edit2 className="w-5 h-5" />
+                      <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Edit Recipe</TooltipContent>
@@ -207,11 +207,11 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    size="iconMobile"
+                    size="icon"
                     onClick={handleShoppingListClick}
-                    className="text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl"
+                    className="w-8 h-8 sm:w-9 sm:h-9 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl shrink-0"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Add to Shopping List</TooltipContent>
@@ -219,7 +219,7 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
             </TooltipProvider>
 
             <Button 
-              className="bg-slate-900 text-white px-5 h-11 rounded-2xl font-bold text-xs hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10"
+              className="bg-slate-900 text-white px-3 sm:px-4 lg:px-5 h-9 sm:h-11 rounded-xl sm:rounded-2xl font-bold text-[10px] sm:text-xs hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 shrink-0 whitespace-nowrap"
             >
               Cook Now
             </Button>

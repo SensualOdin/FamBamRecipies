@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Plus, Heart, ShoppingCart, User, 
@@ -293,13 +293,13 @@ export default function FamilyCookbook() {
   }, [user]);
 
   // Authentication handlers
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     await signOut();
     setUser(null);
     setShowProfile(false);
-  };
+  }, []);
 
-  const handleSignIn = async (authUser) => {
+  const handleSignIn = useCallback(async (authUser) => {
     // Ensure user profile exists (create if needed)
     const profile = await ensureUserProfile(authUser);
     
@@ -358,9 +358,9 @@ export default function FamilyCookbook() {
     }
     
     setShowAuthModal(false);
-  };
+  }, []);
 
-  const handleAddRecipe = async (newRecipe, photoFile = null) => {
+  const handleAddRecipe = useCallback(async (newRecipe, photoFile = null) => {
     // If user is logged in, ensure their name is used as author
     let recipeToSave = user ? {
       ...newRecipe,
@@ -405,14 +405,14 @@ export default function FamilyCookbook() {
         }));
       }
     }
-  };
+  }, [user, userProfile.name]);
 
-  const handleEditRecipe = (recipe) => {
+  const handleEditRecipe = useCallback((recipe) => {
     setEditingRecipe(recipe);
     setShowAddModal(true);
-  };
+  }, []);
 
-  const handleUpdateRecipe = async (updatedRecipe, photoFile = null) => {
+  const handleUpdateRecipe = useCallback(async (updatedRecipe, photoFile = null) => {
     // Optimistic update
     setRecipes(prev => prev.map(r => 
       r.id === updatedRecipe.id ? updatedRecipe : r
@@ -440,10 +440,11 @@ export default function FamilyCookbook() {
     if (user) {
       await recordUserActivity(user.id, 'recipe_updated');
     }
-  };
+  }, [user]);
 
-  const toggleFavorite = async (id) => {
+  const toggleFavorite = useCallback(async (id) => {
     const recipe = recipes.find(r => r.id === id);
+    if (!recipe) return;
     const newFavoriteState = !recipe.isFavorite;
     
     // Optimistic update
@@ -472,9 +473,9 @@ export default function FamilyCookbook() {
         }));
       }
     }
-  };
+  }, [user, recipes]);
 
-  const addToShoppingList = (item) => {
+  const addToShoppingList = useCallback((item) => {
     const parseIngredientForList = (ing) => {
       // Common measurements to strip out
       const measurements = [
@@ -518,7 +519,7 @@ export default function FamilyCookbook() {
       setShoppingList(prev => [...prev, ...ingredients]);
     }
     setShowShoppingList(true);
-  };
+  }, []);
 
   const deleteRecipe = (id) => {
     setRecipes(prev => prev.filter(r => r.id !== id));
@@ -569,35 +570,39 @@ export default function FamilyCookbook() {
     }
   };
 
-  const filteredRecipes = recipes.filter(recipe => {
-    const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         recipe.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         recipe.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         recipe.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                         recipe.ingredients.some(i => i.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = selectedCategory === 'All' || recipe.category === selectedCategory;
-    const matchesDifficulty = selectedDifficulty === 'All' || recipe.difficulty === selectedDifficulty;
-    const matchesDietary = selectedDietary === 'All' || recipe.dietary?.includes(selectedDietary);
-    const matchesFavorite = !showFavoritesOnly || recipe.isFavorite;
-    const matchesAuthor = !selectedAuthor || recipe.author === selectedAuthor;
-    
-    // Cook time filter
-    let matchesCookTime = true;
-    if (cookTimeFilter !== 'All') {
-      const cookMins = parseInt(recipe.cookTime);
-      if (cookTimeFilter === 'Quick' && cookMins > 30) matchesCookTime = false;
-      if (cookTimeFilter === 'Medium' && (cookMins <= 30 || cookMins > 60)) matchesCookTime = false;
-      if (cookTimeFilter === 'Long' && cookMins <= 60) matchesCookTime = false;
-    }
-    
-    return matchesSearch && matchesCategory && matchesDifficulty && matchesDietary && matchesFavorite && matchesCookTime && matchesAuthor;
-  }).sort((a, b) => {
-    if (sortBy === 'newest') return b.id - a.id;
-    if (sortBy === 'oldest') return a.id - b.id;
-    if (sortBy === 'popular') return (b.timesCooked || 0) - (a.timesCooked || 0);
-    if (sortBy === 'name') return a.title.localeCompare(b.title);
-    return 0;
-  });
+  const filteredRecipes = useMemo(() => {
+    return recipes.filter(recipe => {
+      const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           recipe.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           recipe.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           recipe.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                           recipe.ingredients.some(i => i.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCategory = selectedCategory === 'All' || recipe.category === selectedCategory;
+      const matchesDifficulty = selectedDifficulty === 'All' || recipe.difficulty === selectedDifficulty;
+      const matchesDietary = selectedDietary === 'All' || recipe.dietary?.includes(selectedDietary);
+      const matchesFavorite = !showFavoritesOnly || recipe.isFavorite;
+      const matchesAuthor = !selectedAuthor || recipe.author === selectedAuthor;
+      
+      // Cook time filter
+      let matchesCookTime = true;
+      if (cookTimeFilter !== 'All') {
+        const cookMins = parseInt(recipe.cookTime);
+        if (cookTimeFilter === 'Quick' && cookMins > 30) matchesCookTime = false;
+        if (cookTimeFilter === 'Medium' && (cookMins <= 30 || cookMins > 60)) matchesCookTime = false;
+        if (cookTimeFilter === 'Long' && cookMins <= 60) matchesCookTime = false;
+      }
+      
+      return matchesSearch && matchesCategory && matchesDifficulty && matchesDietary && matchesFavorite && matchesCookTime && matchesAuthor;
+    }).sort((a, b) => {
+      if (sortBy === 'newest') return b.id - a.id;
+      if (sortBy === 'oldest') return a.id - b.id;
+      if (sortBy === 'popular') return (b.timesCooked || 0) - (a.timesCooked || 0);
+      if (sortBy === 'name') return a.title.localeCompare(b.title);
+      return 0;
+    });
+  }, [recipes, searchQuery, selectedCategory, selectedDifficulty, selectedDietary, showFavoritesOnly, selectedAuthor, cookTimeFilter, sortBy]);
+
+  const shoppingListCount = useMemo(() => shoppingList.filter(i => !i.checked).length, [shoppingList]);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-detroit-100 selection:text-detroit-900">
@@ -640,9 +645,9 @@ export default function FamilyCookbook() {
         >
           <div className="relative">
             <ShoppingCart className="w-6 h-6" />
-            {shoppingList.filter(i => !i.checked).length > 0 && (
+            {shoppingListCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-detroit-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold">
-                {shoppingList.filter(i => !i.checked).length}
+                {shoppingListCount}
               </span>
             )}
           </div>
@@ -687,7 +692,7 @@ export default function FamilyCookbook() {
               <div className="hidden md:flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10">
                 <TooltipProvider>
                   {[
-                    { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: () => setShowShoppingList(true), label: 'Shopping', count: shoppingList.filter(i => !i.checked).length },
+                    { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: () => setShowShoppingList(true), label: 'Shopping', count: shoppingListCount },
                     { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: () => setShowMealPlanner(true), label: 'Planner' },
                     { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: () => setShowUnitConverter(true), label: 'Units' }
                   ].map((tool) => (

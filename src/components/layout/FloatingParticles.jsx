@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 const FloatingParticles = () => {
   return (
@@ -11,4 +11,4 @@ const FloatingParticles = () => {
   );
 };
 
-export default FloatingParticles;
+export default memo(FloatingParticles);

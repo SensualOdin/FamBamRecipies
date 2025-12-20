@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Heart, Plus, Edit2, 
@@ -230,4 +230,4 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
   );
 };
 
-export default RecipeCard;
+export default memo(RecipeCard);

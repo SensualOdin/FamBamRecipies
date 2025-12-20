@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ShoppingBag, Share2, Plus, Trash2, 
-  Check, Search, ShoppingCart
+  Check, Search, ShoppingCart, ChevronLeft
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -19,10 +19,30 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
   const [open, setOpen] = useState(true);
   const [newItem, setNewItem] = useState('');
 
+  // Handle browser back button to close modal
+  useEffect(() => {
+    const handlePopState = () => {
+      setOpen(false);
+      onClose();
+    };
+
+    // Push a new state so the back button can be intercepted
+    window.history.pushState({ modal: 'shopping-list' }, '');
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      // Only go back if we're still on the modal's history entry
+      if (window.history.state?.modal === 'shopping-list') {
+        window.history.back();
+      }
+    };
+  }, [onClose]);
+
   const handleOpenChange = (isOpen) => {
     if (!isOpen) {
       setOpen(false);
-      setTimeout(onClose, 300);
+      setTimeout(onClose, 150);
     }
   };
 
@@ -86,17 +106,27 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-md h-[90vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border-none rounded-t-[40px] sm:rounded-[40px] shadow-2xl gap-0">
+      <DialogContent className="p-0 sm:max-w-md h-[95vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border-none rounded-t-[40px] sm:rounded-[40px] shadow-2xl gap-0 bg-white">
         {/* Header */}
         <div className="bg-slate-950 p-6 sm:p-8 text-white shrink-0">
           <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-detroit-500 rounded-2xl flex items-center justify-center shadow-lg shadow-detroit-500/20">
-                <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <div>
-                <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight text-white">Shopping List</DialogTitle>
-                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Kitchen Essentials</p>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => handleOpenChange(false)}
+                className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 shrink-0"
+              >
+                <ChevronLeft className="w-6 h-6 text-white" />
+              </Button>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-detroit-500 rounded-2xl flex items-center justify-center shadow-lg shadow-detroit-500/20">
+                  <ShoppingBag className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-black tracking-tight text-white leading-tight">Shopping List</DialogTitle>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest leading-none mt-1">Kitchen Essentials</p>
+                </div>
               </div>
             </div>
             <div className="flex gap-2">

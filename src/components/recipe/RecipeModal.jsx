@@ -207,7 +207,7 @@ const RecipeModal = ({ recipe, onClose, onAddToShoppingList, onDelete, onMarkAsC
         <div className="overflow-y-auto flex-1 scrollbar-hide">
           {/* Header Section */}
           <div className="relative h-64 sm:h-[400px] overflow-hidden">
-            {recipe.image && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
+            {recipe.image && (typeof recipe.image === 'string') && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
               <img 
                 src={recipe.image} 
                 alt={recipe.title} 

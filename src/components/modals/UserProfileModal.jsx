@@ -3,12 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, LogOut, Edit2, Camera, Trophy, 
   BookOpen, Heart, Activity,
-  Clock, Flame, Check, ChevronRight
+  Clock, Flame, Check, ChevronRight, Star
 } from 'lucide-react';
 import { uploadAvatar, updateUserProfile } from '../../lib/supabase';
 import { 
   Dialog, 
   DialogContent, 
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,24 +21,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
-const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onProfileUpdate }) => {
+const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user, onProfileUpdate }) => {
   const [open, setOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [editData, setEditData] = useState({
-    displayName: userProfile.name,
-    bio: userProfile.bio,
-    avatar: userProfile.avatar
+    displayName: userProfile?.name || '',
+    bio: userProfile?.bio || '',
+    avatar: userProfile?.avatar || '👨‍🍳'
   });
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    setEditData({
-      displayName: userProfile.name,
-      bio: userProfile.bio,
-      avatar: userProfile.avatar
-    });
+    if (userProfile) {
+      setEditData({
+        displayName: userProfile.name || '',
+        bio: userProfile.bio || '',
+        avatar: userProfile.avatar || '👨‍🍳'
+      });
+    }
   }, [userProfile]);
 
   const handleOpenChange = (isOpen) => {
@@ -45,10 +50,10 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
     }
   };
 
-  const userRecipes = recipes.filter(r => r.author === userProfile.name);
-  const favoriteRecipes = recipes.filter(r => r.isFavorite);
+  const userRecipes = Array.isArray(recipes) ? recipes.filter(r => r.author === userProfile?.name) : [];
+  const favoriteRecipes = Array.isArray(recipes) ? recipes.filter(r => r.isFavorite) : [];
 
-  const levelProgress = (userProfile.experience / userProfile.experienceToNextLevel) * 100;
+  const levelProgress = userProfile ? (userProfile.experience / userProfile.experienceToNextLevel) * 100 : 0;
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
@@ -91,10 +96,17 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
     }
   };
 
+  if (!userProfile) return null;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-4xl h-[95vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl flex flex-col gap-0">
-        <div className="flex-1 overflow-y-auto scrollbar-hide bg-white">
+      <DialogContent className="p-0 sm:max-w-4xl h-[95vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl flex flex-col gap-0 bg-white">
+        <DialogHeader className="sr-only">
+          <DialogTitle>User Profile</DialogTitle>
+          <DialogDescription>View and edit your family cookbook profile</DialogDescription>
+        </DialogHeader>
+        
+        <div className="flex-1 overflow-y-auto scrollbar-hide">
           {/* Header with gradient background */}
           <div className="relative bg-slate-950 p-8 sm:p-12 text-white overflow-hidden">
             {/* Animated background elements */}
@@ -136,8 +148,8 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                   <div className="w-32 h-32 sm:w-44 sm:h-44 bg-white rounded-[32px] sm:rounded-[48px] flex items-center justify-center text-6xl sm:text-7xl shadow-2xl overflow-hidden ring-4 ring-white/10">
                     <Avatar className="w-full h-full rounded-none">
                       <AvatarImage src={userProfile.avatarUrl} className="object-cover" />
-                      <AvatarFallback className="bg-white rounded-none text-6xl sm:text-7xl">
-                        {userProfile.avatar}
+                      <AvatarFallback className="bg-white rounded-none text-6xl sm:text-7xl flex items-center justify-center">
+                        {userProfile.avatar || '👨‍🍳'}
                       </AvatarFallback>
                     </Avatar>
                   </div>
@@ -147,7 +159,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                   <Button
                     variant="ghost"
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute inset-0 bg-slate-950/60 rounded-[32px] sm:rounded-[48px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm h-full w-full"
+                    className="absolute inset-0 bg-slate-950/60 rounded-[32px] sm:rounded-[48px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm h-full w-full border-none"
                   >
                     {isUploading ? (
                       <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
@@ -167,7 +179,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                 {/* Profile Details */}
                 <div className="flex-1 text-center md:text-left w-full pt-4">
                   {isEditing ? (
-                    <div className="space-y-4 animate-in fade-in duration-500">
+                    <div className="space-y-4">
                       <Input
                         value={editData.displayName}
                         onChange={(e) => setEditData(p => ({ ...p, displayName: e.target.value }))}
@@ -181,12 +193,12 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                         placeholder="Your bio..."
                       />
                       <div className="flex gap-3">
-                        <Button onClick={handleSaveProfile} className="flex-1 sm:flex-none bg-white text-slate-950 hover:bg-slate-100 rounded-2xl font-bold h-10 px-8 text-sm">Save</Button>
-                        <Button variant="ghost" onClick={() => setIsEditing(false)} className="flex-1 sm:flex-none bg-white/10 text-white hover:bg-white/20 rounded-2xl font-bold h-10 px-8 text-sm">Cancel</Button>
+                        <Button onClick={handleSaveProfile} className="flex-1 sm:flex-none bg-white text-slate-950 hover:bg-slate-100 rounded-2xl font-bold h-10 px-8 text-sm border-none">Save</Button>
+                        <Button variant="ghost" onClick={() => setIsEditing(false)} className="flex-1 sm:flex-none bg-white/10 text-white hover:bg-white/20 rounded-2xl font-bold h-10 px-8 text-sm border-none">Cancel</Button>
                       </div>
                     </div>
                   ) : (
-                    <div className="animate-in fade-in duration-500">
+                    <div>
                       <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
                         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">{userProfile.name}</h2>
                         <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10">
@@ -235,13 +247,13 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
 
             {/* Tab Panels */}
             <div className="p-6 sm:p-8 pb-20">
-              <TabsContent value="overview" className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <TabsContent value="overview" className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 grid grid-cols-2 gap-4">
                   {[
                     { label: 'Total Points', value: userProfile.totalPoints, color: 'bg-amber-50 text-amber-600', icon: <Star className="w-6 h-6" /> },
-                    { label: 'Recipes Cooked', value: userProfile.stats.recipesCooked, color: 'bg-emerald-50 text-emerald-600', icon: <Flame className="w-6 h-6" /> },
-                    { label: 'Traditions Kept', value: userProfile.stats.recipesCreated, color: 'bg-detroit-50 text-detroit-600', icon: <BookOpen className="w-6 h-6" /> },
-                    { label: 'Cook Streak', value: userProfile.stats.longestStreak, color: 'bg-rose-50 text-rose-600', icon: <Activity className="w-6 h-6" /> }
+                    { label: 'Recipes Cooked', value: userProfile.stats?.recipesCooked || 0, color: 'bg-emerald-50 text-emerald-600', icon: <Flame className="w-6 h-6" /> },
+                    { label: 'Traditions Kept', value: userProfile.stats?.recipesCreated || 0, color: 'bg-detroit-50 text-detroit-600', icon: <BookOpen className="w-6 h-6" /> },
+                    { label: 'Cook Streak', value: userProfile.stats?.longestStreak || 0, color: 'bg-rose-50 text-rose-600', icon: <Activity className="w-6 h-6" /> }
                   ].map((stat, i) => (
                     <motion.div 
                       key={i}
@@ -258,20 +270,20 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                 <div className="bg-slate-50 rounded-[28px] sm:rounded-[32px] p-6 sm:p-8">
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6 text-center sm:text-left">Recent Badges</h3>
                   <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
-                    {userProfile.achievements.filter(a => a.unlocked).slice(0, 4).map(a => (
+                    {userProfile.achievements?.filter(a => a.unlocked).slice(0, 4).map(a => (
                       <div key={a.id} className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl shadow-sm hover:scale-110 transition-transform cursor-help" title={a.name}>
                         {a.icon}
                       </div>
                     ))}
-                    {userProfile.achievements.filter(a => a.unlocked).length === 0 && (
+                    {(!userProfile.achievements || userProfile.achievements.filter(a => a.unlocked).length === 0) && (
                       <p className="text-slate-400 text-[10px] text-center italic uppercase tracking-wider font-bold">No badges earned yet</p>
                     )}
                   </div>
                 </div>
               </TabsContent>
 
-              <TabsContent value="achievements" className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                {userProfile.achievements.map(a => (
+              <TabsContent value="achievements" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {userProfile.achievements?.map(a => (
                   <div key={a.id} className={`p-5 sm:p-6 rounded-[28px] sm:rounded-[32px] border-2 transition-all flex gap-4 sm:gap-6 ${a.unlocked ? 'bg-white border-detroit-100 shadow-xl shadow-detroit-500/5' : 'bg-slate-50 border-transparent opacity-60 grayscale'}`}>
                     <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shrink-0">
                       {a.icon}
@@ -279,7 +291,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                     <div>
                       <h4 className="font-bold text-slate-900 mb-1 text-sm sm:text-base">{a.name}</h4>
                       <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{a.description}</p>
-                      {a.unlocked && (
+                      {a.unlocked && a.date && (
                         <div className="mt-3 text-[9px] font-black text-detroit-500 uppercase tracking-widest">
                           Unlocked {new Date(a.date).toLocaleDateString()}
                         </div>
@@ -289,13 +301,13 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                 ))}
               </TabsContent>
 
-              <TabsContent value="recipes" className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <TabsContent value="recipes" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {userRecipes.map(r => (
                   <div key={r.id} className="group p-4 bg-white border border-slate-100 rounded-[24px] sm:rounded-[28px] hover:border-detroit-200 transition-all flex gap-4">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
                       <Avatar className="w-full h-full rounded-none">
-                        <AvatarImage src={r.image && (r.image.startsWith('http') || r.image.startsWith('data:')) ? r.image : undefined} className="object-cover" />
-                        <AvatarFallback className="bg-slate-50 rounded-none text-2xl sm:text-3xl">
+                        <AvatarImage src={r.image && (typeof r.image === 'string') && (r.image.startsWith('http') || r.image.startsWith('data:')) ? r.image : undefined} className="object-cover" />
+                        <AvatarFallback className="bg-slate-50 rounded-none text-2xl sm:text-3xl flex items-center justify-center">
                           {r.image || '🥘'}
                         </AvatarFallback>
                       </Avatar>
@@ -318,13 +330,13 @@ const UserProfileModal = ({ onClose, userProfile, recipes, onSignOut, user, onPr
                 )}
               </TabsContent>
 
-              <TabsContent value="favorites" className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <TabsContent value="favorites" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {favoriteRecipes.map(r => (
                   <div key={r.id} className="group p-4 bg-white border border-slate-100 rounded-[24px] sm:rounded-[28px] hover:border-rose-100 transition-all flex gap-4">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-rose-50 rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
                       <Avatar className="w-full h-full rounded-none">
-                        <AvatarImage src={r.image && (r.image.startsWith('http') || r.image.startsWith('data:')) ? r.image : undefined} className="object-cover" />
-                        <AvatarFallback className="bg-rose-50 rounded-none text-2xl sm:text-3xl">
+                        <AvatarImage src={r.image && (typeof r.image === 'string') && (r.image.startsWith('http') || r.image.startsWith('data:')) ? r.image : undefined} className="object-cover" />
+                        <AvatarFallback className="bg-rose-50 rounded-none text-2xl sm:text-3xl flex items-center justify-center">
                           {r.image || '🥘'}
                         </AvatarFallback>
                       </Avatar>

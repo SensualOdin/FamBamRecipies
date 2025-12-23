@@ -1,12 +1,30 @@
-import React from 'react';
-import { ChefHat, Search, X, ShoppingCart, Calendar, UtensilsCrossed } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChefHat, Search, X, ShoppingCart, Calendar, UtensilsCrossed, Moon, Sun } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { motion, AnimatePresence } from 'framer-motion';
 
-const Header = ({ 
+interface HeaderProps {
+  user: any;
+  userProfile: any;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  isSearchFocused: boolean;
+  setIsSearchFocused: (focused: boolean) => void;
+  shoppingListCount: number;
+  onShowShoppingList: () => void;
+  onShowMealPlanner: () => void;
+  onShowUnitConverter: () => void;
+  onShowProfile: () => void;
+  onShowAuth: () => void;
+  onPrefetch: (modal: string) => void;
+  isLoaded: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ 
   user, 
   userProfile, 
   searchQuery, 
@@ -22,11 +40,27 @@ const Header = ({
   onPrefetch,
   isLoaded
 }) => {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
+
   return (
     <header className={`relative transition-all duration-1000 z-10 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-slate-950" />
-        {/* Subtle Noise Texture */}
+        <div className="absolute inset-0 bg-slate-950 dark:bg-black transition-colors duration-700" />
         <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
         <div className="absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-detroit-900/40 via-transparent to-transparent" />
         <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-detroit-600/20 rounded-full blur-[120px] animate-pulse-slow" />
@@ -45,8 +79,32 @@ const Header = ({
 
           {/* Tools & Auth */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <div className="flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10">
+            <div className="flex bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-full p-1 border border-white/10 dark:border-white/5 transition-colors">
               <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={toggleTheme}
+                      className="relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all border-none"
+                    >
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={theme}
+                          initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+                          animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                          exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {theme === 'light' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                        </motion.div>
+                      </AnimatePresence>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Switch Theme</TooltipContent>
+                </Tooltip>
+
                 {[
                   { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: onShowShoppingList, label: 'Shopping', count: shoppingListCount, mobile: false, prefetch: 'shopping' },
                   { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: onShowMealPlanner, label: 'Planner', mobile: true },
@@ -59,7 +117,7 @@ const Header = ({
                         size="icon"
                         onClick={tool.onClick}
                         onMouseEnter={() => tool.prefetch && onPrefetch && onPrefetch(tool.prefetch)}
-                        className={`relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
+                        className={`relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group border-none ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
                       >
                         {tool.icon}
                         {tool.count > 0 && (
@@ -80,7 +138,7 @@ const Header = ({
                 variant="ghost"
                 onClick={onShowProfile}
                 onMouseEnter={() => onPrefetch && onPrefetch('profile')}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto"
+                className="flex items-center gap-2 bg-white/10 dark:bg-black/20 hover:bg-white/15 dark:hover:bg-black/30 backdrop-blur-md border border-white/20 dark:border-white/10 px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto"
               >
                 <div className="text-right hidden sm:block">
                   <div className="text-white font-semibold text-xs">{userProfile.name}</div>
@@ -88,7 +146,7 @@ const Header = ({
                 </div>
                 <Avatar className="w-8 h-8 border-none shadow-inner">
                   <AvatarImage src={userProfile.avatarUrl} />
-                  <AvatarFallback className="bg-gradient-to-br from-detroit-400 to-detroit-600 text-xs text-white">
+                  <AvatarFallback className="bg-gradient-to-br from-detroit-400 to-detroit-600 text-xs text-white border-none">
                     {userProfile.avatar}
                   </AvatarFallback>
                 </Avatar>
@@ -96,7 +154,7 @@ const Header = ({
             ) : (
               <Button 
                 onClick={onShowAuth}
-                className="px-5 sm:px-6 py-2 bg-white text-slate-900 rounded-full hover:bg-slate-100 transition-all font-bold text-sm shadow-xl shadow-white/5"
+                className="px-5 sm:px-6 py-2 bg-white dark:bg-slate-100 text-slate-900 rounded-full hover:bg-slate-100 dark:hover:bg-white transition-all font-bold text-sm shadow-xl shadow-white/5 border-none"
               >
                 Sign In
               </Button>
@@ -150,4 +208,3 @@ const Header = ({
 };
 
 export default Header;
-

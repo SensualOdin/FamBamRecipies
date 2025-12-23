@@ -24,7 +24,7 @@ const FilterSection = ({
   initialRecipes
 }) => {
   return (
-    <div className={`bg-white/70 backdrop-blur-3xl rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] p-4 sm:p-6 mb-16 transform transition-all duration-1000 delay-500 border border-white ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+    <div className={`bg-card/70 dark:bg-slate-900/70 backdrop-blur-3xl rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] dark:shadow-none p-4 sm:p-6 mb-16 transform transition-all duration-1000 delay-500 border border-border dark:border-white/10 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         {/* Categories Tabs */}
         <div className="flex-1 overflow-x-auto scrollbar-hide -mx-2 px-2 pb-1">
@@ -36,8 +36,8 @@ const FilterSection = ({
                   value={category}
                   className={`
                     px-5 sm:px-8 py-3 sm:py-4 rounded-[20px] font-black text-[10px] sm:text-xs transition-all whitespace-nowrap flex items-center gap-3 border border-transparent uppercase tracking-[0.15em]
-                    data-[state=active]:bg-slate-950 data-[state=active]:text-white data-[state=active]:shadow-2xl data-[state=active]:shadow-slate-900/20 data-[state=active]:scale-105
-                    bg-slate-50/50 text-slate-400 hover:bg-slate-100 hover:text-slate-600
+                    data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-2xl data-[state=active]:shadow-primary/20 data-[state=active]:scale-105
+                    bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground
                   `}
                 >
                   <span className="text-lg sm:text-xl grayscale group-data-[state=active]:grayscale-0">
@@ -55,10 +55,10 @@ const FilterSection = ({
           <Button
             variant="ghost"
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 py-4 sm:py-7 rounded-[24px] font-black text-[10px] sm:text-xs transition-all h-auto uppercase tracking-[0.2em] ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 py-4 sm:py-7 rounded-[24px] font-black text-[10px] sm:text-xs transition-all h-auto uppercase tracking-[0.2em] border-none ${
               showFilters 
-                ? 'bg-detroit-50 text-detroit-700 border border-detroit-100' 
-                : 'bg-slate-50/50 text-slate-500 border border-transparent hover:bg-slate-100'
+                ? 'bg-detroit-50 dark:bg-detroit-900/30 text-detroit-700 dark:text-detroit-300' 
+                : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
           >
             <Filter className="w-5 h-5" strokeWidth={2.5} />
@@ -66,7 +66,7 @@ const FilterSection = ({
           </Button>
           <Button
             onClick={onAddRecipe}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-3 px-8 py-4 sm:py-7 bg-slate-950 text-white rounded-[24px] font-black text-[10px] sm:text-xs shadow-2xl shadow-slate-900/20 hover:shadow-slate-900/40 hover:scale-[1.02] active:scale-[0.98] transition-all h-auto uppercase tracking-[0.2em]"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-3 px-8 py-4 sm:py-7 bg-primary text-primary-foreground rounded-[24px] font-black text-[10px] sm:text-xs shadow-2xl shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all h-auto uppercase tracking-[0.2em] border-none"
           >
             <Plus className="w-5 h-5" strokeWidth={3} />
             Add Recipe
@@ -81,16 +81,16 @@ const FilterSection = ({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="mt-8 pt-8 border-t border-slate-100 overflow-hidden"
+            className="mt-8 pt-8 border-t border-border overflow-hidden"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Sort Recipes</label>
+                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Sort Recipes</label>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-full px-6 py-8 bg-slate-50/50 border border-slate-100 rounded-[20px] text-xs font-black uppercase tracking-widest text-slate-600 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all outline-none border-none shadow-inner">
+                  <SelectTrigger className="w-full px-6 py-8 bg-muted border border-border rounded-[20px] text-xs font-black uppercase tracking-widest text-muted-foreground focus:ring-2 focus:ring-primary focus:bg-background transition-all outline-none border-none shadow-inner h-auto">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-[20px] border-slate-100 shadow-2xl">
+                  <SelectContent className="rounded-[20px] border-border shadow-2xl">
                     <SelectItem value="newest" className="font-bold py-3">Latest First</SelectItem>
                     <SelectItem value="popular" className="font-bold py-3">Most Loved</SelectItem>
                     <SelectItem value="name" className="font-bold py-3">Alphabetical</SelectItem>
@@ -99,17 +99,17 @@ const FilterSection = ({
               </div>
 
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Difficulty Level</label>
-                <div className="flex p-1.5 bg-slate-50/50 rounded-[20px] shadow-inner">
+                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Difficulty Level</label>
+                <div className="flex p-1.5 bg-muted rounded-[20px] shadow-inner">
                   {['All', 'Easy', 'Hard'].map(diff => (
                     <Button
                       key={diff}
                       variant="ghost"
                       onClick={() => setSelectedDifficulty(diff)}
-                      className={`flex-1 py-3 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all h-auto ${
+                      className={`flex-1 py-3 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all h-auto border-none ${
                         selectedDifficulty === diff 
-                          ? 'bg-white text-slate-900 shadow-xl shadow-slate-900/5 hover:bg-white' 
-                          : 'text-slate-400 hover:text-slate-600 hover:bg-transparent'
+                          ? 'bg-background text-foreground shadow-xl' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
                       }`}
                     >
                       {diff}
@@ -119,21 +119,21 @@ const FilterSection = ({
               </div>
 
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Saved Recipes</label>
+                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Saved Recipes</label>
                 <Button
                   variant="ghost"
                   onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                   className={`w-full py-8 px-6 rounded-[20px] text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-all h-auto border border-transparent ${
                     showFavoritesOnly 
-                      ? 'bg-rose-50 text-rose-600 border-rose-100' 
-                      : 'bg-slate-50/50 text-slate-400 hover:bg-slate-100 shadow-inner'
+                      ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-900/30' 
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80 shadow-inner'
                   }`}
                 >
                   <span className="flex items-center gap-3">
                     <Heart className={`w-5 h-5 ${showFavoritesOnly ? 'fill-rose-500 text-rose-500' : ''}`} />
                     Favorites
                   </span>
-                  <div className={`w-12 h-6 rounded-full relative transition-colors p-1 ${showFavoritesOnly ? 'bg-rose-500' : 'bg-slate-200'}`}>
+                  <div className={`w-12 h-6 rounded-full relative transition-colors p-1 ${showFavoritesOnly ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-700'}`}>
                     <motion.div 
                       animate={{ x: showFavoritesOnly ? 24 : 0 }}
                       className="w-4 h-4 bg-white rounded-full shadow-lg" 
@@ -145,7 +145,7 @@ const FilterSection = ({
               <div className="space-y-4 flex flex-col justify-end">
                 <Button
                   onClick={onResetFilters}
-                  className="w-full py-8 bg-slate-900 text-white rounded-[20px] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-2xl shadow-slate-900/20 flex items-center justify-center gap-3 h-auto"
+                  className="w-full py-8 bg-primary text-primary-foreground rounded-[20px] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 h-auto border-none"
                 >
                   <Sparkles className="w-5 h-5" />
                   Reset Filters

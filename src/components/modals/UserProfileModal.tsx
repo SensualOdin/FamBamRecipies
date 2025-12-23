@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   X, LogOut, Edit2, Camera, Trophy, 
   BookOpen, Heart, Activity,
-  Clock, Flame, Check, ChevronRight, Star
+  Clock, Flame, Star
 } from 'lucide-react';
 import { uploadAvatar, updateUserProfile } from '../../lib/supabase';
 import { 
@@ -20,8 +20,25 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Recipe, UserProfile } from '../../types';
 
-const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user, onProfileUpdate }) => {
+interface UserProfileModalProps {
+  onClose: () => void;
+  userProfile: UserProfile;
+  recipes: Recipe[];
+  onSignOut: () => void;
+  user: any;
+  onProfileUpdate: (updates: Partial<UserProfile>) => void;
+}
+
+const UserProfileModal: React.FC<UserProfileModalProps> = ({ 
+  onClose, 
+  userProfile, 
+  recipes = [], 
+  onSignOut, 
+  user, 
+  onProfileUpdate 
+}) => {
   const [open, setOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
@@ -31,7 +48,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
     bio: userProfile?.bio || '',
     avatar: userProfile?.avatar || '👨‍🍳'
   });
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (userProfile) {
@@ -43,7 +60,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
     }
   }, [userProfile]);
 
-  const handleOpenChange = (isOpen) => {
+  const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       setOpen(false);
       setTimeout(onClose, 300);
@@ -55,8 +72,8 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
 
   const levelProgress = userProfile ? (userProfile.experience / userProfile.experienceToNextLevel) * 100 : 0;
 
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files[0];
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file || !user?.id) return;
 
     setIsUploading(true);
@@ -100,7 +117,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl flex flex-col gap-0 bg-white top-[auto] bottom-0 translate-y-0 translate-x-[-50%]">
+      <DialogContent className="p-0 sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl flex flex-col gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors duration-500">
         <DialogHeader className="sr-only">
           <DialogTitle>User Profile</DialogTitle>
           <DialogDescription>View and edit your family cookbook profile</DialogDescription>
@@ -108,7 +125,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
         
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           {/* Header with gradient background */}
-          <div className="relative bg-slate-950 p-8 sm:p-12 pt-safe text-white overflow-hidden">
+          <div className="relative bg-slate-950 p-8 sm:p-12 pt-safe text-white overflow-hidden transition-colors">
             {/* Animated background elements */}
             <div className="absolute inset-0">
               <div className="absolute -top-24 -right-24 w-96 h-96 bg-detroit-600/20 rounded-full blur-[120px]" />
@@ -224,7 +241,7 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
 
           {/* Content Navigation */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="bg-white px-6 sm:px-8 pt-4 border-b sticky top-0 z-20">
+            <div className="bg-background px-6 sm:px-8 pt-4 border-b sticky top-0 z-20 transition-colors">
               <TabsList className="bg-transparent h-auto p-0 gap-6 sm:gap-8 overflow-x-auto scrollbar-hide justify-start">
                 {[
                   { id: 'overview', label: 'Overview', icon: <Activity className="w-4 h-4" /> },
@@ -235,25 +252,25 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
-                    className="pb-4 text-[10px] font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 whitespace-nowrap border-none bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none text-slate-400 hover:text-slate-600 rounded-none h-auto p-0"
+                    className="pb-4 text-[10px] font-bold uppercase tracking-widest transition-all relative flex items-center gap-2 whitespace-nowrap border-none bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none text-muted-foreground hover:text-foreground rounded-none h-auto p-0"
                   >
                     {tab.icon}
                     {tab.label}
-                    {activeTab === tab.id && <motion.div layoutId="profileTab" className="absolute bottom-0 left-0 right-0 h-1 bg-detroit-500 rounded-full" />}
+                    {activeTab === tab.id && <motion.div layoutId="profileTab" className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-full" />}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </div>
 
             {/* Tab Panels */}
-            <div className="p-6 sm:p-8 pb-20">
+            <div className="p-6 sm:p-8 pb-20 bg-background transition-colors">
               <TabsContent value="overview" className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 grid grid-cols-2 gap-4">
                   {[
-                    { label: 'Total Points', value: userProfile.totalPoints, color: 'bg-amber-50 text-amber-600', icon: <Star className="w-6 h-6" /> },
-                    { label: 'Recipes Cooked', value: userProfile.stats?.recipesCooked || 0, color: 'bg-emerald-50 text-emerald-600', icon: <Flame className="w-6 h-6" /> },
-                    { label: 'Traditions Kept', value: userProfile.stats?.recipesCreated || 0, color: 'bg-detroit-50 text-detroit-600', icon: <BookOpen className="w-6 h-6" /> },
-                    { label: 'Cook Streak', value: userProfile.stats?.longestStreak || 0, color: 'bg-rose-50 text-rose-600', icon: <Activity className="w-6 h-6" /> }
+                    { label: 'Total Points', value: userProfile.totalPoints, color: 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400', icon: <Star className="w-6 h-6" /> },
+                    { label: 'Recipes Cooked', value: userProfile.stats?.recipesCooked || 0, color: 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400', icon: <Flame className="w-6 h-6" /> },
+                    { label: 'Traditions Kept', value: userProfile.stats?.recipesCreated || 0, color: 'bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary-foreground', icon: <BookOpen className="w-6 h-6" /> },
+                    { label: 'Cook Streak', value: userProfile.stats?.longestStreak || 0, color: 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400', icon: <Activity className="w-6 h-6" /> }
                   ].map((stat, i) => (
                     <motion.div 
                       key={i}
@@ -267,16 +284,16 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
                   ))}
                 </div>
                 
-                <div className="bg-slate-50 rounded-[28px] sm:rounded-[32px] p-6 sm:p-8">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6 text-center sm:text-left">Recent Badges</h3>
+                <div className="bg-muted rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 transition-colors">
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 text-center sm:text-left">Recent Badges</h3>
                   <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
                     {userProfile.achievements?.filter(a => a.unlocked).slice(0, 4).map(a => (
-                      <div key={a.id} className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl shadow-sm hover:scale-110 transition-transform cursor-help" title={a.name}>
+                      <div key={a.id} className="w-12 h-12 sm:w-14 sm:h-14 bg-card rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl shadow-sm hover:scale-110 transition-transform cursor-help" title={a.name}>
                         {a.icon}
                       </div>
                     ))}
                     {(!userProfile.achievements || userProfile.achievements.filter(a => a.unlocked).length === 0) && (
-                      <p className="text-slate-400 text-[10px] text-center italic uppercase tracking-wider font-bold">No badges earned yet</p>
+                      <p className="text-muted-foreground text-[10px] text-center italic uppercase tracking-wider font-bold">No badges earned yet</p>
                     )}
                   </div>
                 </div>
@@ -284,15 +301,15 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
 
               <TabsContent value="achievements" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {userProfile.achievements?.map(a => (
-                  <div key={a.id} className={`p-5 sm:p-6 rounded-[28px] sm:rounded-[32px] border-2 transition-all flex gap-4 sm:gap-6 ${a.unlocked ? 'bg-white border-detroit-100 shadow-xl shadow-detroit-500/5' : 'bg-slate-50 border-transparent opacity-60 grayscale'}`}>
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shrink-0">
+                  <div key={a.id} className={`p-5 sm:p-6 rounded-[28px] sm:rounded-[32px] border-2 transition-all flex gap-4 sm:gap-6 ${a.unlocked ? 'bg-card border-border shadow-xl' : 'bg-muted border-transparent opacity-60 grayscale'}`}>
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-muted rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shrink-0">
                       {a.icon}
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 mb-1 text-sm sm:text-base">{a.name}</h4>
-                      <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{a.description}</p>
+                      <h4 className="font-bold text-foreground mb-1 text-sm sm:text-base">{a.name}</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{a.description}</p>
                       {a.unlocked && a.date && (
-                        <div className="mt-3 text-[9px] font-black text-detroit-500 uppercase tracking-widest">
+                        <div className="mt-3 text-[9px] font-black text-primary uppercase tracking-widest">
                           Unlocked {new Date(a.date).toLocaleDateString()}
                         </div>
                       )}
@@ -303,60 +320,60 @@ const UserProfileModal = ({ onClose, userProfile, recipes = [], onSignOut, user,
 
               <TabsContent value="recipes" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {userRecipes.map(r => (
-                  <div key={r.id} className="group p-4 bg-white border border-slate-100 rounded-[24px] sm:rounded-[28px] hover:border-detroit-200 transition-all flex gap-4">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
+                  <div key={r.id} className="group p-4 bg-card border border-border rounded-[24px] sm:rounded-[28px] hover:border-primary transition-all flex gap-4">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
                       <Avatar className="w-full h-full rounded-none">
                         <AvatarImage src={r.image && (typeof r.image === 'string') && (r.image.startsWith('http') || r.image.startsWith('data:')) ? r.image : undefined} className="object-cover" />
-                        <AvatarFallback className="bg-slate-50 rounded-none text-2xl sm:text-3xl flex items-center justify-center">
+                        <AvatarFallback className="bg-muted rounded-none text-2xl sm:text-3xl flex items-center justify-center">
                           {r.image || '🥘'}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                     <div className="flex-1 min-w-0 py-1">
-                      <h4 className="font-bold text-slate-900 mb-1 truncate group-hover:text-detroit-600 transition-colors text-sm sm:text-base">{r.title}</h4>
-                      <p className="text-[10px] text-slate-400 mb-3 uppercase tracking-widest font-bold">{r.category}</p>
-                      <div className="flex items-center gap-3 text-[9px] font-black text-slate-500 uppercase tracking-tighter">
-                        <span className="bg-slate-50 px-2 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {r.cookTime}</span>
-                        <span className="bg-slate-50 px-2 py-0.5 rounded-md flex items-center gap-1"><Flame className="w-2.5 h-2.5" /> {r.timesCooked || 0} cooks</span>
+                      <h4 className="font-bold text-foreground mb-1 truncate group-hover:text-primary transition-colors text-sm sm:text-base">{r.title}</h4>
+                      <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-widest font-bold">{r.category}</p>
+                      <div className="flex items-center gap-3 text-[9px] font-black text-muted-foreground uppercase tracking-tighter">
+                        <span className="bg-muted px-2 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {r.cookTime}</span>
+                        <span className="bg-muted px-2 py-0.5 rounded-md flex items-center gap-1"><Flame className="w-2.5 h-2.5" /> {r.timesCooked || 0} cooks</span>
                       </div>
                     </div>
                   </div>
                 ))}
                 {userRecipes.length === 0 && (
-                  <div className="col-span-full py-12 text-center bg-slate-50 rounded-[32px]">
-                    <BookOpen className="w-10 h-10 text-slate-200 mx-auto mb-4" />
-                    <p className="text-slate-400 text-sm font-medium uppercase tracking-widest">No recipes created yet</p>
+                  <div className="col-span-full py-12 text-center bg-muted rounded-[32px]">
+                    <BookOpen className="w-10 h-10 text-muted-foreground/30 mx-auto mb-4" />
+                    <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest">No recipes created yet</p>
                   </div>
                 )}
               </TabsContent>
 
               <TabsContent value="favorites" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {favoriteRecipes.map(r => (
-                  <div key={r.id} className="group p-4 bg-white border border-slate-100 rounded-[24px] sm:rounded-[28px] hover:border-rose-100 transition-all flex gap-4">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-rose-50 rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
+                  <div key={r.id} className="group p-4 bg-card border border-border rounded-[24px] sm:rounded-[28px] hover:border-rose-100 dark:hover:border-rose-900/30 transition-all flex gap-4">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-rose-50 dark:bg-rose-950/20 rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
                       <Avatar className="w-full h-full rounded-none">
                         <AvatarImage src={r.image && (typeof r.image === 'string') && (r.image.startsWith('http') || r.image.startsWith('data:')) ? r.image : undefined} className="object-cover" />
-                        <AvatarFallback className="bg-rose-50 rounded-none text-2xl sm:text-3xl flex items-center justify-center">
+                        <AvatarFallback className="bg-rose-50 dark:bg-rose-950/20 rounded-none text-2xl sm:text-3xl flex items-center justify-center">
                           {r.image || '🥘'}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                     <div className="flex-1 min-w-0 py-1">
                       <div className="flex justify-between items-start">
-                        <h4 className="font-bold text-slate-900 mb-1 truncate group-hover:text-rose-500 transition-colors text-sm sm:text-base">{r.title}</h4>
+                        <h4 className="font-bold text-foreground mb-1 truncate group-hover:text-rose-500 transition-colors text-sm sm:text-base">{r.title}</h4>
                         <Heart className="w-3.5 h-3.5 text-rose-500 fill-current" />
                       </div>
-                      <p className="text-[10px] text-slate-400 mb-3 uppercase tracking-widest font-bold">by {r.author}</p>
-                      <div className="flex items-center gap-3 text-[9px] font-black text-slate-500 uppercase tracking-tighter">
-                        <span className="bg-rose-50/50 text-rose-600 px-2 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {r.cookTime}</span>
+                      <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-widest font-bold">by {r.author}</p>
+                      <div className="flex items-center gap-3 text-[9px] font-black text-muted-foreground uppercase tracking-tighter">
+                        <span className="bg-rose-50/50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {r.cookTime}</span>
                       </div>
                     </div>
                   </div>
                 ))}
                 {favoriteRecipes.length === 0 && (
-                  <div className="col-span-full py-12 text-center bg-slate-50 rounded-[32px]">
-                    <Heart className="w-10 h-10 text-slate-200 mx-auto mb-4" />
-                    <p className="text-slate-400 text-sm font-medium uppercase tracking-widest">No favorites saved yet</p>
+                  <div className="col-span-full py-12 text-center bg-muted rounded-[32px]">
+                    <Heart className="w-10 h-10 text-muted-foreground/30 mx-auto mb-4" />
+                    <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest">No favorites saved yet</p>
                   </div>
                 )}
               </TabsContent>

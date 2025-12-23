@@ -3,8 +3,21 @@ import { motion } from 'framer-motion';
 import RecipeCard from './RecipeCard';
 import RecipeSkeleton from './RecipeSkeleton';
 import { Button } from "@/components/ui/button";
+import { Recipe } from '../../types';
 
-const RecipeGrid = memo(({ 
+interface RecipeGridProps {
+  recipes: Recipe[];
+  isLoading: boolean;
+  onRecipeClick: (recipe: Recipe) => void;
+  onToggleFavorite: (id: string | number) => void;
+  onAddToShoppingList: (item: any) => void;
+  onAuthorClick: (author: string) => void;
+  onEditRecipe: (recipe: Recipe) => void;
+  onPrefetch: () => void;
+  onClearFilters: () => void;
+}
+
+const RecipeGrid: React.FC<RecipeGridProps> = memo(({ 
   recipes, 
   isLoading, 
   onRecipeClick, 
@@ -30,14 +43,14 @@ const RecipeGrid = memo(({
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-20 bg-white rounded-[40px] shadow-sm border border-slate-100 mx-1 px-6"
+        className="text-center py-20 bg-card rounded-[40px] shadow-sm border border-border mx-1 px-6 transition-colors"
       >
-        <div className="w-20 h-20 bg-slate-50 rounded-[28px] flex items-center justify-center mx-auto mb-6 text-4xl">🥣</div>
-        <h3 className="text-2xl font-bold text-slate-900 mb-3 font-serif">Kitchen's Empty!</h3>
-        <p className="text-slate-500 mb-8 max-w-sm mx-auto text-sm leading-relaxed">We couldn't find any recipes matching your filters. Try something else or add a new favorite!</p>
+        <div className="w-20 h-20 bg-muted rounded-[28px] flex items-center justify-center mx-auto mb-6 text-4xl">🥣</div>
+        <h3 className="text-2xl font-bold text-foreground mb-3 font-serif">Kitchen's Empty!</h3>
+        <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm leading-relaxed">We couldn't find any recipes matching your filters. Try something else or add a new favorite!</p>
         <Button
           onClick={onClearFilters}
-          className="px-8 py-6 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 h-auto"
+          className="px-8 py-6 bg-primary text-primary-foreground rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-xl shadow-primary/10 h-auto border-none"
         >
           Clear All Filters
         </Button>
@@ -64,5 +77,6 @@ const RecipeGrid = memo(({
   );
 });
 
-export default RecipeGrid;
+RecipeGrid.displayName = "RecipeGrid";
 
+export default RecipeGrid;

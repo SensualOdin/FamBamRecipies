@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { extractRecipeFromImage } from '../../lib/supabase';
 import { 
   Dialog, 
   DialogContent, 
-  DialogHeader, 
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -12,23 +11,40 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, Camera, PenTool, Check, ChevronLeft, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import { X, Plus, Camera, PenTool, Check, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Recipe } from '../../types';
 
-const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRecipe = null, defaultAuthor = '' }) => {
+interface AddRecipeModalProps {
+  onClose: () => void;
+  onSave: (recipe: any, file: File | null) => void;
+  onUpdate: (recipe: any, file: File | null) => void;
+  categories: string[];
+  editingRecipe?: Recipe | null;
+  defaultAuthor?: string;
+}
+
+const AddRecipeModal: React.FC<AddRecipeModalProps> = ({ 
+  onClose, 
+  onSave, 
+  onUpdate, 
+  categories = [], 
+  editingRecipe = null, 
+  defaultAuthor = '' 
+}) => {
   const isEditMode = !!editingRecipe;
   const [open, setOpen] = useState(true);
   const [step, setStep] = useState(isEditMode ? 1 : 0);
   const [isExtracting, setIsExtracting] = useState(false);
-  const [extractionError, setExtractionError] = useState(null);
-  const [uploadedImages, setUploadedImages] = useState([]);
+  const [extractionError, setExtractionError] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<any[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [tagInput, setTagInput] = useState('');
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [recipePhotoFile, setRecipePhotoFile] = useState(null);
-  const [recipePhotoPreview, setRecipePhotoPreview] = useState(editingRecipe?.image?.startsWith('http') ? editingRecipe.image : null);
+  const [recipePhotoFile, setRecipePhotoFile] = useState<File | null>(null);
+  const [recipePhotoPreview, setRecipePhotoPreview] = useState<string | null>(editingRecipe?.image?.startsWith('http') ? (editingRecipe.image as string) : null);
   const [usePhotoAsImage, setUsePhotoAsImage] = useState(editingRecipe?.image?.startsWith('http') || false);
-  const recipePhotoInputRef = useRef(null);
+  const recipePhotoInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     title: editingRecipe?.title || '',
@@ -38,8 +54,8 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
     cookTime: editingRecipe?.cookTime || '',
     servings: editingRecipe?.servings || '',
     description: editingRecipe?.description || '',
-    ingredients: editingRecipe?.ingredients?.length > 0 ? editingRecipe.ingredients : [''],
-    instructions: editingRecipe?.instructions?.length > 0 ? editingRecipe.instructions : [''],
+    ingredients: editingRecipe?.ingredients?.length ? editingRecipe.ingredients : [''],
+    instructions: editingRecipe?.instructions?.length ? editingRecipe.instructions : [''],
     image: editingRecipe?.image || '🍽️',
     difficulty: editingRecipe?.difficulty || 'Easy',
     dietary: editingRecipe?.dietary || [],
@@ -48,20 +64,19 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
   });
 
   const emojis = ['🍽️', '🥧', '🍖', '🍲', '🍰', '🥗', '🍝', '🍕', '🌮', '🍜', '🥘', '🍳', '🥞', '🧁', '🍪', '☕', '🥤', '🍹'];
-  const dietaryOptions = ["Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Keto", "Paleo", "Low-Carb"];
 
-  const handleOpenChange = (isOpen) => {
+  const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       setOpen(false);
       setTimeout(onClose, 300);
     }
   };
 
-  const addListItem = (field) => {
+  const addListItem = (field: 'ingredients' | 'instructions') => {
     setFormData(prev => ({ ...prev, [field]: [...prev[field], ''] }));
   };
 
-  const updateListItem = (field, index, value) => {
+  const updateListItem = (field: 'ingredients' | 'instructions', index: number, value: string) => {
     setFormData(prev => {
       const updated = [...prev[field]];
       updated[index] = value;
@@ -69,7 +84,7 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
     });
   };
 
-  const removeListItem = (field, index) => {
+  const removeListItem = (field: 'ingredients' | 'instructions', index: number) => {
     if (formData[field].length > 1) {
       setFormData(prev => ({
         ...prev,
@@ -78,45 +93,11 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
     }
   };
 
-  const toggleDietary = (option) => {
-    setFormData(prev => ({
-      ...prev,
-      dietary: prev.dietary.includes(option)
-        ? prev.dietary.filter(d => d !== option)
-        : [...prev.dietary, option]
-    }));
-  };
-
-  const addTag = () => {
-    const tag = tagInput.trim();
-    if (tag && !formData.tags.includes(tag)) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, tag]
-      }));
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(t => t !== tagToRemove)
-    }));
-  };
-
-  const handleTagKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTag();
-    }
-  };
-
-  const handleImageSelect = (e) => {
-    const files = Array.from(e.target.files);
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
     if (files.length > 0) {
       setExtractionError(null);
-      const newImages = [];
+      const newImages: any[] = [];
       let processed = 0;
       files.forEach((file, index) => {
         const reader = new FileReader();
@@ -132,13 +113,13 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
     }
   };
 
-  const handleRecipePhotoSelect = (e) => {
-    const file = e.target.files[0];
+  const handleRecipePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setRecipePhotoFile(file);
       setUsePhotoAsImage(true);
       const reader = new FileReader();
-      reader.onloadend = () => setRecipePhotoPreview(reader.result);
+      reader.onloadend = () => setRecipePhotoPreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
@@ -185,24 +166,12 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
       image: imageValue,
       ingredients: formData.ingredients.filter(i => i.trim()),
       instructions: formData.instructions.filter(i => i.trim()),
-      lastModified: new Date().toISOString()
     };
 
-    if (isEditMode) {
-      const updatedRecipe = {
-        ...editingRecipe,
-        ...recipeData,
-        history: [...(editingRecipe.history || []), { action: 'updated', date: new Date().toISOString(), changes: 'Recipe updated' }]
-      };
-      if (onUpdate) onUpdate(updatedRecipe, recipePhotoFile);
+    if (isEditMode && editingRecipe) {
+      onUpdate({ ...editingRecipe, ...recipeData }, recipePhotoFile);
     } else {
-      const newRecipe = {
-        ...recipeData,
-        id: Date.now(),
-        dateAdded: new Date().getFullYear().toString(),
-        history: [{ action: 'created', date: new Date().toISOString(), changes: 'Recipe created' }]
-      };
-      onSave(newRecipe, recipePhotoFile);
+      onSave(recipeData, recipePhotoFile);
     }
     handleOpenChange(false);
   };
@@ -218,9 +187,8 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl gap-0 bg-white top-[auto] bottom-0 translate-y-0 translate-x-[-50%]">
-        {/* Header with Progress */}
-        <div className={`p-8 sm:p-10 pt-safe text-white transition-colors duration-500 ${isEditMode ? 'bg-slate-900' : 'bg-detroit-600'}`}>
+      <DialogContent className="p-0 sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors duration-500">
+        <div className={`p-8 sm:p-10 pt-safe text-white transition-colors duration-500 ${isEditMode ? 'bg-slate-900' : 'bg-primary'}`}>
           <div className="flex justify-between items-start mb-8">
             <div>
               <DialogTitle className="font-serif text-3xl font-extrabold mb-2 text-white">
@@ -243,30 +211,28 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
           )}
         </div>
 
-        {/* Scrollable Form Content */}
-        <div className="p-8 sm:p-10 overflow-y-auto max-h-[60vh] scrollbar-hide bg-white">
-          {/* Step 0: Selection */}
+        <div className="p-8 sm:p-10 overflow-y-auto max-h-[60vh] scrollbar-hide bg-background transition-colors">
           {step === 0 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Button 
                   variant="outline" 
                   onClick={() => setStep(1)} 
-                  className="h-auto p-8 rounded-[32px] border-2 border-slate-100 hover:border-detroit-500 hover:bg-detroit-50/30 transition-all text-left flex flex-col items-start group"
+                  className="h-auto p-8 rounded-[32px] border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left flex flex-col items-start group bg-card"
                 >
-                  <div className="w-16 h-16 bg-detroit-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <PenTool className="w-8 h-8 text-detroit-600" />
+                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <PenTool className="w-8 h-8 text-primary" />
                   </div>
-                  <h4 className="text-xl font-bold text-slate-900 mb-2">Write it down</h4>
-                  <p className="text-slate-500 text-sm leading-relaxed font-normal whitespace-normal">Enter your recipe step-by-step using our guided form.</p>
+                  <h4 className="text-xl font-bold text-foreground mb-2">Write it down</h4>
+                  <p className="text-muted-foreground text-sm leading-relaxed font-normal whitespace-normal">Enter your recipe step-by-step using our guided form.</p>
                 </Button>
 
-                <div className="p-8 rounded-[32px] border-2 border-slate-100 hover:border-cyan-500 hover:bg-cyan-50/30 transition-all text-left group relative">
-                  <div className="w-16 h-16 bg-cyan-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Camera className="w-8 h-8 text-cyan-600" />
+                <div className="p-8 rounded-[32px] border-2 border-border hover:border-cyan-500 hover:bg-cyan-50/10 transition-all text-left group relative bg-card">
+                  <div className="w-16 h-16 bg-cyan-100 dark:bg-cyan-900/30 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Camera className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
                   </div>
-                  <h4 className="text-xl font-bold text-slate-900 mb-2">Scan with AI</h4>
-                  <p className="text-slate-500 text-sm mb-6 leading-relaxed">Upload photos of cards or books and let our AI do the work.</p>
+                  <h4 className="text-xl font-bold text-foreground mb-2">Scan with AI</h4>
+                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">Upload photos of cards or books and let our AI do the work.</p>
                   
                   <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" />
                   
@@ -276,13 +242,13 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
                     </Button>
                   ) : (
                     <div className="space-y-4">
-                      <div className="relative h-32 rounded-2xl overflow-hidden shadow-lg border border-white">
+                      <div className="relative h-32 rounded-2xl overflow-hidden shadow-lg border border-border">
                         <img src={uploadedImages[currentImageIndex].preview} alt="Selected" className="w-full h-full object-cover" />
                         <Button variant="destructive" size="icon" onClick={() => setUploadedImages([])} className="absolute top-2 right-2 w-8 h-8 rounded-lg">
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
-                      <Button onClick={handleExtractRecipe} disabled={isExtracting} className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-sm disabled:opacity-50">
+                      <Button onClick={handleExtractRecipe} disabled={isExtracting} className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 rounded-2xl font-bold text-sm disabled:opacity-50 border-none">
                         {isExtracting ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -297,47 +263,45 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
             </div>
           )}
 
-          {/* Step 1: Basics */}
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">Recipe Name</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Recipe Name</label>
                 <Input 
                   value={formData.title} 
                   onChange={e => setFormData(p => ({ ...p, title: e.target.value }))} 
-                  className="w-full bg-slate-50 border-2 border-transparent focus-visible:border-detroit-500 focus-visible:bg-white rounded-2xl px-6 py-7 text-lg font-bold outline-none transition-all h-auto" 
+                  className="w-full bg-muted border-2 border-transparent focus-visible:border-primary focus-visible:bg-background rounded-2xl px-6 py-7 text-lg font-bold outline-none transition-all h-auto" 
                   placeholder="Grandma's Lemon Cake" 
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">Chef / Author</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Chef / Author</label>
                 <Input 
                   value={formData.author} 
                   onChange={e => setFormData(p => ({ ...p, author: e.target.value }))} 
-                  className="w-full bg-slate-50 border-2 border-transparent focus-visible:border-detroit-500 focus-visible:bg-white rounded-2xl px-6 py-7 font-bold outline-none transition-all h-auto" 
+                  className="w-full bg-muted border-2 border-transparent focus-visible:border-primary focus-visible:bg-background rounded-2xl px-6 py-7 font-bold outline-none transition-all h-auto" 
                   placeholder="Who's recipe is this?" 
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">Short Story or Intro</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Short Story or Intro</label>
                 <Textarea 
                   value={formData.description} 
                   onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} 
-                  className="w-full bg-slate-50 border-2 border-transparent focus-visible:border-detroit-500 focus-visible:bg-white rounded-2xl px-6 py-4 outline-none transition-all resize-none min-h-[120px]" 
+                  className="w-full bg-muted border-2 border-transparent focus-visible:border-primary focus-visible:bg-background rounded-2xl px-6 py-4 outline-none transition-all resize-none min-h-[120px]" 
                   placeholder="The secret ingredient is love (and extra butter)..." 
                 />
               </div>
             </div>
           )}
 
-          {/* Step 2: Logistics */}
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">Category</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Category</label>
                   <Select value={formData.category} onValueChange={val => setFormData(p => ({ ...p, category: val }))}>
-                    <SelectTrigger className="w-full bg-slate-50 rounded-2xl px-6 py-7 font-bold border-2 border-transparent focus:border-detroit-500 transition-all h-auto">
+                    <SelectTrigger className="w-full bg-muted rounded-2xl px-6 py-7 font-bold border-2 border-transparent focus:border-primary transition-all h-auto">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -346,9 +310,9 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">Difficulty</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Difficulty</label>
                   <Select value={formData.difficulty} onValueChange={val => setFormData(p => ({ ...p, difficulty: val }))}>
-                    <SelectTrigger className="w-full bg-slate-50 rounded-2xl px-6 py-7 font-bold border-2 border-transparent focus:border-detroit-500 transition-all h-auto">
+                    <SelectTrigger className="w-full bg-muted rounded-2xl px-6 py-7 font-bold border-2 border-transparent focus:border-primary transition-all h-auto">
                       <SelectValue placeholder="Difficulty" />
                     </SelectTrigger>
                     <SelectContent>
@@ -361,13 +325,13 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
               </div>
 
               <div className="grid grid-cols-3 gap-4">
-                {['prepTime', 'cookTime', 'servings'].map(f => (
+                {['prepTime', 'cookTime', 'servings'].map((f) => (
                   <div key={f} className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">{f === 'servings' ? 'Servings' : f.replace('Time', '')}</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">{f === 'servings' ? 'Servings' : f.replace('Time', '')}</label>
                     <Input 
-                      value={formData[f]} 
+                      value={formData[f as keyof typeof formData] as string} 
                       onChange={e => setFormData(p => ({ ...p, [f]: e.target.value }))} 
-                      className="w-full bg-slate-50 rounded-2xl px-4 py-7 text-center font-black border-2 border-transparent focus-visible:border-detroit-500 transition-all h-auto" 
+                      className="w-full bg-muted rounded-2xl px-4 py-7 text-center font-black border-2 border-transparent focus-visible:border-primary transition-all h-auto" 
                       placeholder={f === 'servings' ? '4' : '20m'} 
                     />
                   </div>
@@ -375,14 +339,14 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
               </div>
 
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 block">Visual Style</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 block">Visual Style</label>
                 <div className="flex flex-wrap gap-3">
                   {emojis.map(e => (
                     <Button 
                       key={e} 
                       variant="ghost"
                       onClick={() => { setFormData(p => ({ ...p, image: e })); setUsePhotoAsImage(false); }} 
-                      className={`w-12 h-12 rounded-2xl text-2xl flex items-center justify-center transition-all p-0 ${formData.image === e && !usePhotoAsImage ? 'bg-detroit-500 hover:bg-detroit-600 shadow-lg scale-110' : 'bg-slate-50 hover:bg-slate-100'}`}
+                      className={`w-12 h-12 rounded-2xl text-2xl flex items-center justify-center transition-all p-0 border-none ${formData.image === e && !usePhotoAsImage ? 'bg-primary text-white shadow-lg scale-110' : 'bg-muted hover:bg-muted/80'}`}
                     >
                       {e}
                     </Button>
@@ -391,7 +355,7 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
                   <Button 
                     variant="outline"
                     onClick={() => recipePhotoInputRef.current?.click()} 
-                    className={`min-w-[100px] h-12 px-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-2 transition-all ${usePhotoAsImage ? 'border-emerald-500 bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'border-slate-200 text-slate-400 hover:border-slate-300'}`}
+                    className={`min-w-[100px] h-12 px-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-2 transition-all ${usePhotoAsImage ? 'border-emerald-500 bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'border-border text-muted-foreground hover:border-primary'}`}
                   >
                     <Plus className="w-5 h-5" />
                     <span className="text-[10px] font-black uppercase tracking-widest">Photo</span>
@@ -401,26 +365,25 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
             </div>
           )}
 
-          {/* Step 3: Ingredients */}
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">Ingredients List</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Ingredients List</label>
               {formData.ingredients.map((ing, i) => (
                 <div key={i} className="flex gap-3 group">
-                  <div className="shrink-0 w-12 h-14 bg-slate-50 rounded-2xl flex items-center justify-center font-black text-slate-300 group-focus-within:bg-detroit-100 group-focus-within:text-detroit-500 transition-colors">
+                  <div className="shrink-0 w-12 h-14 bg-muted rounded-2xl flex items-center justify-center font-black text-muted-foreground/30 group-focus-within:bg-primary/10 group-focus-within:text-primary transition-colors">
                     {i + 1}
                   </div>
                   <Input 
                     value={ing} 
                     onChange={e => updateListItem('ingredients', i, e.target.value)} 
-                    className="flex-1 bg-slate-50 border-2 border-transparent focus-visible:border-detroit-500 focus-visible:bg-white rounded-2xl px-6 py-7 text-base font-bold outline-none transition-all h-auto" 
+                    className="flex-1 bg-muted border-2 border-transparent focus-visible:border-primary focus-visible:bg-background rounded-2xl px-6 py-7 text-base font-bold outline-none transition-all h-auto" 
                     placeholder="2 cups flour..." 
                   />
                   <Button 
                     variant="ghost" 
                     size="iconMobile" 
                     onClick={() => removeListItem('ingredients', i)} 
-                    className="shrink-0 h-14 rounded-2xl text-slate-300 hover:text-rose-500 transition-colors"
+                    className="shrink-0 h-14 rounded-2xl text-muted-foreground hover:text-rose-500 transition-colors border-none"
                   >
                     <X className="w-6 h-6" />
                   </Button>
@@ -429,33 +392,32 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
               <Button 
                 variant="outline" 
                 onClick={() => addListItem('ingredients')} 
-                className="w-full py-7 rounded-[24px] border-2 border-dashed border-slate-200 text-slate-400 font-bold text-sm hover:border-detroit-300 hover:text-detroit-500 transition-all h-auto"
+                className="w-full py-7 rounded-[24px] border-2 border-dashed border-border text-muted-foreground font-bold text-sm hover:border-primary hover:text-primary transition-all h-auto"
               >
                 + Add Ingredient
               </Button>
             </div>
           )}
 
-          {/* Step 4: Steps */}
           {step === 4 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">Cooking Steps</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Cooking Steps</label>
               {formData.instructions.map((ins, i) => (
                 <div key={i} className="flex gap-4 group">
-                  <div className="shrink-0 w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-black text-lg shadow-lg shadow-slate-900/10 transition-transform group-focus-within:scale-110">
+                  <div className="shrink-0 w-14 h-14 bg-foreground text-background rounded-2xl flex items-center justify-center font-black text-lg shadow-lg transition-transform group-focus-within:scale-110">
                     {i + 1}
                   </div>
                   <Textarea 
                     value={ins} 
                     onChange={e => updateListItem('instructions', i, e.target.value)} 
-                    className="flex-1 bg-slate-50 border-2 border-transparent focus-visible:border-detroit-500 focus-visible:bg-white rounded-[32px] px-8 py-6 outline-none transition-all resize-none min-h-[100px]" 
+                    className="flex-1 bg-muted border-2 border-transparent focus-visible:border-primary focus-visible:bg-background rounded-[32px] px-8 py-6 outline-none transition-all resize-none min-h-[100px]" 
                     placeholder="Mix the dry ingredients..." 
                   />
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     onClick={() => removeListItem('instructions', i)} 
-                    className="shrink-0 w-12 h-14 rounded-2xl text-slate-300 hover:text-rose-500 transition-colors mt-2"
+                    className="shrink-0 w-12 h-14 rounded-2xl text-muted-foreground hover:text-rose-500 transition-colors mt-2 border-none"
                   >
                     <X className="w-6 h-6" />
                   </Button>
@@ -464,19 +426,18 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
               <Button 
                 variant="outline" 
                 onClick={() => addListItem('instructions')} 
-                className="w-full py-7 rounded-[32px] border-2 border-dashed border-slate-200 text-slate-400 font-bold text-sm hover:border-detroit-300 hover:text-detroit-500 transition-all h-auto"
+                className="w-full py-7 rounded-[32px] border-2 border-dashed border-border text-muted-foreground font-bold text-sm hover:border-primary hover:text-primary transition-all h-auto"
               >
                 + Add Next Step
               </Button>
             </div>
           )}
 
-          {/* Step 5: Review */}
           {step === 5 && (
             <div className="animate-in fade-in zoom-in-95 duration-500 text-center space-y-8 py-10">
               <div className="relative inline-block">
-                {usePhotoAsImage ? (
-                  <div className="w-40 h-40 rounded-[48px] overflow-hidden shadow-2xl ring-8 ring-slate-50 mx-auto">
+                {usePhotoAsImage && recipePhotoPreview ? (
+                  <div className="w-40 h-40 rounded-[48px] overflow-hidden shadow-2xl ring-8 ring-muted mx-auto">
                     <img src={recipePhotoPreview} alt="Preview" className="w-full h-full object-cover" />
                   </div>
                 ) : (
@@ -488,23 +449,22 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
               </div>
               
               <div>
-                <h3 className="font-serif text-4xl font-extrabold text-slate-900 mb-2">{formData.title}</h3>
-                <p className="text-detroit-600 font-bold">Recipe by {formData.author}</p>
+                <h3 className="font-serif text-4xl font-extrabold text-foreground mb-2">{formData.title}</h3>
+                <p className="text-primary font-bold">Recipe by {formData.author}</p>
               </div>
 
-              <div className="bg-slate-50 rounded-[40px] p-8 max-w-md mx-auto">
-                <p className="text-slate-500 font-medium italic">"{formData.description}"</p>
+              <div className="bg-muted rounded-[40px] p-8 max-w-md mx-auto">
+                <p className="text-muted-foreground font-medium italic">"{formData.description}"</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Action Bar */}
-        <div className="p-8 sm:p-10 border-t bg-slate-50 flex justify-between gap-4">
+        <div className="p-8 sm:p-10 border-t border-border bg-muted/50 flex justify-between gap-4 transition-colors">
           <Button
             variant="ghost"
             onClick={() => setStep(p => Math.max(0, p - 1))}
-            className={`px-8 h-14 rounded-2xl font-bold transition-all ${step === 0 ? 'opacity-0 pointer-events-none' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}
+            className={`px-8 h-14 rounded-2xl font-bold transition-all border-none ${step === 0 ? 'opacity-0 pointer-events-none' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
             Back
@@ -514,7 +474,7 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
             <Button
               onClick={() => setStep(p => Math.min(5, p + 1))}
               disabled={!isStepValid()}
-              className={`px-10 h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold transition-all shadow-xl shadow-slate-900/10 disabled:opacity-30 disabled:shadow-none ${isStepValid() ? 'hover:scale-105 active:scale-95' : ''}`}
+              className={`px-10 h-14 bg-foreground text-background hover:bg-foreground/90 rounded-2xl font-bold transition-all shadow-xl disabled:opacity-30 disabled:shadow-none border-none ${isStepValid() ? 'hover:scale-105 active:scale-95' : ''}`}
             >
               Next Step
               <ChevronRight className="ml-2 h-4 w-4" />
@@ -522,7 +482,7 @@ const AddRecipeModal = ({ onClose, onSave, onUpdate, categories = [], editingRec
           ) : (
             <Button
               onClick={handleSubmit}
-              className="px-12 h-14 bg-detroit-600 hover:bg-detroit-700 text-white rounded-2xl font-bold shadow-2xl shadow-detroit-600/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 border-none"
+              className="px-12 h-14 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl font-bold shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 border-none"
             >
               <Check className="w-6 h-6" strokeWidth={3} />
               {isEditMode ? 'Update Recipe' : 'Add to Collection'}

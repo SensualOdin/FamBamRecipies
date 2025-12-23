@@ -143,6 +143,36 @@ const getSiteUrl = (): string => {
 };
 
 // Authentication functions
+export async function signUp(email: string, password: string, displayName: string): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        display_name: displayName,
+      },
+      emailRedirectTo: getSiteUrl(),
+    },
+  });
+  if (error) {
+    console.error('Error signing up:', error);
+    return { data: null, error };
+  }
+  return { data, error: null };
+}
+
+export async function signIn(email: string, password: string): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error) {
+    console.error('Error signing in:', error);
+    return { data: null, error };
+  }
+  return { data, error: null };
+}
+
 export async function signOut(): Promise<{ error: any }> {
   const { error } = await supabase.auth.signOut();
   if (error) {
@@ -481,6 +511,54 @@ export async function extractRecipeFromImage(imagesBase64: string | string[]): P
   } catch (err: any) {
     return { error: err.message || 'Failed to extract recipe' };
   }
+}
+
+// Update user profile
+export async function updateUserProfile(userId: string, updates: any): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('users')
+    .update(updates)
+    .eq('auth_id', userId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating user profile:', error);
+    return { data: null, error };
+  }
+
+  return { data, error: null };
+}
+
+// Upload avatar to Supabase Storage
+export async function uploadAvatar(file: File, userId: string): Promise<{ data?: { path: string; publicUrl: string }; error?: any }> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${userId}-${Date.now()}.${fileExt}`;
+  const filePath = `avatars/${fileName}`;
+
+  const { data, error } = await supabase.storage
+    .from('recipe-uploads')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: true
+    });
+
+  if (error) {
+    console.error('Error uploading avatar:', error);
+    return { error };
+  }
+
+  const { data: urlData } = supabase.storage
+    .from('recipe-uploads')
+    .getPublicUrl(filePath);
+
+  return { 
+    data: {
+      path: filePath,
+      publicUrl: urlData.publicUrl
+    },
+    error: null 
+  };
 }
 
 // Real-time Presence Helper

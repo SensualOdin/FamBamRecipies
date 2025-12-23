@@ -23,38 +23,37 @@ export const useAuth = () => {
   useEffect(() => {
     if (profileQuery.data && user) {
       const profileWithStats = profileQuery.data;
-      setUserProfile((prev: UserProfile) => ({
-        ...prev,
-        name: profileWithStats.display_name || 'Chef',
-        avatar: profileWithStats.avatar || '👨‍🍳',
-        bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
-        level: profileWithStats.level || 1,
-        experience: profileWithStats.experience || 0,
-        experienceToNextLevel: profileWithStats.experience_to_next_level || 100,
-        totalPoints: profileWithStats.total_points || 0,
-        badges: profileWithStats.badges || [],
-        achievements: initialUserProfile.achievements.map(ach => ({
-          ...ach,
-          unlocked: profileWithStats.badges?.includes(ach.id) || false
-        })),
-        stats: {
-          recipesCooked: profileWithStats.stats?.recipesCooked || 0,
-          recipesCreated: profileWithStats.stats?.recipesCreated || 0,
-          commentsAdded: profileWithStats.stats?.commentsAdded || 0,
-          favoritesCount: profileWithStats.stats?.favoritesCount || 0,
-          daysActive: profileWithStats.stats?.daysActive || 1,
-          longestStreak: profileWithStats.stats?.longestStreak || 0
+      setUserProfile((prev: UserProfile) => {
+        // Only update if data is actually different to prevent unnecessary renders
+        if (prev.experience === profileWithStats.experience && 
+            prev.totalPoints === profileWithStats.total_points &&
+            prev.name === (profileWithStats.display_name || 'Chef')) {
+          return prev;
         }
-      }));
 
-      // Update basic user info in store
-      setUser({
-        id: user.id,
-        email: user.email,
-        display_name: profileWithStats.display_name,
-        avatar: profileWithStats.avatar,
-        avatar_url: profileWithStats.avatar_url,
-        bio: profileWithStats.bio
+        return {
+          ...prev,
+          name: profileWithStats.display_name || 'Chef',
+          avatar: profileWithStats.avatar || '👨‍🍳',
+          bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
+          level: profileWithStats.level || 1,
+          experience: profileWithStats.experience || 0,
+          experienceToNextLevel: profileWithStats.experience_to_next_level || 100,
+          totalPoints: profileWithStats.total_points || 0,
+          badges: profileWithStats.badges || [],
+          achievements: initialUserProfile.achievements.map(ach => ({
+            ...ach,
+            unlocked: profileWithStats.badges?.includes(ach.id) || false
+          })),
+          stats: {
+            recipesCooked: profileWithStats.stats?.recipesCooked || 0,
+            recipesCreated: profileWithStats.stats?.recipesCreated || 0,
+            commentsAdded: profileWithStats.stats?.commentsAdded || 0,
+            favoritesCount: profileWithStats.stats?.favoritesCount || 0,
+            daysActive: profileWithStats.stats?.daysActive || 1,
+            longestStreak: profileWithStats.stats?.longestStreak || 0
+          }
+        };
       });
     }
   }, [profileQuery.data, setUser, setUserProfile, user]);

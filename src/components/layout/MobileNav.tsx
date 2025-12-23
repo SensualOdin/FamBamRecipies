@@ -1,7 +1,22 @@
 import React from 'react';
 import { Home, Heart, Plus, ShoppingCart, User } from 'lucide-react';
+import { User as UserType, UserProfile } from '../../types';
 
-const MobileNav = ({ 
+interface MobileNavProps {
+  showFavoritesOnly: boolean;
+  setShowFavoritesOnly: (val: boolean) => void;
+  selectedCategory: string;
+  setSelectedCategory: (val: string) => void;
+  onAddRecipe: () => void;
+  onShowShoppingList: () => void;
+  shoppingListCount: number;
+  user: UserType | null;
+  userProfile: UserProfile;
+  onShowProfile: () => void;
+  onShowAuth: () => void;
+}
+
+const MobileNav: React.FC<MobileNavProps> = ({ 
   showFavoritesOnly, 
   setShowFavoritesOnly, 
   selectedCategory, 

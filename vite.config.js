@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'favicon.svg'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'FamBam | Our Family Cookbook',
         short_name: 'FamBam',
@@ -24,7 +24,7 @@ export default defineConfig({
             src: 'favicon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
             src: 'favicon.svg',
@@ -85,6 +85,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: false
+    sourcemap: false,
+    target: 'es2015'
   }
 })

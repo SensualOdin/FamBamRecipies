@@ -21,7 +21,7 @@ export const useAuth = () => {
 
   // Sync profile data to store when Query data changes
   useEffect(() => {
-    if (profileQuery.data) {
+    if (profileQuery.data && user) {
       const profileWithStats = profileQuery.data;
       setUserProfile((prev: UserProfile) => ({
         ...prev,
@@ -49,8 +49,8 @@ export const useAuth = () => {
 
       // Update basic user info in store
       setUser({
-        id: user!.id,
-        email: user!.email,
+        id: user.id,
+        email: user.email,
         display_name: profileWithStats.display_name,
         avatar: profileWithStats.avatar,
         avatar_url: profileWithStats.avatar_url,

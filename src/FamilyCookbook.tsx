@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion, LayoutGroup } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -48,6 +49,7 @@ const prefetchModal = (modalName: string) => {
 };
 
 export default function FamilyCookbook() {
+  const queryClient = useQueryClient();
   // Store State
   const {
     user,
@@ -154,7 +156,9 @@ export default function FamilyCookbook() {
   const handleMarkAsCooked = async (recipeId: string | number, notes: string | null = null, rating: number | null = null) => {
     const { error } = await markRecipeAsCooked(user?.id || null, recipeId, notes, rating);
     if (!error) {
-      // Logic for refreshing stats is handled in the auth hook's listeners
+      // Refresh queries
+      queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['recipes'] });
     }
   };
 
@@ -174,7 +178,7 @@ export default function FamilyCookbook() {
     if (typeof item === 'string') {
       const parsed = parseIngredientForList(item);
       setShoppingList((prev: any[]) => [...prev, { ...parsed, checked: false, id: Date.now() }]);
-    } else {
+    } else if (item && item.ingredients) {
       const ingredients = item.ingredients.map((ing: string, i: number) => ({ ...parseIngredientForList(ing), checked: false, id: Date.now() + i }));
       setShoppingList((prev: any[]) => [...prev, ...ingredients]);
     }
@@ -283,7 +287,12 @@ export default function FamilyCookbook() {
         </LayoutGroup>
       </main>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={
+        <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[100]">
+          <div className="w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
+          <p className="text-slate-400 font-medium animate-pulse">Setting the table...</p>
+        </div>
+      }>
         {selectedRecipe && !modals.kitchenMode && (
           <RecipeModal 
             recipe={selectedRecipe} 

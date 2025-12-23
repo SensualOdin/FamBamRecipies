@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import RecipeCard from './RecipeCard';
 import RecipeSkeleton from './RecipeSkeleton';
 import { Button } from "@/components/ui/button";
 
-const RecipeGrid = ({ 
+const RecipeGrid = memo(({ 
   recipes, 
   isLoading, 
   onRecipeClick, 
@@ -12,6 +12,7 @@ const RecipeGrid = ({
   onAddToShoppingList, 
   onAuthorClick, 
   onEditRecipe,
+  onPrefetch,
   onClearFilters 
 }) => {
   if (isLoading) {
@@ -56,11 +57,12 @@ const RecipeGrid = ({
           onAddToShoppingList={onAddToShoppingList}
           onAuthorClick={onAuthorClick}
           onEdit={onEditRecipe}
+          onMouseEnter={onPrefetch}
         />
       ))}
     </div>
   );
-};
+});
 
 export default RecipeGrid;
 

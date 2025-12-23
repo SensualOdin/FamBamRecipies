@@ -22,6 +22,17 @@ const UserProfileModal = lazy(() => import('./components/modals/UserProfileModal
 const MealPlannerModal = lazy(() => import('./components/modals/MealPlannerModal'));
 const AuthModal = lazy(() => import('./components/modals/AuthModal'));
 
+// Prefetch functions to eliminate "slight delay" on first click
+const prefetchModal = (modalName) => {
+  const modMap = {
+    recipe: () => import('./components/recipe/RecipeModal'),
+    add: () => import('./components/modals/AddRecipeModal'),
+    shopping: () => import('./components/modals/ShoppingListModal'),
+    profile: () => import('./components/modals/UserProfileModal')
+  };
+  if (modMap[modalName]) modMap[modalName]();
+};
+
 import { fetchRecipes, fetchCategories, createRecipe, updateRecipe, getCurrentUser, getUserProfile, getUserProfileWithStats, signOut, onAuthStateChange, ensureUserProfile, recordUserActivity, toggleFavorite as toggleFavoriteDB, getUserFavorites, markRecipeAsCooked, uploadRecipeImage } from './lib/supabase';
 import { initialRecipes } from './data/initialRecipes';
 import { initialUserProfile } from './data/initialProfile';
@@ -245,18 +256,11 @@ export default function FamilyCookbook() {
     async function loadData() {
       setIsLoading(true);
       try {
-        // Try to fetch from Supabase first
-        let favoriteIds = [];
-        try {
-          favoriteIds = user ? await getUserFavorites(user.id) : [];
-        } catch (favError) {
-          console.error('Error loading favorites:', favError);
-          favoriteIds = [];
-        }
-
-        const [recipesData, categoriesData] = await Promise.all([
+        // Parallelize all initial data fetching
+        const [recipesData, categoriesData, favoriteIds] = await Promise.all([
           fetchRecipes(),
-          fetchCategories()
+          fetchCategories(),
+          user ? getUserFavorites(user.id) : Promise.resolve([])
         ]);
         
         if (recipesData && recipesData.length > 0) {
@@ -650,6 +654,7 @@ export default function FamilyCookbook() {
         onShowUnitConverter={() => setShowUnitConverter(true)}
         onShowProfile={() => setShowProfile(true)}
         onShowAuth={() => setShowAuthModal(true)}
+        onPrefetch={prefetchModal}
         isLoaded={isLoaded}
       />
 
@@ -713,6 +718,7 @@ export default function FamilyCookbook() {
           onAddToShoppingList={addToShoppingList}
           onAuthorClick={setSelectedAuthor}
           onEditRecipe={handleEditRecipe}
+          onPrefetch={() => prefetchModal('recipe')}
           onClearFilters={() => { 
             setSearchQuery(''); 
             setSelectedCategory('All'); 

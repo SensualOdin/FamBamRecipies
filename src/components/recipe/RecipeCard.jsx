@@ -11,10 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingList, onAuthorClick, onEdit }) => {
+const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingList, onAuthorClick, onEdit, onMouseEnter }) => {
   const [isHovered, setIsHovered] = useState(false);
   
-  const handleFavoriteClick = (e) => {
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    if (onMouseEnter) onMouseEnter();
+  };
     e.stopPropagation();
     onToggleFavorite(recipe.id);
   };
@@ -47,7 +50,7 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -8 }}
       onClick={() => onClick(recipe)}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
       className="h-full"
     >

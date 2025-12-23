@@ -19,6 +19,7 @@ const Header = ({
   onShowUnitConverter,
   onShowProfile,
   onShowAuth,
+  onPrefetch,
   isLoaded
 }) => {
   return (
@@ -47,7 +48,7 @@ const Header = ({
             <div className="flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10">
               <TooltipProvider>
                 {[
-                  { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: onShowShoppingList, label: 'Shopping', count: shoppingListCount, mobile: false },
+                  { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: onShowShoppingList, label: 'Shopping', count: shoppingListCount, mobile: false, prefetch: 'shopping' },
                   { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: onShowMealPlanner, label: 'Planner', mobile: true },
                   { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: onShowUnitConverter, label: 'Units', mobile: true }
                 ].map((tool) => (
@@ -57,6 +58,7 @@ const Header = ({
                         variant="ghost"
                         size="icon"
                         onClick={tool.onClick}
+                        onMouseEnter={() => tool.prefetch && onPrefetch && onPrefetch(tool.prefetch)}
                         className={`relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
                       >
                         {tool.icon}
@@ -77,6 +79,7 @@ const Header = ({
               <Button 
                 variant="ghost"
                 onClick={onShowProfile}
+                onMouseEnter={() => onPrefetch && onPrefetch('profile')}
                 className="flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto"
               >
                 <div className="text-right hidden sm:block">

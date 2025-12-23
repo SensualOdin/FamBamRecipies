@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Plus, Heart, ShoppingCart, User, 
@@ -7,15 +7,21 @@ import {
   ChefHat, Layers, Star, X
 } from 'lucide-react';
 import FloatingParticles from './components/layout/FloatingParticles';
-import RecipeCard from './components/recipe/RecipeCard';
-import RecipeModal from './components/recipe/RecipeModal';
-import AddRecipeModal from './components/modals/AddRecipeModal';
-import ShoppingListModal from './components/modals/ShoppingListModal';
-import UnitConverterModal from './components/modals/UnitConverterModal';
-import IngredientSubstitutionsModal from './components/modals/IngredientSubstitutionsModal';
-import UserProfileModal from './components/modals/UserProfileModal';
-import MealPlannerModal from './components/modals/MealPlannerModal';
-import AuthModal from './components/modals/AuthModal';
+import RecipeGrid from './components/recipe/RecipeGrid';
+import Header from './components/layout/Header';
+import FilterSection from './components/layout/FilterSection';
+import MobileNav from './components/layout/MobileNav';
+
+// Lazy loaded modals
+const RecipeModal = lazy(() => import('./components/recipe/RecipeModal'));
+const AddRecipeModal = lazy(() => import('./components/modals/AddRecipeModal'));
+const ShoppingListModal = lazy(() => import('./components/modals/ShoppingListModal'));
+const UnitConverterModal = lazy(() => import('./components/modals/UnitConverterModal'));
+const IngredientSubstitutionsModal = lazy(() => import('./components/modals/IngredientSubstitutionsModal'));
+const UserProfileModal = lazy(() => import('./components/modals/UserProfileModal'));
+const MealPlannerModal = lazy(() => import('./components/modals/MealPlannerModal'));
+const AuthModal = lazy(() => import('./components/modals/AuthModal'));
+
 import { fetchRecipes, fetchCategories, createRecipe, updateRecipe, getCurrentUser, getUserProfile, getUserProfileWithStats, signOut, onAuthStateChange, ensureUserProfile, recordUserActivity, toggleFavorite as toggleFavoriteDB, getUserFavorites, markRecipeAsCooked, uploadRecipeImage } from './lib/supabase';
 import { initialRecipes } from './data/initialRecipes';
 import { initialUserProfile } from './data/initialProfile';
@@ -31,6 +37,7 @@ export default function FamilyCookbook() {
   const [recipes, setRecipes] = useState([]);
   const [categories, setCategories] = useState(['All']);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -38,6 +45,12 @@ export default function FamilyCookbook() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Feature states
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
@@ -572,11 +585,13 @@ export default function FamilyCookbook() {
 
   const filteredRecipes = useMemo(() => {
     return recipes.filter(recipe => {
-      const matchesSearch = recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           recipe.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           recipe.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           recipe.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                           recipe.ingredients.some(i => i.toLowerCase().includes(searchQuery.toLowerCase()));
+      const searchTerms = debouncedSearch.toLowerCase();
+      const matchesSearch = !debouncedSearch || 
+                           recipe.title.toLowerCase().includes(searchTerms) ||
+                           recipe.description.toLowerCase().includes(searchTerms) ||
+                           recipe.author.toLowerCase().includes(searchTerms) ||
+                           recipe.tags?.some(t => t.toLowerCase().includes(searchTerms)) ||
+                           recipe.ingredients.some(i => i.toLowerCase().includes(searchTerms));
       const matchesCategory = selectedCategory === 'All' || recipe.category === selectedCategory;
       const matchesDifficulty = selectedDifficulty === 'All' || recipe.difficulty === selectedDifficulty;
       const matchesDietary = selectedDietary === 'All' || recipe.dietary?.includes(selectedDietary);
@@ -600,7 +615,7 @@ export default function FamilyCookbook() {
       if (sortBy === 'name') return a.title.localeCompare(b.title);
       return 0;
     });
-  }, [recipes, searchQuery, selectedCategory, selectedDifficulty, selectedDietary, showFavoritesOnly, selectedAuthor, cookTimeFilter, sortBy]);
+  }, [recipes, debouncedSearch, selectedCategory, selectedDifficulty, selectedDietary, showFavoritesOnly, selectedAuthor, cookTimeFilter, sortBy]);
 
   const shoppingListCount = useMemo(() => shoppingList.filter(i => !i.checked).length, [shoppingList]);
 
@@ -608,326 +623,60 @@ export default function FamilyCookbook() {
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 selection:bg-detroit-100 selection:text-detroit-900">
       <FloatingParticles />
       
-      {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 px-6 pt-3 pb-safe z-50 flex justify-between items-center shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
-        <button 
-          onClick={() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            setSelectedCategory('All');
-            setShowFavoritesOnly(false);
-          }}
-          className={`flex flex-col items-center gap-1 transition-all min-w-[44px] min-h-[44px] justify-center ${!showFavoritesOnly && selectedCategory === 'All' ? 'text-detroit-600' : 'text-slate-400'}`}
-        >
-          <Home className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-tighter">Home</span>
-        </button>
-        <button 
-          onClick={() => {
-            setShowFavoritesOnly(true);
-            setSelectedCategory('All');
-          }}
-          className={`flex flex-col items-center gap-1 transition-all min-w-[44px] min-h-[44px] justify-center ${showFavoritesOnly ? 'text-rose-500' : 'text-slate-400'}`}
-        >
-          <Heart className={`w-6 h-6 ${showFavoritesOnly ? 'fill-rose-500' : ''}`} />
-          <span className="text-[10px] font-bold uppercase tracking-tighter">Saved</span>
-        </button>
-        <button 
-          onClick={() => setShowAddModal(true)}
-          className="flex flex-col items-center -mt-8 min-w-[56px] min-h-[56px]"
-        >
-          <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl shadow-slate-900/20 text-white active:scale-90 transition-transform">
-            <Plus className="w-8 h-8" strokeWidth={3} />
-          </div>
-        </button>
-        <button 
-          onClick={() => setShowShoppingList(true)}
-          className={`flex flex-col items-center gap-1 transition-all min-w-[44px] min-h-[44px] justify-center ${showShoppingList ? 'text-detroit-600' : 'text-slate-400'}`}
-        >
-          <div className="relative">
-            <ShoppingCart className="w-6 h-6" />
-            {shoppingListCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-detroit-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold">
-                {shoppingListCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-tighter">List</span>
-        </button>
-        <button 
-          onClick={() => user ? setShowProfile(true) : setShowAuthModal(true)}
-          className={`flex flex-col items-center gap-1 transition-all min-w-[44px] min-h-[44px] justify-center ${showProfile ? 'text-detroit-600' : 'text-slate-400'}`}
-        >
-          {user ? (
-            <div className="w-6 h-6 bg-detroit-100 rounded-full flex items-center justify-center text-xs">
-              {userProfile.avatar}
-            </div>
-          ) : (
-            <User className="w-6 h-6" />
-          )}
-          <span className="text-[10px] font-bold uppercase tracking-tighter">{user ? 'Me' : 'Join'}</span>
-        </button>
-      </div>
+      <MobileNav 
+        showFavoritesOnly={showFavoritesOnly}
+        setShowFavoritesOnly={setShowFavoritesOnly}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        onAddRecipe={() => setShowAddModal(true)}
+        onShowShoppingList={() => setShowShoppingList(true)}
+        shoppingListCount={shoppingListCount}
+        user={user}
+        userProfile={userProfile}
+        onShowProfile={() => setShowProfile(true)}
+        onShowAuth={() => setShowAuthModal(true)}
+      />
 
-      {/* Hero Header */}
-      <header className={`relative transition-all duration-1000 z-10 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute inset-0 bg-slate-950" />
-          <div className="absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-detroit-900/40 via-transparent to-transparent" />
-          <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-detroit-600/20 rounded-full blur-[120px] animate-pulse-slow" />
-          <div className="absolute top-[20%] -right-[10%] w-[30%] h-[30%] bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 py-12 sm:py-20 md:py-28">
-          {/* Top Navigation */}
-          <nav className="flex justify-between items-center mb-12 sm:absolute sm:top-8 sm:left-6 sm:right-6">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-detroit-500 to-detroit-700 rounded-xl flex items-center justify-center shadow-lg shadow-detroit-500/20">
-                <ChefHat className="w-6 h-6 text-white" />
-              </div>
-              <span className="font-serif text-white font-bold text-xl tracking-tight hidden sm:block">FamBam</span>
-            </div>
+      <Header 
+        user={user}
+        userProfile={userProfile}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        isSearchFocused={isSearchFocused}
+        setIsSearchFocused={setIsSearchFocused}
+        shoppingListCount={shoppingListCount}
+        onShowShoppingList={() => setShowShoppingList(true)}
+        onShowMealPlanner={() => setShowMealPlanner(true)}
+        onShowUnitConverter={() => setShowUnitConverter(true)}
+        onShowProfile={() => setShowProfile(true)}
+        onShowAuth={() => setShowAuthModal(true)}
+        isLoaded={isLoaded}
+      />
 
-            {/* Tools & Auth */}
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10">
-                <TooltipProvider>
-                  {[
-                    { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: () => setShowShoppingList(true), label: 'Shopping', count: shoppingListCount, mobile: false },
-                    { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: () => setShowMealPlanner(true), label: 'Planner', mobile: true },
-                    { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: () => setShowUnitConverter(true), label: 'Units', mobile: true }
-                  ].map((tool) => (
-                    <Tooltip key={tool.id}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={tool.onClick}
-                          className={`relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
-                        >
-                          {tool.icon}
-                          {tool.count > 0 && (
-                            <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 bg-detroit-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold border-none">
-                              {tool.count}
-                            </Badge>
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{tool.label}</TooltipContent>
-                    </Tooltip>
-                  ))}
-                </TooltipProvider>
-              </div>
-
-              {user ? (
-                <Button 
-                  variant="ghost"
-                  onClick={() => setShowProfile(true)}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto"
-                >
-                  <div className="text-right hidden sm:block">
-                    <div className="text-white font-semibold text-xs">{userProfile.name}</div>
-                    <div className="text-detroit-400 text-[10px] font-medium">Lvl {userProfile.level} Chef</div>
-                  </div>
-                  <Avatar className="w-8 h-8 border-none shadow-inner">
-                    <AvatarImage src={userProfile.avatarUrl} />
-                    <AvatarFallback className="bg-gradient-to-br from-detroit-400 to-detroit-600 text-xs text-white">
-                      {userProfile.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              ) : (
-                <Button 
-                  onClick={() => setShowAuthModal(true)}
-                  className="px-5 sm:px-6 py-2 bg-white text-slate-900 rounded-full hover:bg-slate-100 transition-all font-bold text-sm shadow-xl shadow-white/5"
-                >
-                  Sign In
-                </Button>
-              )}
-            </div>
-          </nav>
-
-          <div className={`text-center max-w-4xl mx-auto transform transition-all duration-1000 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-            <h1 className="font-serif text-4xl sm:text-6xl md:text-8xl font-extrabold text-white mb-6 tracking-tight leading-tight px-4">
-              Our Family <span className="text-transparent bg-clip-text bg-gradient-to-r from-detroit-400 to-cyan-300">Cookbook</span>
-            </h1>
-            <p className="text-slate-400 text-base sm:text-xl md:text-2xl mb-8 sm:mb-12 font-light tracking-wide max-w-2xl mx-auto px-6">
-              Preserving our family's culinary traditions and creating new memories, one meal at a time.
-            </p>
-            
-            {/* Search Bar Container */}
-            <div className={`max-w-2xl mx-auto px-4 transform transition-all duration-500 ${isSearchFocused ? 'scale-[1.02]' : 'scale-100'}`}>
-              <div className={`relative group transition-all duration-300 ${isSearchFocused ? 'ring-2 ring-detroit-500/50 rounded-2xl' : ''}`}>
-                <div className="absolute inset-0 bg-gradient-to-r from-detroit-500/20 to-cyan-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center bg-white/5 backdrop-blur-2xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
-                  <div className="pl-6 text-slate-400">
-                    <Search className="w-6 h-6" />
-                  </div>
-                  <Input
-                    type="text"
-                    placeholder="Search for a recipe..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    onFocus={() => setIsSearchFocused(true)}
-                    onBlur={() => setIsSearchFocused(false)}
-                    className="w-full px-4 py-5 sm:py-6 bg-transparent text-white placeholder-slate-500 text-base sm:text-lg outline-none font-medium border-none h-auto focus-visible:ring-0"
-                  />
-                  {searchQuery && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setSearchQuery('')}
-                      className="mr-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all w-8 h-8"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
       <main className="relative max-w-7xl mx-auto px-4 pb-20 -mt-12 sm:-mt-16 z-20">
-        {/* Navigation & Controls Card */}
-        <div className={`bg-white rounded-3xl shadow-2xl shadow-slate-200/50 p-6 sm:p-8 mb-12 transform transition-all duration-700 delay-500 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            {/* Categories Tabs */}
-            <div className="flex-1 overflow-x-auto scrollbar-hide -mx-2 px-2 pb-2">
-              <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-                <TabsList className="bg-transparent h-auto p-0 gap-3">
-                  {categories.map((category) => (
-                    <TabsTrigger
-                      key={category}
-                      value={category}
-                      className={`
-                        px-6 py-3 rounded-2xl font-bold text-sm transition-all whitespace-nowrap flex items-center gap-2 border border-transparent
-                        data-[state=active]:bg-detroit-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-detroit-600/20 data-[state=active]:scale-105
-                        bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700
-                      `}
-                    >
-                      <span className="text-lg">{initialRecipes.find(r => r.category === category)?.image || '🍽️'}</span>
-                      {category}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-6 rounded-2xl font-bold text-sm transition-all h-auto ${
-                  showFilters 
-                    ? 'bg-detroit-50 text-detroit-700 border-2 border-detroit-100 hover:bg-detroit-100 hover:text-detroit-800' 
-                    : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:bg-slate-100'
-                }`}
-              >
-                <Filter className="w-5 h-5" />
-                Filters
-              </Button>
-              <Button
-                onClick={() => setShowAddModal(true)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-6 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-all h-auto"
-              >
-                <Plus className="w-5 h-5" strokeWidth={3} />
-                <span className="hidden sm:inline">Add Recipe</span>
-                <span className="sm:hidden">Add New</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* Expanded Filters Panel */}
-          <AnimatePresence>
-            {showFilters && (
-              <motion.div 
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="mt-8 pt-8 border-t border-slate-100 overflow-hidden"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Sort Recipes</label>
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-full px-5 py-7 bg-slate-50 border-2 border-transparent rounded-2xl text-sm font-bold text-slate-700 focus:border-detroit-500 focus:bg-white transition-all outline-none">
-                        <SelectValue placeholder="Sort by" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="newest">Latest First</SelectItem>
-                        <SelectItem value="popular">Most Loved</SelectItem>
-                        <SelectItem value="name">Alphabetical</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Difficulty Level</label>
-                    <div className="flex p-1.5 bg-slate-50 rounded-2xl">
-                      {['All', 'Easy', 'Hard'].map(diff => (
-                        <Button
-                          key={diff}
-                          variant="ghost"
-                          onClick={() => setSelectedDifficulty(diff)}
-                          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all h-auto ${
-                            selectedDifficulty === diff 
-                              ? 'bg-white text-detroit-600 shadow-sm hover:bg-white hover:text-detroit-600' 
-                              : 'text-slate-500 hover:text-slate-700 hover:bg-transparent'
-                          }`}
-                        >
-                          {diff}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Saved Recipes</label>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                      className={`w-full py-7 px-5 rounded-2xl text-sm font-bold flex items-center justify-between transition-all h-auto ${
-                        showFavoritesOnly 
-                          ? 'bg-rose-50 text-rose-600 border-2 border-rose-100 hover:bg-rose-100 hover:text-rose-700' 
-                          : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:bg-slate-100'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <Heart className={`w-5 h-5 ${showFavoritesOnly ? 'fill-rose-500 text-rose-500' : ''}`} />
-                        Favorites
-                      </span>
-                      <div className={`w-10 h-6 rounded-full relative transition-colors ${showFavoritesOnly ? 'bg-rose-500' : 'bg-slate-300'}`}>
-                        <motion.div 
-                          animate={{ x: showFavoritesOnly ? 16 : 0 }}
-                          className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm" 
-                        />
-                      </div>
-                    </Button>
-                  </div>
-
-                  <div className="space-y-3 flex flex-col justify-end">
-                    <Button
-                      onClick={() => {
-                        setSelectedCategory('All');
-                        setSearchQuery('');
-                        setSelectedDifficulty('All');
-                        setShowFavoritesOnly(false);
-                        setSortBy('newest');
-                      }}
-                      className="w-full py-7 bg-slate-900 text-white rounded-2xl text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2 h-auto"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      Reset Filters
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <FilterSection 
+          categories={categories}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          onAddRecipe={() => setShowAddModal(true)}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          selectedDifficulty={selectedDifficulty}
+          setSelectedDifficulty={setSelectedDifficulty}
+          showFavoritesOnly={showFavoritesOnly}
+          setShowFavoritesOnly={setShowFavoritesOnly}
+          onResetFilters={() => {
+            setSelectedCategory('All');
+            setSearchQuery('');
+            setSelectedDifficulty('All');
+            setShowFavoritesOnly(false);
+            setSortBy('newest');
+          }}
+          isLoaded={isLoaded}
+          initialRecipes={initialRecipes}
+        />
 
         {/* Results Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 px-2">
@@ -956,137 +705,110 @@ export default function FamilyCookbook() {
           )}
         </div>
 
-        {/* Main Grid */}
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-32 space-y-8">
-            <div className="relative">
-              <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="w-20 h-20 border-4 border-slate-100 border-t-detroit-500 rounded-full" 
-              />
-              <ChefHat className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-detroit-500" />
-            </div>
-            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs animate-pulse">Gathering family secrets...</p>
-          </div>
-        ) : filteredRecipes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 pb-20">
-            {filteredRecipes.map((recipe, index) => (
-              <RecipeCard 
-                key={recipe.id} 
-                recipe={recipe} 
-                index={index}
-                onClick={setSelectedRecipe}
-                onToggleFavorite={toggleFavorite}
-                onAddToShoppingList={addToShoppingList}
-                onAuthorClick={setSelectedAuthor}
-                onEdit={handleEditRecipe}
-              />
-            ))}
-          </div>
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-20 bg-white rounded-[40px] shadow-sm border border-slate-100 mx-1 px-6"
-          >
-            <div className="w-20 h-20 bg-slate-50 rounded-[28px] flex items-center justify-center mx-auto mb-6 text-4xl">🥣</div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-3 font-serif">Kitchen's Empty!</h3>
-            <p className="text-slate-500 mb-8 max-w-sm mx-auto text-sm leading-relaxed">We couldn't find any recipes matching your filters. Try something else or add a new favorite!</p>
-            <Button
-              onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedDifficulty('All'); setShowFavoritesOnly(false); setSortBy('newest'); }}
-              className="px-8 py-6 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 h-auto"
-            >
-              Clear All Filters
-            </Button>
-          </motion.div>
-        )}
+        <RecipeGrid 
+          recipes={filteredRecipes}
+          isLoading={isLoading}
+          onRecipeClick={setSelectedRecipe}
+          onToggleFavorite={toggleFavorite}
+          onAddToShoppingList={addToShoppingList}
+          onAuthorClick={setSelectedAuthor}
+          onEditRecipe={handleEditRecipe}
+          onClearFilters={() => { 
+            setSearchQuery(''); 
+            setSelectedCategory('All'); 
+            setSelectedDifficulty('All'); 
+            setShowFavoritesOnly(false); 
+            setSortBy('newest'); 
+          }}
+        />
       </main>
 
       {/* Modals */}
-      {selectedRecipe && (
-        <RecipeModal 
-          recipe={selectedRecipe} 
-          onClose={() => setSelectedRecipe(null)} 
-          onAddToShoppingList={addToShoppingList}
-          onDelete={deleteRecipe}
-          onMarkAsCooked={handleMarkAsCooked}
-          user={user}
-          onUpdateRecipeImage={(recipeId, photoUrl) => {
-            // Update recipe in list
-            setRecipes(prev => prev.map(r => 
-              r.id === recipeId ? { ...r, image: photoUrl } : r
-            ));
-            // Update selected recipe
-            setSelectedRecipe(prev => prev ? { ...prev, image: photoUrl } : null);
-          }}
-        />
-      )}
-      
-      {showAddModal && (
-        <AddRecipeModal 
-          onClose={() => {
-            setShowAddModal(false);
-            setEditingRecipe(null);
-          }} 
-          onSave={handleAddRecipe}
-          onUpdate={handleUpdateRecipe}
-          categories={categories.filter(c => c !== 'All')}
-          editingRecipe={editingRecipe}
-          defaultAuthor={user ? userProfile.name : ''}
-        />
-      )}
+      <Suspense fallback={null}>
+        {selectedRecipe && (
+          <RecipeModal 
+            recipe={selectedRecipe} 
+            onClose={() => setSelectedRecipe(null)} 
+            onAddToShoppingList={addToShoppingList}
+            onDelete={deleteRecipe}
+            onMarkAsCooked={handleMarkAsCooked}
+            user={user}
+            onUpdateRecipeImage={(recipeId, photoUrl) => {
+              // Update recipe in list
+              setRecipes(prev => prev.map(r => 
+                r.id === recipeId ? { ...r, image: photoUrl } : r
+              ));
+              // Update selected recipe
+              setSelectedRecipe(prev => prev ? { ...prev, image: photoUrl } : null);
+            }}
+          />
+        )}
+        
+        {showAddModal && (
+          <AddRecipeModal 
+            onClose={() => {
+              setShowAddModal(false);
+              setEditingRecipe(null);
+            }} 
+            onSave={handleAddRecipe}
+            onUpdate={handleUpdateRecipe}
+            categories={categories.filter(c => c !== 'All')}
+            editingRecipe={editingRecipe}
+            defaultAuthor={user ? userProfile.name : ''}
+          />
+        )}
 
-      {showShoppingList && (
-        <ShoppingListModal 
-          onClose={() => setShowShoppingList(false)} 
-          shoppingList={shoppingList}
-          setShoppingList={setShoppingList}
-        />
-      )}
+        {showShoppingList && (
+          <ShoppingListModal 
+            onClose={() => setShowShoppingList(false)} 
+            shoppingList={shoppingList}
+            setShoppingList={setShoppingList}
+          />
+        )}
 
-      {showUnitConverter && (
-        <UnitConverterModal onClose={() => setShowUnitConverter(false)} />
-      )}
+        {showUnitConverter && (
+          <UnitConverterModal onClose={() => setShowUnitConverter(false)} />
+        )}
 
-      {showSubstitutions && (
-        <IngredientSubstitutionsModal onClose={() => setShowSubstitutions(false)} />
-      )}
+        {showSubstitutions && (
+          <IngredientSubstitutionsModal onClose={() => setShowSubstitutions(false)} />
+        )}
 
-      {showProfile && (
-        <UserProfileModal 
-          onClose={() => setShowProfile(false)} 
-          userProfile={userProfile}
-          recipes={recipes}
-          onSignOut={handleSignOut}
-          user={user}
-          onProfileUpdate={(updates) => {
-            setUserProfile(prev => ({
-              ...prev,
-              name: updates.name || prev.name,
-              bio: updates.bio || prev.bio,
-              avatar: updates.avatar || prev.avatar,
-              avatarUrl: updates.avatarUrl || prev.avatarUrl
-            }));
-          }}
-        />
-      )}
+        {showProfile && (
+          <UserProfileModal 
+            onClose={() => setShowProfile(false)} 
+            userProfile={userProfile}
+            recipes={recipes}
+            onSignOut={handleSignOut}
+            user={user}
+            onProfileUpdate={(updates) => {
+              setUserProfile(prev => ({
+                ...prev,
+                name: updates.name || prev.name,
+                bio: updates.bio || prev.bio,
+                avatar: updates.avatar || prev.avatar,
+                avatarUrl: updates.avatarUrl || prev.avatarUrl
+              }));
+            }}
+          />
+        )}
 
-      {showMealPlanner && (
-        <MealPlannerModal
-          onClose={() => setShowMealPlanner(false)}
-          recipes={recipes}
-          mealPlan={mealPlan}
-          setMealPlan={setMealPlan}
-        />
-      )}
+        {showMealPlanner && (
+          <MealPlannerModal
+            onClose={() => setShowMealPlanner(false)}
+            recipes={recipes}
+            mealPlan={mealPlan}
+            setMealPlan={setMealPlan}
+          />
+        )}
 
-      {showAuthModal && (
-        <AuthModal 
-          onClose={() => setShowAuthModal(false)} 
-          onSignIn={handleSignIn}
-        />
-      )}
+        {showAuthModal && (
+          <AuthModal 
+            onClose={() => setShowAuthModal(false)} 
+            onSignIn={handleSignIn}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

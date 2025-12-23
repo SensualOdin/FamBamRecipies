@@ -51,11 +51,11 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
       onMouseLeave={() => setIsHovered(false)}
       className="h-full"
     >
-      <Card className="group relative flex flex-col h-full bg-white rounded-[32px] overflow-hidden transition-all duration-300 border border-slate-100/50 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+      <Card className="group relative flex flex-col h-full bg-white/70 backdrop-blur-sm rounded-[32px] overflow-hidden transition-all duration-500 border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)] hover:-translate-y-2">
         {/* Image / Header Section */}
         <div className="relative h-64 overflow-hidden">
           {/* Background Overlay */}
-          <div className={`absolute inset-0 bg-slate-900 transition-opacity duration-500 ${isHovered ? 'opacity-20' : 'opacity-0'} z-10`} />
+          <div className={`absolute inset-0 bg-slate-900 transition-opacity duration-700 ${isHovered ? 'opacity-30' : 'opacity-0'} z-10`} />
           
           {/* Image Content */}
           <div className="absolute inset-0 bg-slate-50 flex items-center justify-center">
@@ -65,6 +65,7 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
                 transition={{ duration: 0.7 }}
                 src={recipe.image} 
                 alt={recipe.title} 
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -86,11 +87,11 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
             size="icon"
             onClick={handleFavoriteClick}
             className={`
-              absolute top-4 left-4 z-20 w-11 h-11 rounded-2xl backdrop-blur-md
-              transition-all duration-300
+              absolute top-4 left-4 z-20 w-11 h-11 rounded-2xl backdrop-blur-xl
+              transition-all duration-500
               ${recipe.isFavorite 
-                ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 hover:bg-rose-600 hover:text-white' 
-                : 'bg-white/80 text-slate-400 hover:text-rose-500 hover:bg-white shadow-sm'
+                ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 hover:bg-rose-600 hover:text-white scale-110' 
+                : 'bg-white/40 text-white hover:text-rose-500 hover:bg-white shadow-sm'
               }
             `}
           >
@@ -99,13 +100,13 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
 
           {/* Category & Difficulty Badges */}
           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
-            <Badge variant="secondary" className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-sm border border-white/50 flex items-center gap-2 hover:bg-white">
+            <Badge variant="secondary" className="bg-white/30 backdrop-blur-xl px-3 py-1.5 rounded-xl shadow-sm border border-white/20 flex items-center gap-2 hover:bg-white/50 text-white">
               <span className="text-sm">{categoryIcons[recipe.category] || '🍽️'}</span>
-              <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">{recipe.category}</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.1em]">{recipe.category}</span>
             </Badge>
             <Badge 
               variant="outline"
-              className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] shadow-sm border-none ${difficultyColor[recipe.difficulty]}`}
+              className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] shadow-sm border-none backdrop-blur-md ${difficultyColor[recipe.difficulty]}`}
             >
               {recipe.difficulty}
             </Badge>

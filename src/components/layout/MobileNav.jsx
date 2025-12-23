@@ -1,0 +1,86 @@
+import React from 'react';
+import { Home, Heart, Plus, ShoppingCart, User } from 'lucide-react';
+
+const MobileNav = ({ 
+  showFavoritesOnly, 
+  setShowFavoritesOnly, 
+  selectedCategory, 
+  setSelectedCategory,
+  onAddRecipe,
+  onShowShoppingList,
+  shoppingListCount,
+  user,
+  userProfile,
+  onShowProfile,
+  onShowAuth
+}) => {
+  return (
+    <div className="md:hidden fixed bottom-6 left-6 right-6 bg-white/80 backdrop-blur-2xl border border-white/50 px-2 py-3 rounded-[32px] z-50 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+      <button 
+        onClick={() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setSelectedCategory('All');
+          setShowFavoritesOnly(false);
+        }}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${!showFavoritesOnly && selectedCategory === 'All' ? 'text-detroit-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
+      >
+        <Home className="w-6 h-6" strokeWidth={!showFavoritesOnly && selectedCategory === 'All' ? 2.5 : 2} />
+        <span className="text-[9px] font-black uppercase tracking-widest">Home</span>
+      </button>
+      <button 
+        onClick={() => {
+          setShowFavoritesOnly(true);
+          setSelectedCategory('All');
+        }}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${showFavoritesOnly ? 'text-rose-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
+      >
+        <Heart className={`w-6 h-6 ${showFavoritesOnly ? 'fill-rose-500' : ''}`} strokeWidth={showFavoritesOnly ? 2.5 : 2} />
+        <span className="text-[9px] font-black uppercase tracking-widest">Saved</span>
+      </button>
+      
+      <button 
+        onClick={onAddRecipe}
+        className="flex flex-col items-center -mt-12 px-2 group"
+      >
+        <div className="w-16 h-16 bg-slate-950 rounded-[24px] flex items-center justify-center shadow-2xl shadow-slate-900/40 text-white active:scale-90 transition-all group-hover:bg-detroit-600">
+          <Plus className="w-9 h-9" strokeWidth={2.5} />
+        </div>
+      </button>
+
+      <button 
+        onClick={onShowShoppingList}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${shoppingListCount > 0 ? 'text-emerald-600' : 'text-slate-400'}`}
+      >
+        <div className="relative">
+          <ShoppingCart className="w-6 h-6" strokeWidth={shoppingListCount > 0 ? 2.5 : 2} />
+          {shoppingListCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-white text-[8px] flex items-center justify-center rounded-full font-black">
+              {shoppingListCount}
+            </span>
+          )}
+        </div>
+        <span className="text-[9px] font-black uppercase tracking-widest">List</span>
+      </button>
+      <button 
+        onClick={() => user ? onShowProfile() : onShowAuth()}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${user ? 'text-detroit-600' : 'text-slate-400'}`}
+      >
+        {user ? (
+          <div className="w-7 h-7 bg-slate-100 rounded-full flex items-center justify-center text-xs overflow-hidden border border-slate-200 shadow-inner">
+            {userProfile.avatarUrl ? (
+              <img src={userProfile.avatarUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              userProfile.avatar
+            )}
+          </div>
+        ) : (
+          <User className="w-6 h-6" strokeWidth={2} />
+        )}
+        <span className="text-[9px] font-black uppercase tracking-widest">{user ? 'Me' : 'Join'}</span>
+      </button>
+    </div>
+  );
+};
+
+export default MobileNav;
+

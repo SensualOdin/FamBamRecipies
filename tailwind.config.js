@@ -9,6 +9,10 @@ export default {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+  			serif: ['"Playfair Display"', 'serif'],
+  		},
   		screens: {
   			xs: '475px'
   		},

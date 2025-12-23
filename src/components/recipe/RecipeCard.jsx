@@ -18,6 +18,8 @@ const RecipeCard = ({ recipe, index, onClick, onToggleFavorite, onAddToShoppingL
     setIsHovered(true);
     if (onMouseEnter) onMouseEnter();
   };
+  
+  const handleFavoriteClick = (e) => {
     e.stopPropagation();
     onToggleFavorite(recipe.id);
   };

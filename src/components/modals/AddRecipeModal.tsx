@@ -187,8 +187,8 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors duration-500">
-        <div className={`p-8 sm:p-10 pt-safe text-white transition-colors duration-500 ${isEditMode ? 'bg-slate-900' : 'bg-primary'}`}>
+      <DialogContent className="p-0 sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors duration-500 flex flex-col">
+        <div className={`shrink-0 p-8 sm:p-10 pt-safe text-white transition-colors duration-500 ${isEditMode ? 'bg-slate-900' : 'bg-primary'}`}>
           <div className="flex justify-between items-start mb-8">
             <div>
               <DialogTitle className="font-serif text-3xl font-extrabold mb-2 text-white">
@@ -211,7 +211,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
           )}
         </div>
 
-        <div className="p-8 sm:p-10 overflow-y-auto max-h-[60vh] scrollbar-hide bg-background transition-colors">
+        <div className="p-8 sm:p-10 overflow-y-auto flex-1 min-h-0 scrollbar-hide bg-background transition-colors">
           {step === 0 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -256,6 +256,11 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                           </>
                         ) : `Extract ${uploadedImages.length} Page${uploadedImages.length > 1 ? 's' : ''}`}
                       </Button>
+                      {extractionError && (
+                        <div className="mt-3 p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-2xl">
+                          <p className="text-rose-600 dark:text-rose-400 text-sm font-medium">{extractionError}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -460,7 +465,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
           )}
         </div>
 
-        <div className="p-8 sm:p-10 border-t border-border bg-muted/50 flex justify-between gap-4 transition-colors">
+        <div className="shrink-0 p-8 sm:p-10 border-t border-border bg-muted/50 flex justify-between gap-4 transition-colors">
           <Button
             variant="ghost"
             onClick={() => setStep(p => Math.max(0, p - 1))}

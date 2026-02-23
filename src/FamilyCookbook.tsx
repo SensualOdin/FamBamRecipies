@@ -87,6 +87,15 @@ export default function FamilyCookbook() {
     return dbRecipes.length > 0 ? dbRecipes : (initialRecipes as unknown as Recipe[]);
   }, [dbRecipes]);
 
+  // Save error state
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+  useEffect(() => {
+    if (saveError) {
+      const timer = setTimeout(() => setSaveError(null), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveError]);
+
   // Debounce search (local state for immediate input feedback, then update store)
   const [localSearch, setLocalSearch] = React.useState(searchQuery);
   useEffect(() => {
@@ -130,27 +139,37 @@ export default function FamilyCookbook() {
 
   // Handlers
   const handleAddRecipe = useCallback(async (newRecipe: Partial<Recipe>, photoFile: File | null = null) => {
-    const recipeToSave = user ? { ...newRecipe, author: newRecipe.author || userProfile.name || 'Chef' } : newRecipe;
-    const saved = await createRecipe({ recipe: recipeToSave, userId: user?.id || null });
-    
-    if (photoFile && saved?.id) {
-      const { data: uploadData } = await uploadRecipeImage(photoFile);
-      if (uploadData?.publicUrl) {
-        await updateRecipe({ id: saved.id, recipe: { ...recipeToSave, image: uploadData.publicUrl } });
+    try {
+      const recipeToSave = user ? { ...newRecipe, author: newRecipe.author || userProfile.name || 'Chef' } : newRecipe;
+      const saved = await createRecipe({ recipe: recipeToSave, userId: user?.id || null });
+
+      if (photoFile && saved?.id) {
+        const { data: uploadData } = await uploadRecipeImage(photoFile);
+        if (uploadData?.publicUrl) {
+          await updateRecipe({ id: saved.id, recipe: { ...recipeToSave, image: uploadData.publicUrl } });
+        }
       }
+    } catch (err: any) {
+      console.error('Failed to save recipe:', err);
+      setSaveError(err.message || 'Failed to save recipe. Please try again.');
     }
   }, [user, userProfile.name, createRecipe, updateRecipe]);
 
   const handleUpdateRecipe = useCallback(async (updatedRecipe: Recipe, photoFile: File | null = null) => {
-    let recipeToUpdate = { ...updatedRecipe };
-    if (photoFile) {
-      const { data: uploadData } = await uploadRecipeImage(photoFile);
-      if (uploadData?.publicUrl) {
-        recipeToUpdate.image = uploadData.publicUrl;
+    try {
+      let recipeToUpdate = { ...updatedRecipe };
+      if (photoFile) {
+        const { data: uploadData } = await uploadRecipeImage(photoFile);
+        if (uploadData?.publicUrl) {
+          recipeToUpdate.image = uploadData.publicUrl;
+        }
       }
+      await updateRecipe({ id: recipeToUpdate.id, recipe: recipeToUpdate });
+      setEditingRecipe(null);
+    } catch (err: any) {
+      console.error('Failed to update recipe:', err);
+      setSaveError(err.message || 'Failed to update recipe. Please try again.');
     }
-    await updateRecipe({ id: recipeToUpdate.id, recipe: recipeToUpdate });
-    setEditingRecipe(null);
   }, [updateRecipe, setEditingRecipe]);
 
   const handleMarkAsCooked = async (recipeId: string | number, notes: string | null = null, rating: number | null = null) => {
@@ -189,6 +208,16 @@ export default function FamilyCookbook() {
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-detroit-100 selection:text-detroit-900 transition-colors duration-500">
+      {saveError && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] max-w-md w-full px-4 animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="bg-rose-50 dark:bg-rose-950 border border-rose-200 dark:border-rose-800 rounded-2xl p-4 shadow-xl flex items-center gap-3">
+            <p className="text-rose-600 dark:text-rose-400 text-sm font-medium flex-1">{saveError}</p>
+            <button onClick={() => setSaveError(null)} className="text-rose-400 hover:text-rose-600 shrink-0">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
       <FloatingParticles />
       <CommandPalette />
       

@@ -84,9 +84,9 @@ export async function updateRecipe(recipeId: string | number, recipe: Partial<Re
   
   if (error) {
     console.error('Error updating recipe:', error);
-    return null;
+    throw new Error(error.message || 'Failed to update recipe');
   }
-  
+
   return data;
 }
 
@@ -128,9 +128,9 @@ export async function createRecipe(recipe: Partial<Recipe>, userId: string | nul
   
   if (error) {
     console.error('Error creating recipe:', error);
-    return null;
+    throw new Error(error.message || 'Failed to save recipe');
   }
-  
+
   return data;
 }
 

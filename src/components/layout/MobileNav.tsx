@@ -37,20 +37,20 @@ const MobileNav: React.FC<MobileNavProps> = ({
           setSelectedCategory('All');
           setShowFavoritesOnly(false);
         }}
-        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${!showFavoritesOnly && selectedCategory === 'All' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 min-w-[44px] min-h-[44px] ${!showFavoritesOnly && selectedCategory === 'All' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
       >
         <Home className="w-6 h-6" strokeWidth={!showFavoritesOnly && selectedCategory === 'All' ? 2.5 : 2} />
-        <span className="text-[10px] font-black uppercase tracking-widest">Home</span>
+        <span className="text-[11px] xs:text-xs font-black uppercase tracking-widest">Home</span>
       </button>
       <button 
         onClick={() => {
           setShowFavoritesOnly(true);
           setSelectedCategory('All');
         }}
-        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${showFavoritesOnly ? 'text-rose-500 scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 min-w-[44px] min-h-[44px] ${showFavoritesOnly ? 'text-rose-500 scale-110' : 'text-muted-foreground hover:text-foreground'}`}
       >
         <Heart className={`w-6 h-6 ${showFavoritesOnly ? 'fill-rose-500' : ''}`} strokeWidth={showFavoritesOnly ? 2.5 : 2} />
-        <span className="text-[10px] font-black uppercase tracking-widest">Saved</span>
+        <span className="text-[11px] xs:text-xs font-black uppercase tracking-widest">Saved</span>
       </button>
       
       <button 
@@ -64,7 +64,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
 
       <button 
         onClick={onShowShoppingList}
-        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${shoppingListCount > 0 ? 'text-emerald-600' : 'text-muted-foreground'}`}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 min-w-[44px] min-h-[44px] ${shoppingListCount > 0 ? 'text-emerald-600' : 'text-muted-foreground'}`}
       >
         <div className="relative">
           <ShoppingCart className="w-6 h-6" strokeWidth={shoppingListCount > 0 ? 2.5 : 2} />
@@ -74,11 +74,11 @@ const MobileNav: React.FC<MobileNavProps> = ({
             </span>
           )}
         </div>
-        <span className="text-[10px] font-black uppercase tracking-widest">List</span>
+        <span className="text-[11px] xs:text-xs font-black uppercase tracking-widest">List</span>
       </button>
       <button 
         onClick={() => user ? onShowProfile() : onShowAuth()}
-        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${user ? 'text-primary' : 'text-muted-foreground'}`}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 min-w-[44px] min-h-[44px] ${user ? 'text-primary' : 'text-muted-foreground'}`}
       >
         {user ? (
           <div className="w-7 h-7 bg-muted rounded-full flex items-center justify-center text-xs overflow-hidden border border-border shadow-inner">
@@ -91,7 +91,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
         ) : (
           <User className="w-6 h-6" strokeWidth={2} />
         )}
-        <span className="text-[10px] font-black uppercase tracking-widest">{user ? 'Me' : 'Join'}</span>
+        <span className="text-[11px] xs:text-xs font-black uppercase tracking-widest">{user ? 'Me' : 'Join'}</span>
       </button>
     </div>
   );

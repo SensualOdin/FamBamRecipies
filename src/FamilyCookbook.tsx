@@ -252,7 +252,7 @@ export default function FamilyCookbook() {
         isLoaded={true}
       />
 
-      <main className="relative max-w-7xl mx-auto px-4 pb-20 -mt-12 sm:-mt-16 z-20">
+      <main className="relative max-w-7xl mx-auto px-4 pb-28 sm:pb-20 -mt-12 sm:-mt-16 z-20">
         <LayoutGroup>
           <FilterSection 
             categories={categories}

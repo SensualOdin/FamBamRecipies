@@ -307,13 +307,13 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
       </div>
 
       {/* Footer Navigation */}
-      <div className="p-8 sm:p-12 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6 bg-slate-950/80 backdrop-blur-2xl z-20">
+      <div className="p-4 sm:p-8 md:p-12 pb-safe border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 bg-slate-950/80 backdrop-blur-2xl z-20">
         <Button 
           variant="ghost" 
           onClick={() => {
             handleToggleIngredients();
           }}
-          className="text-white hover:bg-white/10 rounded-[28px] h-16 px-10 font-black text-lg border border-white/10 group w-full sm:w-auto"
+          className="text-white hover:bg-white/10 rounded-[28px] h-14 sm:h-16 px-6 sm:px-10 font-black text-base sm:text-lg border border-white/10 group w-full sm:w-auto"
         >
           <div className="flex items-center gap-3">
             <ListChecks className="w-6 h-6 group-hover:rotate-12 transition-transform" />
@@ -329,7 +329,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
               handlePrev();
             }}
             disabled={currentStep === 0 || showIngredients}
-            className="rounded-full bg-white/5 text-white hover:bg-white/10 h-20 w-20 disabled:opacity-20 border border-white/10 transition-all hover:scale-105 active:scale-95"
+            className="rounded-full bg-white/5 text-white hover:bg-white/10 h-16 w-16 sm:h-20 sm:w-20 disabled:opacity-20 border border-white/10 transition-all hover:scale-105 active:scale-95"
           >
             <ChevronLeft className="w-10 h-10" />
           </Button>
@@ -339,7 +339,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
               onClick={() => {
                 onFinish();
               }}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-[36px] h-20 px-12 font-black text-2xl shadow-2xl shadow-emerald-500/40 border-none group transition-all hover:scale-105 active:scale-95"
+              className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-[36px] h-16 sm:h-20 px-8 sm:px-12 font-black text-xl sm:text-2xl shadow-2xl shadow-emerald-500/40 border-none group transition-all hover:scale-105 active:scale-95"
             >
               <CheckCircle2 className="w-8 h-8 mr-4 group-hover:scale-110 transition-transform" />
               Done!
@@ -351,7 +351,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
                 handleNext();
               }}
               disabled={currentStep === steps.length - 1 || showIngredients}
-              className="rounded-full bg-emerald-50 text-emerald-600 hover:bg-white h-20 w-20 shadow-2xl shadow-emerald-500/40 border-none transition-all hover:scale-105 active:scale-95"
+              className="rounded-full bg-emerald-50 text-emerald-600 hover:bg-white h-16 w-16 sm:h-20 sm:w-20 shadow-2xl shadow-emerald-500/40 border-none transition-all hover:scale-105 active:scale-95"
             >
               <ChevronRight className="w-10 h-10" />
             </Button>

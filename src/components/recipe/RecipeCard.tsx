@@ -211,7 +211,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                         variant="ghost"
                         size="icon"
                         onClick={handleEditClick}
-                        className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground hover:text-detroit-600 dark:hover:text-detroit-400 hover:bg-muted rounded-xl shrink-0 border-none"
+                        className="w-10 h-10 text-muted-foreground hover:text-detroit-600 dark:hover:text-detroit-400 hover:bg-muted rounded-xl shrink-0 border-none"
                       >
                         <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
                       </Button>
@@ -226,7 +226,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                       variant="ghost"
                       size="icon"
                       onClick={handleShoppingListClick}
-                      className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-muted rounded-xl shrink-0 border-none"
+                      className="w-10 h-10 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-muted rounded-xl shrink-0 border-none"
                     >
                       <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                     </Button>

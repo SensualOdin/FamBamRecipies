@@ -73,7 +73,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
         className={`bg-background dark:bg-slate-900 rounded-[40px] shadow-2xl max-w-md w-full overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
         onClick={e => e.stopPropagation()}
       >
-        <div className="bg-slate-950 p-10 text-white text-center relative overflow-hidden">
+        <div className="bg-slate-950 p-6 sm:p-10 text-white text-center relative overflow-hidden">
           <div className="absolute -top-20 -right-20 w-40 h-40 bg-detroit-500/20 rounded-full blur-3xl" />
           <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl" />
 
@@ -94,7 +94,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
           </div>
         </div>
 
-        <div className="p-10">
+        <div className="p-6 sm:p-10">
           <form onSubmit={handleSubmit} className="space-y-6">
             {isSignUp && (
               <div className="group">

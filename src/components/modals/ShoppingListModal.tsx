@@ -106,7 +106,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-md h-[92vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border-none rounded-t-[40px] sm:rounded-[40px] shadow-2xl gap-0 bg-white top-[auto] bottom-0 translate-y-0 translate-x-[-50%]">
+      <DialogContent className="p-0 sm:max-w-md h-[92vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border-none rounded-t-[40px] sm:rounded-[40px] shadow-2xl gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors">
         {/* Header */}
         <div className="bg-slate-950 p-6 sm:p-8 pt-safe text-white shrink-0">
           <div className="flex justify-between items-center mb-6">
@@ -162,7 +162,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
         </div>
 
         {/* List Content */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8 scrollbar-hide bg-white">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 scrollbar-hide bg-background transition-colors">
           {shoppingList.length === 0 ? (
             <div className="text-center py-12 sm:py-16">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 rounded-[28px] sm:rounded-[32px] flex items-center justify-center mx-auto mb-6">
@@ -176,10 +176,10 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
               {shoppingList.map((item) => (
                 <div 
                   key={item.id}
-                  className={`group flex items-center gap-4 p-4 rounded-3xl transition-all border-2 ${
-                    item.checked 
-                      ? 'bg-slate-50 border-transparent opacity-50' 
-                      : 'bg-white border-slate-50 hover:border-detroit-100 hover:shadow-xl hover:shadow-slate-200/50'
+                  className={`group flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-3xl transition-all border-2 ${
+                    item.checked
+                      ? 'bg-muted border-transparent opacity-50'
+                      : 'bg-card border-border hover:border-detroit-100 dark:hover:border-detroit-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none'
                   }`}
                 >
                   <Button
@@ -244,7 +244,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
 
         {/* Footer */}
         {shoppingList.length > 0 && (
-          <div className="p-6 sm:p-8 pt-0 flex flex-col gap-4 shrink-0 bg-white border-t border-slate-50 pb-safe">
+          <div className="p-4 sm:p-8 pt-0 flex flex-col gap-4 shrink-0 bg-background border-t border-border pb-safe transition-colors">
             <div className="flex justify-between items-center py-4">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

@@ -75,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className="absolute top-[10%] -right-[5%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
       </div>
       
-      <div className="relative max-w-7xl mx-auto px-4 py-12 sm:py-20 md:py-28">
+      <div className="relative max-w-7xl mx-auto px-4 py-8 sm:py-16 md:py-24">
         {/* Top Navigation */}
         <nav className="flex justify-between items-center mb-12 sm:absolute sm:top-8 sm:left-6 sm:right-6">
           <div className="flex items-center gap-2">
@@ -171,11 +171,11 @@ const Header: React.FC<HeaderProps> = ({
         </nav>
 
         <div className={`text-center max-w-5xl mx-auto transform transition-all duration-1000 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
-          <h1 className="font-serif text-5xl sm:text-7xl md:text-[9rem] font-extrabold text-white mb-8 tracking-tighter leading-[0.85] px-4">
+          <h1 className="font-serif text-4xl sm:text-6xl md:text-8xl font-extrabold text-white mb-6 sm:mb-8 tracking-tighter leading-[0.85] px-4">
             Our Family <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-detroit-400 via-white to-cyan-300 drop-shadow-2xl">Cookbook</span>
           </h1>
-          <p className="text-slate-400 text-base sm:text-xl md:text-2xl mb-12 sm:mb-16 font-light tracking-[0.2em] uppercase max-w-3xl mx-auto px-6 opacity-80">
+          <p className="text-slate-400 text-sm sm:text-lg md:text-xl mb-8 sm:mb-14 font-light tracking-[0.2em] uppercase max-w-3xl mx-auto px-6 opacity-80">
             Preserving traditions, one meal at a time.
           </p>
           
@@ -184,8 +184,8 @@ const Header: React.FC<HeaderProps> = ({
             <div className={`relative group transition-all duration-500 ${isSearchFocused ? 'ring-4 ring-white/10 rounded-[32px]' : ''}`}>
               <div className="absolute inset-0 bg-gradient-to-r from-detroit-500/30 to-cyan-500/30 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative flex items-center bg-white/5 backdrop-blur-[40px] rounded-[28px] border border-white/10 overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
-                <div className="pl-8 text-slate-300">
-                  <Search className="w-7 h-7" strokeWidth={1.5} />
+                <div className="pl-5 sm:pl-8 text-slate-300">
+                  <Search className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
                 </div>
                 <Input
                   type="text"
@@ -194,7 +194,7 @@ const Header: React.FC<HeaderProps> = ({
                   onChange={e => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
-                  className="w-full px-6 py-7 sm:py-9 bg-transparent text-white placeholder-slate-500 text-lg sm:text-xl outline-none font-light tracking-wide border-none h-auto focus-visible:ring-0"
+                  className="w-full px-4 sm:px-6 py-5 sm:py-7 bg-transparent text-white placeholder-slate-500 text-base sm:text-lg outline-none font-light tracking-wide border-none h-auto focus-visible:ring-0"
                 />
                 {searchQuery && (
                   <Button

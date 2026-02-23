@@ -24,7 +24,7 @@ const FilterSection = ({
   initialRecipes
 }) => {
   return (
-    <div className={`bg-card/70 dark:bg-slate-900/70 backdrop-blur-3xl rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] dark:shadow-none p-4 sm:p-6 mb-16 transform transition-all duration-1000 delay-500 border border-border dark:border-white/10 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+    <div className={`bg-card/70 dark:bg-slate-900/70 backdrop-blur-3xl rounded-[28px] sm:rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] dark:shadow-none p-3 sm:p-6 mb-8 sm:mb-12 transform transition-all duration-1000 delay-500 border border-border dark:border-white/10 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         {/* Categories Tabs */}
         <div className="flex-1 overflow-x-auto scrollbar-hide -mx-2 px-2 pb-1">
@@ -55,7 +55,7 @@ const FilterSection = ({
           <Button
             variant="ghost"
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 py-4 sm:py-7 rounded-[24px] font-black text-[10px] sm:text-xs transition-all h-auto uppercase tracking-[0.2em] border-none ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-4 sm:px-6 py-3 sm:py-5 rounded-[20px] sm:rounded-[24px] font-black text-[10px] sm:text-xs transition-all h-auto uppercase tracking-[0.2em] border-none ${
               showFilters 
                 ? 'bg-detroit-50 dark:bg-detroit-900/30 text-detroit-700 dark:text-detroit-300' 
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -66,7 +66,7 @@ const FilterSection = ({
           </Button>
           <Button
             onClick={onAddRecipe}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-3 px-8 py-4 sm:py-7 bg-primary text-primary-foreground rounded-[24px] font-black text-[10px] sm:text-xs shadow-2xl shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all h-auto uppercase tracking-[0.2em] border-none"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-5 bg-primary text-primary-foreground rounded-[20px] sm:rounded-[24px] font-black text-[10px] sm:text-xs shadow-2xl shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all h-auto uppercase tracking-[0.2em] border-none"
           >
             <Plus className="w-5 h-5" strokeWidth={3} />
             Add Recipe
@@ -83,11 +83,11 @@ const FilterSection = ({
             exit={{ height: 0, opacity: 0 }}
             className="mt-8 pt-8 border-t border-border overflow-hidden"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <div className="space-y-4">
                 <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Sort Recipes</label>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-full px-6 py-8 bg-muted border border-border rounded-[20px] text-xs font-black uppercase tracking-widest text-muted-foreground focus:ring-2 focus:ring-primary focus:bg-background transition-all outline-none border-none shadow-inner h-auto">
+                  <SelectTrigger className="w-full px-5 py-5 sm:py-6 bg-muted border border-border rounded-[16px] sm:rounded-[20px] text-xs font-black uppercase tracking-widest text-muted-foreground focus:ring-2 focus:ring-primary focus:bg-background transition-all outline-none border-none shadow-inner h-auto">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent className="rounded-[20px] border-border shadow-2xl">
@@ -123,7 +123,7 @@ const FilterSection = ({
                 <Button
                   variant="ghost"
                   onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                  className={`w-full py-8 px-6 rounded-[20px] text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-all h-auto border border-transparent ${
+                  className={`w-full py-5 sm:py-6 px-5 rounded-[16px] sm:rounded-[20px] text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-all h-auto border border-transparent ${
                     showFavoritesOnly 
                       ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-900/30' 
                       : 'bg-muted text-muted-foreground hover:bg-muted/80 shadow-inner'
@@ -145,7 +145,7 @@ const FilterSection = ({
               <div className="space-y-4 flex flex-col justify-end">
                 <Button
                   onClick={onResetFilters}
-                  className="w-full py-8 bg-primary text-primary-foreground rounded-[20px] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 h-auto border-none"
+                  className="w-full py-5 sm:py-6 bg-primary text-primary-foreground rounded-[16px] sm:rounded-[20px] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3 h-auto border-none"
                 >
                   <Sparkles className="w-5 h-5" />
                   Reset Filters

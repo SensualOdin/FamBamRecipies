@@ -24,14 +24,14 @@ const IngredientSubstitutionsModal = ({ onClose }) => {
     : filteredSubs;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? 'bg-slate-900/60 backdrop-blur-md' : 'bg-transparent'}`} onClick={onClose}>
-      <div 
-        className={`bg-white rounded-[40px] shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+    <div className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 transition-all duration-300 ${isVisible ? 'bg-slate-900/60 backdrop-blur-md' : 'bg-transparent'}`} onClick={onClose}>
+      <div
+        className={`bg-background dark:bg-slate-900 rounded-t-[40px] sm:rounded-[40px] shadow-2xl max-w-3xl w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) flex flex-col ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-slate-950 p-8 text-white">
-          <div className="flex justify-between items-center mb-8">
+        <div className="shrink-0 bg-slate-950 p-5 sm:p-8 text-white">
+          <div className="flex justify-between items-center mb-6 sm:mb-8">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-sage-500 rounded-2xl flex items-center justify-center shadow-lg shadow-sage-500/20">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
@@ -61,7 +61,7 @@ const IngredientSubstitutionsModal = ({ onClose }) => {
         </div>
 
         {/* Category Tabs */}
-        <div className="px-8 pt-6 pb-2 bg-slate-50 border-b overflow-x-auto scrollbar-hide">
+        <div className="shrink-0 px-4 sm:px-8 pt-4 sm:pt-6 pb-2 bg-muted border-b border-border overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 min-w-max pb-4">
             {categories.map(cat => (
               <button
@@ -81,7 +81,7 @@ const IngredientSubstitutionsModal = ({ onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="p-8 overflow-y-auto max-h-[50vh] scrollbar-hide">
+        <div className="p-4 sm:p-8 overflow-y-auto flex-1 min-h-0 scrollbar-hide">
           {searchedSubs.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-20 h-20 bg-slate-50 rounded-[32px] flex items-center justify-center mx-auto mb-6 text-4xl">🧪</div>
@@ -91,7 +91,7 @@ const IngredientSubstitutionsModal = ({ onClose }) => {
           ) : (
             <div className="grid gap-6 md:grid-cols-2">
               {searchedSubs.map((sub, i) => (
-                <div key={i} className="group p-6 bg-white border border-slate-100 rounded-[32px] hover:border-sage-200 transition-all hover:shadow-xl hover:shadow-sage-200/20">
+                <div key={i} className="group p-4 sm:p-6 bg-card border border-border rounded-[24px] sm:rounded-[32px] hover:border-sage-200 dark:hover:border-sage-800 transition-all hover:shadow-xl hover:shadow-sage-200/20">
                   <div className="flex items-center justify-between mb-6">
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 group-hover:text-sage-500 transition-colors">{sub.category}</span>
                     <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 group-hover:bg-sage-50 group-hover:text-sage-600 transition-all">
@@ -119,7 +119,7 @@ const IngredientSubstitutionsModal = ({ onClose }) => {
           )}
         </div>
 
-        <div className="p-8 pt-0 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+        <div className="shrink-0 p-4 sm:p-8 pt-0 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
           <svg className="w-4 h-4 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeWidth={3} /></svg>
           Results may vary • Use your best judgment
         </div>

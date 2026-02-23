@@ -30,7 +30,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
   onShowAuth
 }) => {
   return (
-    <div className="md:hidden fixed bottom-6 left-6 right-6 bg-background/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-border dark:border-white/10 px-2 py-3 rounded-[32px] z-50 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-colors duration-500">
+    <div className="md:hidden fixed bottom-4 left-4 right-4 bg-background/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-border dark:border-white/10 px-2 py-3 pb-safe rounded-[32px] z-50 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-colors duration-500">
       <button 
         onClick={() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -40,7 +40,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
         className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${!showFavoritesOnly && selectedCategory === 'All' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
       >
         <Home className="w-6 h-6" strokeWidth={!showFavoritesOnly && selectedCategory === 'All' ? 2.5 : 2} />
-        <span className="text-[9px] font-black uppercase tracking-widest">Home</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Home</span>
       </button>
       <button 
         onClick={() => {
@@ -50,7 +50,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
         className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${showFavoritesOnly ? 'text-rose-500 scale-110' : 'text-muted-foreground hover:text-foreground'}`}
       >
         <Heart className={`w-6 h-6 ${showFavoritesOnly ? 'fill-rose-500' : ''}`} strokeWidth={showFavoritesOnly ? 2.5 : 2} />
-        <span className="text-[9px] font-black uppercase tracking-widest">Saved</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">Saved</span>
       </button>
       
       <button 
@@ -74,7 +74,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
             </span>
           )}
         </div>
-        <span className="text-[9px] font-black uppercase tracking-widest">List</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">List</span>
       </button>
       <button 
         onClick={() => user ? onShowProfile() : onShowAuth()}
@@ -91,7 +91,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
         ) : (
           <User className="w-6 h-6" strokeWidth={2} />
         )}
-        <span className="text-[9px] font-black uppercase tracking-widest">{user ? 'Me' : 'Join'}</span>
+        <span className="text-[10px] font-black uppercase tracking-widest">{user ? 'Me' : 'Join'}</span>
       </button>
     </div>
   );

@@ -62,7 +62,7 @@ const UnitConverterModal = ({ onClose }) => {
   return (
     <div className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 transition-all duration-300 ${isVisible ? 'bg-slate-900/60 backdrop-blur-md' : 'bg-transparent'}`} onClick={onClose}>
       <div 
-        className={`bg-white rounded-t-[40px] sm:rounded-[40px] shadow-2xl max-w-md w-full h-[80vh] sm:h-auto overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-32'}`}
+        className={`bg-background dark:bg-slate-900 rounded-t-[40px] sm:rounded-[40px] shadow-2xl max-w-md w-full h-[80vh] sm:h-auto overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-32'}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="bg-slate-950 p-8 pt-safe text-white">
@@ -94,7 +94,7 @@ const UnitConverterModal = ({ onClose }) => {
           </div>
         </div>
 
-        <div className="p-8 space-y-8">
+        <div className="p-5 sm:p-8 space-y-6 sm:space-y-8">
           {isMixedConversion && (
             <div className="bg-amber-50 rounded-[20px] p-4 flex items-start gap-3 border border-amber-100">
               <span className="text-xl">⚠️</span>
@@ -107,18 +107,18 @@ const UnitConverterModal = ({ onClose }) => {
           <div className="space-y-6">
             <div className="group">
               <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">Amount to Convert</label>
-              <input 
-                type="number" 
-                value={amount} 
-                onChange={(e) => setAmount(e.target.value)} 
-                className="w-full bg-slate-50 border-2 border-transparent focus:border-cyan-500 focus:bg-white rounded-2xl px-6 py-4 text-xl font-black outline-none transition-all font-mono"
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full bg-muted border-2 border-transparent focus:border-cyan-500 focus:bg-background rounded-2xl px-6 py-4 text-xl font-black outline-none transition-all font-mono text-foreground"
               />
             </div>
 
             <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center">
               <div className="group">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">From</label>
-                <select value={fromUnit} onChange={(e) => setFromUnit(e.target.value)} className="w-full bg-slate-50 rounded-2xl px-4 py-4 font-bold outline-none border-2 border-transparent focus:border-cyan-500 transition-all appearance-none text-sm">
+                <select value={fromUnit} onChange={(e) => setFromUnit(e.target.value)} className="w-full bg-muted text-foreground rounded-2xl px-4 py-4 font-bold outline-none border-2 border-transparent focus:border-cyan-500 transition-all appearance-none text-sm">
                   {commonUnits.map(u => <option key={u} value={u}>{u}</option>)}
                 </select>
               </div>
@@ -131,7 +131,7 @@ const UnitConverterModal = ({ onClose }) => {
 
               <div className="group">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">To</label>
-                <select value={toUnit} onChange={(e) => setToUnit(e.target.value)} className="w-full bg-slate-50 rounded-2xl px-4 py-4 font-bold outline-none border-2 border-transparent focus:border-cyan-500 transition-all appearance-none text-sm">
+                <select value={toUnit} onChange={(e) => setToUnit(e.target.value)} className="w-full bg-muted text-foreground rounded-2xl px-4 py-4 font-bold outline-none border-2 border-transparent focus:border-cyan-500 transition-all appearance-none text-sm">
                   {commonUnits.map(u => <option key={u} value={u}>{u}</option>)}
                 </select>
               </div>
@@ -139,8 +139,8 @@ const UnitConverterModal = ({ onClose }) => {
           </div>
         </div>
         
-        <div className="px-8 pb-8">
-          <button onClick={onClose} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10">Done</button>
+        <div className="px-5 sm:px-8 pb-5 sm:pb-8">
+          <button onClick={onClose} className="w-full py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-bold hover:bg-slate-800 dark:hover:bg-slate-700 transition-all shadow-xl shadow-slate-900/10">Done</button>
         </div>
       </div>
     </div>

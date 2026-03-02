@@ -106,7 +106,7 @@ const UnitConverterModal = ({ onClose }) => {
 
           <div className="space-y-6">
             <div className="group">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">Amount to Convert</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 mb-2 block">Amount to Convert</label>
               <input
                 type="number"
                 value={amount}
@@ -117,7 +117,7 @@ const UnitConverterModal = ({ onClose }) => {
 
             <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center">
               <div className="group">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">From</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 mb-2 block">From</label>
                 <select value={fromUnit} onChange={(e) => setFromUnit(e.target.value)} className="w-full bg-muted text-foreground rounded-2xl px-4 py-4 font-bold outline-none border-2 border-transparent focus:border-cyan-500 transition-all appearance-none text-sm">
                   {commonUnits.map(u => <option key={u} value={u}>{u}</option>)}
                 </select>
@@ -130,7 +130,7 @@ const UnitConverterModal = ({ onClose }) => {
               </div>
 
               <div className="group">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2 block">To</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 mb-2 block">To</label>
                 <select value={toUnit} onChange={(e) => setToUnit(e.target.value)} className="w-full bg-muted text-foreground rounded-2xl px-4 py-4 font-bold outline-none border-2 border-transparent focus:border-cyan-500 transition-all appearance-none text-sm">
                   {commonUnits.map(u => <option key={u} value={u}>{u}</option>)}
                 </select>

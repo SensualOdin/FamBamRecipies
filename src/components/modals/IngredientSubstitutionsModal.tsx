@@ -93,7 +93,7 @@ const IngredientSubstitutionsModal = ({ onClose }) => {
               {searchedSubs.map((sub, i) => (
                 <div key={i} className="group p-4 sm:p-6 bg-card border border-border rounded-[24px] sm:rounded-[32px] hover:border-sage-200 dark:hover:border-sage-800 transition-all hover:shadow-xl hover:shadow-sage-200/20">
                   <div className="flex items-center justify-between mb-6">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 group-hover:text-sage-500 transition-colors">{sub.category}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 group-hover:text-sage-500 transition-colors">{sub.category}</span>
                     <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 group-hover:bg-sage-50 group-hover:text-sage-600 transition-all">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6" strokeWidth={3} /></svg>
                     </div>

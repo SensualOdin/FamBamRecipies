@@ -85,7 +85,7 @@ const FilterSection = ({
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Sort Recipes</label>
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Sort Recipes</label>
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-full px-5 py-5 sm:py-6 bg-muted border border-border rounded-[16px] sm:rounded-[20px] text-xs font-black uppercase tracking-widest text-muted-foreground focus:ring-2 focus:ring-primary focus:bg-background transition-all outline-none border-none shadow-inner h-auto">
                     <SelectValue placeholder="Sort by" />
@@ -99,7 +99,7 @@ const FilterSection = ({
               </div>
 
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Difficulty Level</label>
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Difficulty Level</label>
                 <div className="flex p-1.5 bg-muted rounded-[20px] shadow-inner">
                   {['All', 'Easy', 'Hard'].map(diff => (
                     <Button
@@ -119,7 +119,7 @@ const FilterSection = ({
               </div>
 
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Saved Recipes</label>
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Saved Recipes</label>
                 <Button
                   variant="ghost"
                   onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}

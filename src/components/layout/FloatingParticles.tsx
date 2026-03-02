@@ -1,6 +1,11 @@
 import React, { memo } from 'react';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 const FloatingParticles = () => {
+  const reducedMotion = useReducedMotion();
+
+  if (reducedMotion) return null;
+
   return (
     <>
       {/* Detroit-inspired ambient light effects - Honolulu Blue and Silver */}

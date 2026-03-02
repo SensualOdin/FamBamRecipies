@@ -279,7 +279,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     >
                       <div className="mb-2 opacity-80">{stat.icon}</div>
                       <span className="text-2xl sm:text-3xl font-black mb-1">{stat.value}</span>
-                      <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest opacity-60">{stat.label}</span>
+                      <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest opacity-60">{stat.label}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -309,7 +309,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <h4 className="font-bold text-foreground mb-1 text-sm sm:text-base">{a.name}</h4>
                       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{a.description}</p>
                       {a.unlocked && a.date && (
-                        <div className="mt-3 text-[9px] font-black text-primary uppercase tracking-widest">
+                        <div className="mt-3 text-[10px] font-black text-primary uppercase tracking-widest">
                           Unlocked {new Date(a.date).toLocaleDateString()}
                         </div>
                       )}
@@ -332,7 +332,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <div className="flex-1 min-w-0 py-1">
                       <h4 className="font-bold text-foreground mb-1 truncate group-hover:text-primary transition-colors text-sm sm:text-base">{r.title}</h4>
                       <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-widest font-bold">{r.category}</p>
-                      <div className="flex items-center gap-3 text-[9px] font-black text-muted-foreground uppercase tracking-tighter">
+                      <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-tighter">
                         <span className="bg-muted px-2 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {r.cookTime}</span>
                         <span className="bg-muted px-2 py-0.5 rounded-md flex items-center gap-1"><Flame className="w-2.5 h-2.5" /> {r.timesCooked || 0} cooks</span>
                       </div>
@@ -364,7 +364,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                         <Heart className="w-3.5 h-3.5 text-rose-500 fill-current" />
                       </div>
                       <p className="text-[10px] text-muted-foreground mb-3 uppercase tracking-widest font-bold">by {r.author}</p>
-                      <div className="flex items-center gap-3 text-[9px] font-black text-muted-foreground uppercase tracking-tighter">
+                      <div className="flex items-center gap-3 text-[10px] font-black text-muted-foreground uppercase tracking-tighter">
                         <span className="bg-rose-50/50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-md flex items-center gap-1"><Clock className="w-2.5 h-2.5" /> {r.cookTime}</span>
                       </div>
                     </div>

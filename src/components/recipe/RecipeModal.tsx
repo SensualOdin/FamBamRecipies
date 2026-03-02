@@ -204,7 +204,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                   ))}
                 </div>
                 {activeUsers.length > 3 && (
-                  <span className="text-[8px] font-black text-muted-foreground ml-2 self-center">+{activeUsers.length - 3}</span>
+                  <span className="text-[10px] font-black text-muted-foreground ml-2 self-center">+{activeUsers.length - 3}</span>
                 )}
                 <Eye className="w-3 h-3 text-emerald-500 ml-2 self-center animate-pulse" />
               </div>
@@ -276,10 +276,10 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
             
             {/* Floating Badges */}
             <div className="absolute bottom-12 left-6 sm:left-8 flex flex-wrap gap-2">
-              <Badge className="bg-detroit-600 text-white px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg border-none">
+              <Badge className="bg-detroit-600 text-white px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-lg border-none">
                 {recipe.category}
               </Badge>
-              <Badge className={`px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg border-none ${
+              <Badge className={`px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-lg border-none ${
                 recipe.difficulty === 'Easy' ? 'bg-emerald-500 text-white' :
                 recipe.difficulty === 'Medium' ? 'bg-amber-500 text-white' :
                 'bg-rose-500 text-white'
@@ -302,7 +302,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                       <span className="text-sm">👨‍🍳</span>
                     </div>
                     <div className="text-left">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Recipe by</p>
+                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Recipe by</p>
                       <p className="text-sm font-bold text-foreground group-hover:text-detroit-600 transition-colors">{recipe.author}</p>
                     </div>
                   </Button>
@@ -317,7 +317,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                     <div key={i} className="bg-muted px-3 sm:px-6 py-3 rounded-2xl text-center flex flex-col items-center justify-center">
                       <div className="text-muted-foreground mb-1">{stat.icon}</div>
                       <div className="text-xs sm:text-sm font-black text-foreground">{stat.value}</div>
-                      <div className="text-[8px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">{stat.label}</div>
+                      <div className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-tighter">{stat.label}</div>
                     </div>
                   ))}
                 </div>
@@ -332,7 +332,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
             <div className="bg-slate-900 dark:bg-black rounded-[32px] p-4 sm:p-6 mb-8 sm:mb-12 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-6 shadow-2xl shadow-slate-900/20">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1 text-center sm:text-left">Scale Recipe</span>
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1 text-center sm:text-left">Scale Recipe</span>
                   <div className="flex items-center justify-between sm:justify-start gap-1 bg-white/10 rounded-2xl p-1">
                     <Button variant="ghost" size="iconMobile" onClick={() => setServingMultiplier(Math.max(0.5, servingMultiplier - 0.5))} className="hover:bg-white/10 text-white transition-all">
                       <Minus className="w-4 h-4" />
@@ -347,7 +347,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                 <div className="h-10 w-px bg-white/10 mx-2 hidden sm:block" />
 
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1 text-center sm:text-left">Experience</span>
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1 text-center sm:text-left">Experience</span>
                   <Button 
                     onClick={() => setModal('kitchenMode', true)} 
                     className="h-12 bg-emerald-500 hover:bg-emerald-400 text-white px-6 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 border-none"
@@ -360,7 +360,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                 <div className="h-10 w-px bg-white/10 mx-2 hidden sm:block" />
 
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1 text-center sm:text-left">Action</span>
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1 text-center sm:text-left">Action</span>
                   <Button onClick={() => setShowCookConfirm(true)} className="h-12 bg-detroit-500 hover:bg-detroit-400 text-white px-6 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-detroit-500/20 flex items-center justify-center gap-2 border-none">
                     <Flame className="w-4 h-4" />
                     Mark as Cooked
@@ -402,8 +402,8 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                       {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
                     </span>
                     <div className="flex flex-col gap-1">
-                      <Button variant="ghost" onClick={toggleTimer} className="h-auto p-0 text-[10px] font-black uppercase text-detroit-600 hover:text-detroit-700 tracking-widest hover:bg-transparent">{timerRunning ? 'Pause' : 'Start'}</Button>
-                      <Button variant="ghost" onClick={resetTimer} className="h-auto p-0 text-[10px] font-black uppercase text-rose-500 hover:text-rose-600 tracking-widest hover:bg-transparent">Reset</Button>
+                      <Button variant="ghost" onClick={toggleTimer} className="h-auto p-0 text-[11px] font-black uppercase text-detroit-600 hover:text-detroit-700 tracking-widest hover:bg-transparent">{timerRunning ? 'Pause' : 'Start'}</Button>
+                      <Button variant="ghost" onClick={resetTimer} className="h-auto p-0 text-[11px] font-black uppercase text-rose-500 hover:text-rose-600 tracking-widest hover:bg-transparent">Reset</Button>
                     </div>
                   </div>
                 </div>
@@ -543,7 +543,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
             <Textarea value={cookNotes} onChange={(e) => setCookNotes(e.target.value)} placeholder="Any notes for next time?" className="w-full p-5 bg-muted rounded-[24px] border-none focus-visible:ring-2 focus-visible:ring-detroit-500 outline-none transition-all resize-none mb-6 min-h-[100px]" />
             <div className="flex gap-4">
               <Button variant="ghost" onClick={() => setShowCookConfirm(false)} className="flex-1 h-14 bg-muted text-muted-foreground rounded-[24px] font-bold hover:bg-muted/80 border-none transition-all">Later</Button>
-              <Button onClick={handleCookSubmit} className="flex-1 h-14 bg-detroit-500 text-white rounded-[24px] font-bold shadow-xl shadow-detroit-500/20 hover:bg-detroit-600 border-none transition-all">Finish!</Button>
+              <Button onClick={handleCookSubmit} loading={isMarkingCooked} className="flex-1 h-14 bg-detroit-500 text-white rounded-[24px] font-bold shadow-xl shadow-detroit-500/20 hover:bg-detroit-600 border-none transition-all">Finish!</Button>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import {
   Clock, Users, Flame
 } from 'lucide-react';
 import { categoryIcons } from '../../data/constants';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   onMouseEnter 
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  
+  const reducedMotion = useReducedMotion();
+
   const handleMouseEnter = () => {
     setIsHovered(true);
     if (onMouseEnter) onMouseEnter();
@@ -68,15 +70,15 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
+      layout={!reducedMotion}
+      initial={reducedMotion ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ 
+      transition={reducedMotion ? { duration: 0 } : {
         delay: index * 0.05,
         layout: { type: "spring", stiffness: 300, damping: 30 }
       }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={reducedMotion ? undefined : { y: -8, scale: 1.02 }}
+      whileTap={reducedMotion ? undefined : { scale: 0.98 }}
       onClick={() => onClick(recipe)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
@@ -91,9 +93,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           {/* Image Content */}
           <div className="absolute inset-0 bg-muted flex items-center justify-center">
             {recipe.image && (typeof recipe.image === 'string') && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
-              <motion.img 
-                animate={{ scale: isHovered ? 1.1 : 1 }}
-                transition={{ duration: 0.7 }}
+              <motion.img
+                animate={reducedMotion ? undefined : { scale: isHovered ? 1.1 : 1 }}
+                transition={reducedMotion ? { duration: 0 } : { duration: 0.7 }}
                 src={recipe.image} 
                 alt={recipe.title} 
                 loading="lazy"
@@ -101,9 +103,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               />
             ) : (
               <div className="relative flex items-center justify-center w-full h-full bg-gradient-to-br from-muted to-muted/50">
-                <motion.span 
-                  animate={{ scale: isHovered ? 1.25 : 1, rotate: isHovered ? 6 : 0 }}
-                  transition={{ duration: 0.7 }}
+                <motion.span
+                  animate={reducedMotion ? undefined : { scale: isHovered ? 1.25 : 1, rotate: isHovered ? 6 : 0 }}
+                  transition={reducedMotion ? { duration: 0 } : { duration: 0.7 }}
                   className="text-8xl"
                 >
                   {recipe.image || '🥘'}
@@ -117,6 +119,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             variant="ghost"
             size="icon"
             onClick={handleFavoriteClick}
+            aria-label={recipe.isFavorite ? "Remove from favorites" : "Add to favorites"}
             className={`
               absolute top-4 left-5 z-20 w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl backdrop-blur-xl
               transition-all duration-500
@@ -133,11 +136,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
             <Badge variant="secondary" className="bg-white/30 dark:bg-black/30 backdrop-blur-xl px-3 py-1.5 rounded-xl shadow-sm border border-white/20 flex items-center gap-2 hover:bg-white/50 dark:hover:bg-black/50 text-white border-none">
               <span className="text-sm">{categoryIcons[recipe.category as keyof typeof categoryIcons] || '🍽️'}</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.1em]">{recipe.category}</span>
+              <span className="text-[11px] font-black uppercase tracking-[0.1em]">{recipe.category}</span>
             </Badge>
             <Badge 
               variant="outline"
-              className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] shadow-sm border-none backdrop-blur-md ${difficultyColor[recipe.difficulty as keyof typeof difficultyColor]}`}
+              className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm border-none backdrop-blur-md ${difficultyColor[recipe.difficulty as keyof typeof difficultyColor]}`}
             >
               {recipe.difficulty}
             </Badge>
@@ -152,11 +155,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-lg min-h-[44px] h-auto border-none hover:bg-white dark:hover:bg-slate-700"
             >
               <Avatar className="w-6 h-6 border-none">
-                <AvatarFallback className="bg-detroit-500 text-[10px] text-white font-bold flex items-center justify-center">
+                <AvatarFallback className="bg-detroit-500 text-[11px] text-white font-bold flex items-center justify-center">
                   {recipe.author?.charAt(0) || 'C'}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">by {recipe.author}</span>
+              <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">by {recipe.author}</span>
             </Button>
           </div>
         </div>
@@ -167,7 +170,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mb-3">
               {recipe.tags?.slice(0, 2).map((tag, i) => (
-                <Badge key={i} variant="outline" className="text-[10px] font-bold text-detroit-600 dark:text-detroit-400 bg-detroit-50 dark:bg-detroit-900/30 px-2 py-0.5 rounded-md uppercase tracking-wide border-none whitespace-nowrap">
+                <Badge key={i} variant="outline" className="text-[11px] font-bold text-detroit-600 dark:text-detroit-400 bg-detroit-50 dark:bg-detroit-900/30 px-2 py-0.5 rounded-md uppercase tracking-wide border-none whitespace-nowrap">
                   #{tag}
                 </Badge>
               ))}
@@ -189,13 +192,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 <div className="p-1.5 bg-muted rounded-lg text-muted-foreground">
                   <Clock className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-bold text-muted-foreground whitespace-nowrap">{recipe.cookTime}</span>
+                <span className="text-[11px] sm:text-xs font-bold text-muted-foreground whitespace-nowrap">{recipe.cookTime}</span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <div className="p-1.5 bg-muted rounded-lg text-muted-foreground">
                   <Users className="w-3.5 h-3.5" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-bold text-muted-foreground whitespace-nowrap">{recipe.servings} serving</span>
+                <span className="text-[11px] sm:text-xs font-bold text-muted-foreground whitespace-nowrap">{recipe.servings} serving</span>
               </div>
             </div>
           </div>
@@ -211,7 +214,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                         variant="ghost"
                         size="icon"
                         onClick={handleEditClick}
-                        className="w-10 h-10 text-muted-foreground hover:text-detroit-600 dark:hover:text-detroit-400 hover:bg-muted rounded-xl shrink-0 border-none"
+                        className="w-11 h-11 min-w-[44px] min-h-[44px] text-muted-foreground hover:text-detroit-600 dark:hover:text-detroit-400 hover:bg-muted rounded-xl shrink-0 border-none"
                       >
                         <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
                       </Button>
@@ -226,7 +229,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                       variant="ghost"
                       size="icon"
                       onClick={handleShoppingListClick}
-                      className="w-10 h-10 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-muted rounded-xl shrink-0 border-none"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-muted rounded-xl shrink-0 border-none"
                     >
                       <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                     </Button>
@@ -237,7 +240,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             </div>
 
             <Button 
-              className="bg-primary text-primary-foreground px-4 sm:px-6 h-9 sm:h-11 rounded-xl sm:rounded-2xl font-bold text-[10px] sm:text-xs hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 shrink-0 whitespace-nowrap border-none"
+              className="bg-primary text-primary-foreground px-4 sm:px-6 h-9 sm:h-11 rounded-xl sm:rounded-2xl font-bold text-[11px] sm:text-xs hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 shrink-0 whitespace-nowrap border-none"
             >
               Cook Now
             </Button>
@@ -245,9 +248,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
           {/* Times Cooked Overlay */}
           {recipe.timesCooked && recipe.timesCooked > 0 ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileHover={{ opacity: 1, scale: 1 }}
+            <motion.div
+              initial={reducedMotion ? undefined : { opacity: 0, scale: 0.8 }}
+              whileHover={reducedMotion ? undefined : { opacity: 1, scale: 1 }}
               className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex justify-center pointer-events-none z-30 opacity-0 group-hover:opacity-100"
             >
               <div className="bg-card/95 dark:bg-slate-800/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-border dark:border-white/10 flex items-center gap-2">

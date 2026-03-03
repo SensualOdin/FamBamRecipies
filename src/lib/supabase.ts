@@ -173,6 +173,17 @@ export async function signIn(email: string, password: string): Promise<{ data: a
   return { data, error: null };
 }
 
+export async function resetPassword(email: string): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${getSiteUrl()}/`,
+  });
+  if (error) {
+    console.error('Error sending reset email:', error);
+    return { data: null, error };
+  }
+  return { data, error: null };
+}
+
 export async function signOut(): Promise<{ error: any }> {
   const { error } = await supabase.auth.signOut();
   if (error) {

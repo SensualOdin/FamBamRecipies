@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { signUp, signIn, resetPassword } from '../../lib/supabase';
+import { signUp, signIn, resetPassword, updatePassword } from '../../lib/supabase';
+import { useStore } from '../../store/useStore';
 import { X } from 'lucide-react';
 
 interface AuthModalProps {
@@ -9,10 +10,14 @@ interface AuthModalProps {
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => {
+  const authMode = useStore((state) => state.authMode);
+  const setAuthMode = useStore((state) => state.setAuthMode);
+
   const [isVisible, setIsVisible] = useState(false);
-  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
+  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot' | 'reset'>(authMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +27,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
     setTimeout(() => setIsVisible(true), 50);
   }, []);
 
+  // Sync if store authMode changes while modal is open
+  useEffect(() => {
+    setMode(authMode);
+  }, [authMode]);
+
+  const handleClose = () => {
+    setAuthMode('signin');
+    setIsVisible(false);
+    setTimeout(onClose, 300);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -29,6 +45,32 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
     setSuccessMessage(null);
 
     try {
+      if (mode === 'reset') {
+        if (password.length < 6) {
+          setError('Password must be at least 6 characters.');
+          setIsLoading(false);
+          return;
+        }
+        if (password !== confirmPassword) {
+          setError('Passwords do not match.');
+          setIsLoading(false);
+          return;
+        }
+        const { error: updateError } = await updatePassword(password);
+        if (updateError) {
+          setError(updateError.message || 'Failed to update password. Please try again.');
+          setIsLoading(false);
+          return;
+        }
+        setSuccessMessage('Password updated successfully! You can now sign in with your new password.');
+        setIsLoading(false);
+        setAuthMode('signin');
+        setTimeout(() => {
+          handleClose();
+        }, 2000);
+        return;
+      }
+
       if (mode === 'forgot') {
         const { error: resetError } = await resetPassword(email);
         if (resetError) {
@@ -80,14 +122,51 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
 
   const switchMode = (newMode: 'signin' | 'signup' | 'forgot') => {
     setMode(newMode);
+    setAuthMode(newMode);
     setError(null);
     setSuccessMessage(null);
+  };
+
+  const getIcon = () => {
+    switch (mode) {
+      case 'signup': return '👨‍🍳';
+      case 'forgot': return '🔑';
+      case 'reset': return '🔒';
+      default: return '🥘';
+    }
+  };
+
+  const getTitle = () => {
+    switch (mode) {
+      case 'signup': return 'Join the Family';
+      case 'forgot': return 'Reset Password';
+      case 'reset': return 'New Password';
+      default: return 'Welcome Back';
+    }
+  };
+
+  const getSubtitle = () => {
+    switch (mode) {
+      case 'signup': return 'Start Your Collection';
+      case 'forgot': return "We'll Email You a Link";
+      case 'reset': return 'Choose a New Password';
+      default: return 'Your Kitchen Awaits';
+    }
+  };
+
+  const getButtonLabel = () => {
+    switch (mode) {
+      case 'signup': return 'Create Profile';
+      case 'forgot': return 'Send Reset Link';
+      case 'reset': return 'Update Password';
+      default: return 'Enter Kitchen';
+    }
   };
 
   return (
     <div
       className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? 'bg-slate-950/60 backdrop-blur-md' : 'bg-transparent'}`}
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className={`bg-background dark:bg-slate-900 rounded-[40px] shadow-2xl max-w-md w-full overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
@@ -97,19 +176,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
           <div className="absolute -top-20 -right-20 w-40 h-40 bg-detroit-500/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          <button onClick={onClose} className="absolute top-6 right-6 z-20 w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center transition-all border border-white/10">
+          <button onClick={handleClose} className="absolute top-6 right-6 z-20 w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center transition-all border border-white/10">
             <X className="w-5 h-5" strokeWidth={2.5} />
           </button>
 
           <div className="relative z-10">
             <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-4xl shadow-2xl mx-auto mb-6">
-              {mode === 'signup' ? '👨‍🍳' : mode === 'forgot' ? '🔑' : '🥘'}
+              {getIcon()}
             </div>
             <h2 className="text-3xl font-black tracking-tight mb-2">
-              {mode === 'signup' ? 'Join the Family' : mode === 'forgot' ? 'Reset Password' : 'Welcome Back'}
+              {getTitle()}
             </h2>
             <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">
-              {mode === 'signup' ? 'Start Your Collection' : mode === 'forgot' ? 'We\'ll Email You a Link' : 'Your Kitchen Awaits'}
+              {getSubtitle()}
             </p>
           </div>
         </div>
@@ -130,19 +209,21 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
               </div>
             )}
 
-            <div className="group">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-muted border-2 border-transparent focus:border-detroit-500 focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
-                placeholder="george@example.com"
-                required
-              />
-            </div>
+            {mode !== 'reset' && (
+              <div className="group">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-muted border-2 border-transparent focus:border-detroit-500 focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
+                  placeholder="george@example.com"
+                  required={mode !== 'reset'}
+                />
+              </div>
+            )}
 
-            {mode !== 'forgot' && (
+            {(mode === 'signin' || mode === 'signup') && (
               <div className="group">
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">Security Key</label>
                 <input
@@ -154,6 +235,35 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
                   required
                 />
               </div>
+            )}
+
+            {mode === 'reset' && (
+              <>
+                <div className="group">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">New Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-muted border-2 border-transparent focus:border-detroit-500 focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <div className="group">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">Confirm Password</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-muted border-2 border-transparent focus:border-detroit-500 focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                  />
+                </div>
+              </>
             )}
 
             {error && (
@@ -176,7 +286,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                mode === 'signup' ? 'Create Profile' : mode === 'forgot' ? 'Send Reset Link' : 'Enter Kitchen'
+                getButtonLabel()
               )}
             </button>
           </form>
@@ -192,23 +302,25 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
             </div>
           )}
 
-          <div className="mt-4 text-center">
-            {mode === 'forgot' ? (
-              <button
-                onClick={() => switchMode('signin')}
-                className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-detroit-600 transition-colors"
-              >
-                Back to Sign In
-              </button>
-            ) : (
-              <button
-                onClick={() => switchMode(mode === 'signup' ? 'signin' : 'signup')}
-                className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-detroit-600 transition-colors"
-              >
-                {mode === 'signup' ? 'Already a Chef? Sign In' : "No account? Join the family"}
-              </button>
-            )}
-          </div>
+          {mode !== 'reset' && (
+            <div className="mt-4 text-center">
+              {mode === 'forgot' ? (
+                <button
+                  onClick={() => switchMode('signin')}
+                  className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-detroit-600 transition-colors"
+                >
+                  Back to Sign In
+                </button>
+              ) : (
+                <button
+                  onClick={() => switchMode(mode === 'signup' ? 'signin' : 'signup')}
+                  className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-detroit-600 transition-colors"
+                >
+                  {mode === 'signup' ? 'Already a Chef? Sign In' : "No account? Join the family"}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

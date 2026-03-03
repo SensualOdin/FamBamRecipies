@@ -40,6 +40,9 @@ interface StoreState {
   editingRecipe: Recipe | null;
   setEditingRecipe: (recipe: Recipe | null) => void;
   
+  authMode: 'signin' | 'signup' | 'forgot' | 'reset';
+  setAuthMode: (mode: 'signin' | 'signup' | 'forgot' | 'reset') => void;
+
   isSearchFocused: boolean;
   setIsSearchFocused: (isFocused: boolean) => void;
   
@@ -87,7 +90,10 @@ export const useStore = create<StoreState>((set) => ({
   setSelectedRecipe: (recipe) => set({ selectedRecipe: recipe }),
   editingRecipe: null,
   setEditingRecipe: (recipe) => set({ editingRecipe: recipe }),
-  
+
+  authMode: 'signin' as const,
+  setAuthMode: (mode) => set({ authMode: mode }),
+
   isSearchFocused: false,
   setIsSearchFocused: (isFocused) => set({ isSearchFocused: isFocused }),
   

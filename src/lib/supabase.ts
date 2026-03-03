@@ -184,6 +184,15 @@ export async function resetPassword(email: string): Promise<{ data: any; error: 
   return { data, error: null };
 }
 
+export async function updatePassword(newPassword: string): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) {
+    console.error('Error updating password:', error);
+    return { data: null, error };
+  }
+  return { data, error: null };
+}
+
 export async function signOut(): Promise<{ error: any }> {
   const { error } = await supabase.auth.signOut();
   if (error) {

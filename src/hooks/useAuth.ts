@@ -10,6 +10,7 @@ export const useAuth = () => {
   const setUserProfile = useStore((state) => state.setUserProfile);
   const user = useStore((state) => state.user);
   const setModal = useStore((state) => state.setModal);
+  const setAuthMode = useStore((state) => state.setAuthMode);
   const queryClient = useQueryClient();
 
   // Fetch profile with stats using React Query
@@ -72,7 +73,11 @@ export const useAuth = () => {
     checkSession();
 
     const { data: { subscription } } = onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+      if (event === 'PASSWORD_RECOVERY' && session?.user) {
+        setUser({ id: session.user.id, email: session.user.email! });
+        setAuthMode('reset');
+        setModal('auth', true);
+      } else if (event === 'SIGNED_IN' && session?.user) {
         setUser({ id: session.user.id, email: session.user.email! });
         setModal('auth', false);
         queryClient.invalidateQueries({ queryKey: ['profile', session.user.id] });

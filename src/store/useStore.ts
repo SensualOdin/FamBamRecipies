@@ -28,7 +28,7 @@ interface StoreState {
   // Auth & Profile State
   user: User | null;
   userProfile: UserProfile;
-  setUser: (user: User | null) => void;
+  setUser: (user: User | null | ((prev: User | null) => User | null)) => void;
   setUserProfile: (profile: UserProfile | ((prev: UserProfile) => UserProfile)) => void;
 
   // UI / Modal State
@@ -66,7 +66,9 @@ export const useStore = create<StoreState>((set) => ({
   // Auth & Profile State
   user: null,
   userProfile: initialUserProfile as UserProfile,
-  setUser: (user) => set({ user }),
+  setUser: (user) => set((state) => ({
+    user: typeof user === 'function' ? user(state.user) : user
+  })),
   setUserProfile: (profile) => set((state) => ({ 
     userProfile: typeof profile === 'function' ? profile(state.userProfile) : profile 
   })),

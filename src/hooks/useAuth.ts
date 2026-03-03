@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '../store/useStore';
 import { getCurrentUser, ensureUserProfile, getUserProfileWithStats, onAuthStateChange, recordUserActivity, signOut as supabaseSignOut, supabase } from '../lib/supabase';
@@ -12,6 +12,7 @@ export const useAuth = () => {
   const setModal = useStore((state) => state.setModal);
   const setAuthMode = useStore((state) => state.setAuthMode);
   const queryClient = useQueryClient();
+  const isRecoveryFlow = useRef(false);
 
   // Fetch profile with stats using React Query
   const profileQuery = useQuery({
@@ -21,8 +22,10 @@ export const useAuth = () => {
   });
 
   // Sync profile data to store when Query data changes
+  // Use user?.id (primitive) instead of user (object) to avoid infinite re-render loop
+  const userId = user?.id;
   useEffect(() => {
-    if (profileQuery.data && user) {
+    if (profileQuery.data && userId) {
       const profileWithStats = profileQuery.data;
       setUserProfile((prev: UserProfile) => ({
         ...prev,
@@ -48,23 +51,29 @@ export const useAuth = () => {
         }
       }));
 
-      // Update basic user info in store
-      setUser({
-        id: user.id,
-        email: user.email,
-        display_name: profileWithStats.display_name,
-        avatar: profileWithStats.avatar,
-        avatar_url: profileWithStats.avatar_url,
-        bio: profileWithStats.bio
+      setUser((prev: any) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          display_name: profileWithStats.display_name,
+          avatar: profileWithStats.avatar,
+          avatar_url: profileWithStats.avatar_url,
+          bio: profileWithStats.bio
+        };
       });
     }
-  }, [profileQuery.data, setUser, setUserProfile, user]);
+  }, [profileQuery.data, userId, setUser, setUserProfile]);
 
-  // Handle PKCE code exchange from password reset (and email confirm) redirects
+  // Handle PKCE code exchange from password reset and email confirm redirects
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
+    const isReset = params.get('reset') === '1';
+
     if (code) {
+      if (isReset) {
+        isRecoveryFlow.current = true;
+      }
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (error) {
           console.error('Code exchange failed:', error);
@@ -79,7 +88,6 @@ export const useAuth = () => {
     const checkSession = async () => {
       const currentUser = await getCurrentUser();
       if (currentUser) {
-        // Just set the user; profileQuery will handle the rest
         setUser({ id: currentUser.id, email: currentUser.email! });
         await recordUserActivity(currentUser.id, 'login');
       }
@@ -89,12 +97,20 @@ export const useAuth = () => {
 
     const { data: { subscription } } = onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY' && session?.user) {
+        isRecoveryFlow.current = true;
         setUser({ id: session.user.id, email: session.user.email! });
         setAuthMode('reset');
         setModal('auth', true);
       } else if (event === 'SIGNED_IN' && session?.user) {
         setUser({ id: session.user.id, email: session.user.email! });
-        setModal('auth', false);
+        // If this SIGNED_IN came from a password recovery flow, show reset modal instead of closing
+        if (isRecoveryFlow.current) {
+          isRecoveryFlow.current = false;
+          setAuthMode('reset');
+          setModal('auth', true);
+        } else {
+          setModal('auth', false);
+        }
         queryClient.invalidateQueries({ queryKey: ['profile', session.user.id] });
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
@@ -107,14 +123,14 @@ export const useAuth = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser, setUserProfile, setModal, queryClient]);
+  }, [setUser, setUserProfile, setModal, setAuthMode, queryClient]);
 
   const signOut = async () => {
     await supabaseSignOut();
   };
 
-  return { 
-    user, 
+  return {
+    user,
     signOut,
     isLoading: profileQuery.isLoading && !!user
   };

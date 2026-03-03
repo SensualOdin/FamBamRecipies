@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from 'framer-motion';
-import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 interface HeaderProps {
   user: any;
@@ -41,7 +40,6 @@ const Header: React.FC<HeaderProps> = ({
   onPrefetch,
   isLoaded
 }) => {
-  const reducedMotion = useReducedMotion();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
@@ -99,21 +97,17 @@ const Header: React.FC<HeaderProps> = ({
                       onClick={toggleTheme}
                       className="relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all border-none"
                     >
-                      {reducedMotion ? (
-                        <>{theme === 'light' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</>
-                      ) : (
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={theme}
-                            initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
-                            animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                            exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            {theme === 'light' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                          </motion.div>
-                        </AnimatePresence>
-                      )}
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={theme}
+                          initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+                          animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                          exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {theme === 'light' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                        </motion.div>
+                      </AnimatePresence>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Switch Theme</TooltipContent>
@@ -159,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({
                   <div className="text-detroit-400 text-[10px] font-medium">Lvl {userProfile.level} Chef</div>
                 </div>
                 <Avatar className="w-8 h-8 border-none shadow-inner">
-                  <AvatarImage src={userProfile.avatarUrl} alt={userProfile.name} />
+                  <AvatarImage src={userProfile.avatarUrl} />
                   <AvatarFallback className="bg-gradient-to-br from-detroit-400 to-detroit-600 text-xs text-white border-none">
                     {userProfile.avatar}
                   </AvatarFallback>
@@ -207,8 +201,7 @@ const Header: React.FC<HeaderProps> = ({
                     variant="ghost"
                     size="icon"
                     onClick={() => setSearchQuery('')}
-                    aria-label="Clear search"
-                    className="mr-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all w-10 h-10 min-w-[44px] min-h-[44px]"
+                    className="mr-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all w-8 h-8"
                   >
                     <X className="w-4 h-4" />
                   </Button>

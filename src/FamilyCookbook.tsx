@@ -11,7 +11,6 @@ import FilterSection from './components/layout/FilterSection';
 import MobileNav from './components/layout/MobileNav';
 import { CommandPalette } from './components/layout/CommandPalette';
 import { Badge } from "@/components/ui/badge";
-import { RecipeSkeleton } from './components/recipe/RecipeSkeleton';
 
 // Hooks & Store
 import { useStore } from './store/useStore';
@@ -209,9 +208,6 @@ export default function FamilyCookbook() {
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-detroit-100 selection:text-detroit-900 transition-colors duration-500">
-      <a href="#main-recipes" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-4 focus:left-4 focus:bg-primary focus:text-primary-foreground focus:px-6 focus:py-3 focus:rounded-2xl focus:font-bold focus:text-sm focus:shadow-xl">
-        Skip to recipes
-      </a>
       {saveError && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] max-w-md w-full px-4 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="bg-rose-50 dark:bg-rose-950 border border-rose-200 dark:border-rose-800 rounded-2xl p-4 shadow-xl flex items-center gap-3">
@@ -256,7 +252,7 @@ export default function FamilyCookbook() {
         isLoaded={true}
       />
 
-      <main id="main-recipes" className="relative max-w-7xl mx-auto px-4 pb-28 sm:pb-20 -mt-12 sm:-mt-16 z-20">
+      <main className="relative max-w-7xl mx-auto px-4 pb-28 sm:pb-20 -mt-12 sm:-mt-16 z-20">
         <LayoutGroup>
           <FilterSection 
             categories={categories}
@@ -289,7 +285,7 @@ export default function FamilyCookbook() {
             {selectedAuthor && (
               <motion.div layout initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 self-start sm:self-auto">
                 <Badge variant="outline" className="flex items-center gap-2 bg-detroit-50 dark:bg-detroit-900/20 text-detroit-700 dark:text-detroit-300 px-4 py-2 rounded-xl border-detroit-100 dark:border-detroit-800">
-                  <span className="text-[11px] font-bold uppercase tracking-widest">Author: {selectedAuthor}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Author: {selectedAuthor}</span>
                   <button onClick={() => setFilter('selectedAuthor', null)} className="hover:text-detroit-900 dark:hover:text-detroit-100">
                     <X className="w-4 h-4" />
                   </button>
@@ -321,12 +317,9 @@ export default function FamilyCookbook() {
       </main>
 
       <Suspense fallback={
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <RecipeSkeleton key={i} />
-            ))}
-          </div>
+        <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[100]">
+          <div className="w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
+          <p className="text-slate-400 font-medium animate-pulse">Setting the table...</p>
         </div>
       }>
         {selectedRecipe && !modals.kitchenMode && (

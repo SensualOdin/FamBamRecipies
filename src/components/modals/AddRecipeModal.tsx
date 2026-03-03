@@ -46,7 +46,6 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
   const [usePhotoAsImage, setUsePhotoAsImage] = useState(editingRecipe?.image?.startsWith('http') || false);
   const recipePhotoInputRef = useRef<HTMLInputElement>(null);
   
-  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: editingRecipe?.title || '',
     author: editingRecipe?.author || defaultAuthor || '',
@@ -160,26 +159,21 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
     }
   };
 
-  const handleSubmit = async () => {
-    setIsSaving(true);
-    try {
-      const imageValue = usePhotoAsImage && recipePhotoPreview ? recipePhotoPreview : formData.image;
-      const recipeData = {
-        ...formData,
-        image: imageValue,
-        ingredients: formData.ingredients.filter(i => i.trim()),
-        instructions: formData.instructions.filter(i => i.trim()),
-      };
+  const handleSubmit = () => {
+    const imageValue = usePhotoAsImage && recipePhotoPreview ? recipePhotoPreview : formData.image;
+    const recipeData = {
+      ...formData,
+      image: imageValue,
+      ingredients: formData.ingredients.filter(i => i.trim()),
+      instructions: formData.instructions.filter(i => i.trim()),
+    };
 
-      if (isEditMode && editingRecipe) {
-        await onUpdate({ ...editingRecipe, ...recipeData }, recipePhotoFile);
-      } else {
-        await onSave(recipeData, recipePhotoFile);
-      }
-      handleOpenChange(false);
-    } finally {
-      setIsSaving(false);
+    if (isEditMode && editingRecipe) {
+      onUpdate({ ...editingRecipe, ...recipeData }, recipePhotoFile);
+    } else {
+      onSave(recipeData, recipePhotoFile);
     }
+    handleOpenChange(false);
   };
 
   const isStepValid = () => {
@@ -208,7 +202,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
 
           {step > 0 && (
             <div className="space-y-2">
-              <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-white/60">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-white/40">
                 <span>Progress</span>
                 <span>Step {step} of 5</span>
               </div>
@@ -277,7 +271,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Recipe Name</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Recipe Name</label>
                 <Input 
                   value={formData.title} 
                   onChange={e => setFormData(p => ({ ...p, title: e.target.value }))} 
@@ -286,7 +280,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Chef / Author</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Chef / Author</label>
                 <Input 
                   value={formData.author} 
                   onChange={e => setFormData(p => ({ ...p, author: e.target.value }))} 
@@ -295,7 +289,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Short Story or Intro</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Short Story or Intro</label>
                 <Textarea 
                   value={formData.description} 
                   onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} 
@@ -310,7 +304,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Category</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Category</label>
                   <Select value={formData.category} onValueChange={val => setFormData(p => ({ ...p, category: val }))}>
                     <SelectTrigger className="w-full bg-muted rounded-2xl px-6 py-7 font-bold border-2 border-transparent focus:border-primary transition-all h-auto">
                       <SelectValue placeholder="Category" />
@@ -321,7 +315,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Difficulty</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Difficulty</label>
                   <Select value={formData.difficulty} onValueChange={val => setFormData(p => ({ ...p, difficulty: val }))}>
                     <SelectTrigger className="w-full bg-muted rounded-2xl px-6 py-7 font-bold border-2 border-transparent focus:border-primary transition-all h-auto">
                       <SelectValue placeholder="Difficulty" />
@@ -338,7 +332,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
               <div className="grid grid-cols-3 gap-4">
                 {['prepTime', 'cookTime', 'servings'].map((f) => (
                   <div key={f} className="space-y-2">
-                    <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">{f === 'servings' ? 'Servings' : f.replace('Time', '')}</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">{f === 'servings' ? 'Servings' : f.replace('Time', '')}</label>
                     <Input 
                       value={formData[f as keyof typeof formData] as string} 
                       onChange={e => setFormData(p => ({ ...p, [f]: e.target.value }))} 
@@ -369,7 +363,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                     className={`min-w-[100px] h-12 px-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-2 transition-all ${usePhotoAsImage ? 'border-emerald-500 bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'border-border text-muted-foreground hover:border-primary'}`}
                   >
                     <Plus className="w-5 h-5" />
-                    <span className="text-[11px] font-black uppercase tracking-widest">Photo</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Photo</span>
                   </Button>
                 </div>
               </div>
@@ -378,7 +372,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
 
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
-              <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Ingredients List</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Ingredients List</label>
               {formData.ingredients.map((ing, i) => (
                 <div key={i} className="flex gap-3 group">
                   <div className="shrink-0 w-12 h-14 bg-muted rounded-2xl flex items-center justify-center font-black text-muted-foreground/30 group-focus-within:bg-primary/10 group-focus-within:text-primary transition-colors">
@@ -412,7 +406,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
 
           {step === 4 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Cooking Steps</label>
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block">Cooking Steps</label>
               {formData.instructions.map((ins, i) => (
                 <div key={i} className="flex gap-4 group">
                   <div className="shrink-0 w-14 h-14 bg-foreground text-background rounded-2xl flex items-center justify-center font-black text-lg shadow-lg transition-transform group-focus-within:scale-110">
@@ -493,7 +487,6 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
           ) : (
             <Button
               onClick={handleSubmit}
-              loading={isSaving}
               className="px-12 h-14 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl font-bold shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 border-none"
             >
               <Check className="w-6 h-6" strokeWidth={3} />

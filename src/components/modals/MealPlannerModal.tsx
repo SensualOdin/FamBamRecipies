@@ -139,7 +139,7 @@ END:VCALENDAR`;
                   </div>
                   <div>
                     <h2 className="text-2xl font-black tracking-tight text-slate-900 leading-tight">Meal Planner</h2>
-                    <p className="text-slate-600 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest leading-none mt-1">Organize Your Family Menu</p>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest leading-none mt-1">Organize Your Family Menu</p>
                   </div>
                 </div>
               </div>
@@ -159,7 +159,7 @@ END:VCALENDAR`;
 
               <div className="grid grid-cols-7 gap-3 mb-4">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                <div key={d} className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{d}</div>
+                <div key={d} className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">{d}</div>
               ))}
             </div>
 
@@ -182,7 +182,7 @@ END:VCALENDAR`;
                         'border-slate-50 bg-white hover:border-detroit-100 hover:shadow-xl hover:shadow-slate-200/50'}
                     `}
                   >
-                    <span className={`text-sm font-black ${isToday && !isSelected ? 'text-detroit-600' : isSelected ? 'text-white' : 'text-slate-600 dark:text-slate-400'}`}>{day}</span>
+                    <span className={`text-sm font-black ${isToday && !isSelected ? 'text-detroit-600' : isSelected ? 'text-white' : 'text-slate-400'}`}>{day}</span>
                     {meals.length > 0 && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
                         <div className={`w-full h-1 rounded-full ${isSelected ? 'bg-white/30' : 'bg-detroit-500/30'}`} />
@@ -194,7 +194,7 @@ END:VCALENDAR`;
                               <span className="text-xl">{meals[0].image || '🥘'}</span>
                             )}
                           </div>
-                          {meals.length > 1 && <span className={`text-[10px] font-black mt-1 ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>+{meals.length - 1} more</span>}
+                          {meals.length > 1 && <span className={`text-[8px] font-black mt-1 ${isSelected ? 'text-white/60' : 'text-slate-400'}`}>+{meals.length - 1} more</span>}
                         </div>
                       </div>
                     )}
@@ -225,7 +225,7 @@ END:VCALENDAR`;
                     <div className="space-y-3">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-detroit-500">Pick a Recipe</span>
-                        <button onClick={() => setShowRecipePicker(false)} className="text-[10px] font-black uppercase text-slate-600 dark:text-slate-400">Cancel</button>
+                        <button onClick={() => setShowRecipePicker(false)} className="text-[10px] font-black uppercase text-slate-400">Cancel</button>
                       </div>
                       {recipes.map(r => (
                         <button key={r.id} onClick={() => handleAddMeal(r)} className="w-full group p-4 bg-white rounded-3xl border border-slate-100 hover:border-detroit-200 transition-all flex items-center gap-4 text-left">

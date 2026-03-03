@@ -97,7 +97,7 @@ const Header: React.FC<HeaderProps> = ({
                       variant="ghost"
                       size="icon"
                       onClick={toggleTheme}
-                      className="relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all border-none"
+                      className="relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all border-none min-w-[44px] min-h-[44px]"
                     >
                       {reducedMotion ? (
                         <>{theme === 'light' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</>
@@ -131,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({
                         size="icon"
                         onClick={tool.onClick}
                         onMouseEnter={() => tool.prefetch && onPrefetch && onPrefetch(tool.prefetch)}
-                        className={`relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group border-none ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
+                        className={`relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group border-none min-w-[44px] min-h-[44px] ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
                       >
                         {tool.icon}
                         {tool.count > 0 && (
@@ -168,7 +168,7 @@ const Header: React.FC<HeaderProps> = ({
             ) : (
               <Button 
                 onClick={onShowAuth}
-                className="px-5 sm:px-6 py-2 bg-white dark:bg-slate-100 text-slate-900 rounded-full hover:bg-slate-100 dark:hover:bg-white transition-all font-bold text-sm shadow-xl shadow-white/5 border-none"
+                className="px-5 sm:px-6 py-2 min-h-[44px] bg-white dark:bg-slate-100 text-slate-900 rounded-full hover:bg-slate-100 dark:hover:bg-white transition-all font-bold text-sm shadow-xl shadow-white/5 border-none"
               >
                 Sign In
               </Button>

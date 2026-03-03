@@ -96,9 +96,9 @@ const UnitConverterModal = ({ onClose }) => {
 
         <div className="p-5 sm:p-8 space-y-6 sm:space-y-8">
           {isMixedConversion && (
-            <div className="bg-amber-50 dark:bg-amber-950/30 rounded-[20px] p-4 flex items-start gap-3 border border-amber-100 dark:border-amber-800/30">
+            <div className="bg-amber-50 rounded-[20px] p-4 flex items-start gap-3 border border-amber-100">
               <span className="text-xl">⚠️</span>
-              <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide leading-relaxed">
+              <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide leading-relaxed">
                 Note: This assumes water density. For flour or sugar, use a scale for better accuracy!
               </p>
             </div>
@@ -124,7 +124,7 @@ const UnitConverterModal = ({ onClose }) => {
               </div>
 
               <div className="pt-6">
-                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-400">
+                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </div>
               </div>

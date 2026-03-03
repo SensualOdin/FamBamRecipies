@@ -27,17 +27,15 @@ import { initialUserProfile } from './data/initialProfile';
 import { markRecipeAsCooked, uploadRecipeImage } from './lib/supabase';
 import { Recipe, UserProfile } from './types';
 
-// Eagerly loaded modals (small, frequently accessed)
-import UnitConverterModal from './components/modals/UnitConverterModal';
-import MealPlannerModal from './components/modals/MealPlannerModal';
-import AuthModal from './components/modals/AuthModal';
-
-// Lazy loaded modals (larger, less frequent)
+// Lazy loaded modals
 const RecipeModal = lazy(() => import('./components/recipe/RecipeModal'));
 const AddRecipeModal = lazy(() => import('./components/modals/AddRecipeModal'));
 const ShoppingListModal = lazy(() => import('./components/modals/ShoppingListModal'));
+const UnitConverterModal = lazy(() => import('./components/modals/UnitConverterModal'));
 const IngredientSubstitutionsModal = lazy(() => import('./components/modals/IngredientSubstitutionsModal'));
 const UserProfileModal = lazy(() => import('./components/modals/UserProfileModal'));
+const MealPlannerModal = lazy(() => import('./components/modals/MealPlannerModal'));
+const AuthModal = lazy(() => import('./components/modals/AuthModal'));
 const KitchenMode = lazy(() => import('./components/recipe/KitchenMode'));
 
 // Prefetch functions
@@ -258,7 +256,7 @@ export default function FamilyCookbook() {
         isLoaded={true}
       />
 
-      <main id="main-recipes" className="relative max-w-7xl mx-auto px-4 pb-28 sm:pb-20 mt-2 sm:-mt-16 z-20">
+      <main id="main-recipes" className="relative max-w-7xl mx-auto px-4 pb-28 sm:pb-20 -mt-12 sm:-mt-16 z-20">
         <LayoutGroup>
           <FilterSection 
             categories={categories}
@@ -322,37 +320,19 @@ export default function FamilyCookbook() {
         </LayoutGroup>
       </main>
 
-      {/* Eagerly loaded modals - no Suspense needed */}
-      {modals.unitConverter && (
-        <UnitConverterModal onClose={() => setModal('unitConverter', false)} />
-      )}
-
-      {modals.mealPlanner && (
-        <MealPlannerModal
-          onClose={() => setModal('mealPlanner', false)}
-          recipes={allRecipes}
-          mealPlan={mealPlan}
-          setMealPlan={setMealPlan}
-        />
-      )}
-
-      {modals.auth && (
-        <AuthModal
-          onClose={() => setModal('auth', false)}
-          onSignIn={() => setModal('auth', false)}
-        />
-      )}
-
-      {/* Lazy loaded modals */}
       <Suspense fallback={
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
-          <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" />
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <RecipeSkeleton key={i} />
+            ))}
+          </div>
         </div>
       }>
         {selectedRecipe && !modals.kitchenMode && (
-          <RecipeModal
-            recipe={selectedRecipe}
-            onClose={() => setSelectedRecipe(null)}
+          <RecipeModal 
+            recipe={selectedRecipe} 
+            onClose={() => setSelectedRecipe(null)} 
             onAddToShoppingList={addToShoppingList}
             onMarkAsCooked={handleMarkAsCooked}
             user={user}
@@ -361,13 +341,13 @@ export default function FamilyCookbook() {
             }}
           />
         )}
-
+        
         {modals.addRecipe && (
-          <AddRecipeModal
+          <AddRecipeModal 
             onClose={() => {
               setModal('addRecipe', false);
               setEditingRecipe(null);
-            }}
+            }} 
             onSave={handleAddRecipe}
             onUpdate={handleUpdateRecipe}
             categories={categories.filter(c => c !== 'All')}
@@ -377,11 +357,15 @@ export default function FamilyCookbook() {
         )}
 
         {modals.shoppingList && (
-          <ShoppingListModal
-            onClose={() => setModal('shoppingList', false)}
+          <ShoppingListModal 
+            onClose={() => setModal('shoppingList', false)} 
             shoppingList={shoppingList}
             setShoppingList={setShoppingList}
           />
+        )}
+
+        {modals.unitConverter && (
+          <UnitConverterModal onClose={() => setModal('unitConverter', false)} />
         )}
 
         {modals.substitutions && (
@@ -389,8 +373,8 @@ export default function FamilyCookbook() {
         )}
 
         {modals.profile && (
-          <UserProfileModal
-            onClose={() => setModal('profile', false)}
+          <UserProfileModal 
+            onClose={() => setModal('profile', false)} 
             userProfile={userProfile}
             recipes={allRecipes}
             onSignOut={signOut}
@@ -398,6 +382,22 @@ export default function FamilyCookbook() {
             onProfileUpdate={(updates: Partial<UserProfile>) => {
               setUserProfile((prev: UserProfile) => ({ ...prev, ...updates }));
             }}
+          />
+        )}
+
+        {modals.mealPlanner && (
+          <MealPlannerModal
+            onClose={() => setModal('mealPlanner', false)}
+            recipes={allRecipes}
+            mealPlan={mealPlan}
+            setMealPlan={setMealPlan}
+          />
+        )}
+
+        {modals.auth && (
+          <AuthModal 
+            onClose={() => setModal('auth', false)} 
+            onSignIn={() => setModal('auth', false)}
           />
         )}
 

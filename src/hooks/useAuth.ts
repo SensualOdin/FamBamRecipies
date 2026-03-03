@@ -21,44 +21,43 @@ export const useAuth = () => {
 
   // Sync profile data to store when Query data changes
   useEffect(() => {
-    if (!profileQuery.data) return;
-    const currentUser = useStore.getState().user;
-    if (!currentUser) return;
+    if (profileQuery.data && user) {
+      const profileWithStats = profileQuery.data;
+      setUserProfile((prev: UserProfile) => ({
+        ...prev,
+        name: profileWithStats.display_name || 'Chef',
+        avatar: profileWithStats.avatar || '👨‍🍳',
+        bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
+        level: profileWithStats.level || 1,
+        experience: profileWithStats.experience || 0,
+        experienceToNextLevel: profileWithStats.experience_to_next_level || 100,
+        totalPoints: profileWithStats.total_points || 0,
+        badges: profileWithStats.badges || [],
+        achievements: initialUserProfile.achievements.map(ach => ({
+          ...ach,
+          unlocked: profileWithStats.badges?.includes(ach.id) || false
+        })),
+        stats: {
+          recipesCooked: profileWithStats.stats?.recipesCooked || 0,
+          recipesCreated: profileWithStats.stats?.recipesCreated || 0,
+          commentsAdded: profileWithStats.stats?.commentsAdded || 0,
+          favoritesCount: profileWithStats.stats?.favoritesCount || 0,
+          daysActive: profileWithStats.stats?.daysActive || 1,
+          longestStreak: profileWithStats.stats?.longestStreak || 0
+        }
+      }));
 
-    const profileWithStats = profileQuery.data;
-    setUserProfile((prev: UserProfile) => ({
-      ...prev,
-      name: profileWithStats.display_name || 'Chef',
-      avatar: profileWithStats.avatar || '👨‍🍳',
-      bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
-      level: profileWithStats.level || 1,
-      experience: profileWithStats.experience || 0,
-      experienceToNextLevel: profileWithStats.experience_to_next_level || 100,
-      totalPoints: profileWithStats.total_points || 0,
-      badges: profileWithStats.badges || [],
-      achievements: initialUserProfile.achievements.map(ach => ({
-        ...ach,
-        unlocked: profileWithStats.badges?.includes(ach.id) || false
-      })),
-      stats: {
-        recipesCooked: profileWithStats.stats?.recipesCooked || 0,
-        recipesCreated: profileWithStats.stats?.recipesCreated || 0,
-        commentsAdded: profileWithStats.stats?.commentsAdded || 0,
-        favoritesCount: profileWithStats.stats?.favoritesCount || 0,
-        daysActive: profileWithStats.stats?.daysActive || 1,
-        longestStreak: profileWithStats.stats?.longestStreak || 0
-      }
-    }));
-
-    setUser({
-      id: currentUser.id,
-      email: currentUser.email,
-      display_name: profileWithStats.display_name,
-      avatar: profileWithStats.avatar,
-      avatar_url: profileWithStats.avatar_url,
-      bio: profileWithStats.bio
-    });
-  }, [profileQuery.data, setUser, setUserProfile]);
+      // Update basic user info in store
+      setUser({
+        id: user.id,
+        email: user.email,
+        display_name: profileWithStats.display_name,
+        avatar: profileWithStats.avatar,
+        avatar_url: profileWithStats.avatar_url,
+        bio: profileWithStats.bio
+      });
+    }
+  }, [profileQuery.data, setUser, setUserProfile, user]);
 
   useEffect(() => {
     const checkSession = async () => {

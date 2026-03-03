@@ -24,7 +24,7 @@ const FilterSection = ({
   initialRecipes
 }) => {
   return (
-    <div className={`bg-card/70 dark:bg-slate-900/70 backdrop-blur-3xl rounded-[28px] sm:rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] dark:shadow-none p-3 sm:p-6 mb-8 sm:mb-12 transform transition-all duration-1000 delay-500 border border-border dark:border-white/10 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+    <div className={`bg-card dark:bg-slate-900/95 rounded-[28px] sm:rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] dark:shadow-none p-3 sm:p-6 mb-8 sm:mb-12 transform transition-all duration-700 delay-300 border border-border dark:border-white/10 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         {/* Categories Tabs */}
         <div className="flex-1 overflow-x-auto scrollbar-hide -mx-2 px-2 pb-1 snap-x snap-mandatory">

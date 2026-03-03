@@ -345,7 +345,7 @@ export default function FamilyCookbook() {
 
       {/* Lazy loaded modals */}
       <Suspense fallback={
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80">
           <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" />
         </div>
       }>

@@ -66,11 +66,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
 
   return (
     <div 
-      className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? 'bg-slate-950/60 backdrop-blur-md' : 'bg-transparent'}`} 
+      className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-opacity duration-300 ${isVisible ? 'bg-slate-950/80 opacity-100' : 'bg-transparent opacity-0'}`}
       onClick={onClose}
     >
       <div 
-        className={`bg-background dark:bg-slate-900 rounded-[40px] shadow-2xl max-w-md w-full overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+        className={`bg-background dark:bg-slate-900 rounded-[40px] shadow-2xl max-w-md w-full overflow-hidden transition-[transform,opacity] duration-500 ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="bg-slate-950 p-6 sm:p-10 text-white text-center relative overflow-hidden">

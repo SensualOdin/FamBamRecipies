@@ -89,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* Tools & Auth */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <div className="flex bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-full p-1 border border-white/10 dark:border-white/5 transition-colors">
+            <div className="flex bg-white/10 dark:bg-black/30 rounded-full p-1 border border-white/10 dark:border-white/5 transition-colors">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -152,7 +152,7 @@ const Header: React.FC<HeaderProps> = ({
                 variant="ghost"
                 onClick={onShowProfile}
                 onMouseEnter={() => onPrefetch && onPrefetch('profile')}
-                className="flex items-center gap-2 bg-white/10 dark:bg-black/20 hover:bg-white/15 dark:hover:bg-black/30 backdrop-blur-md border border-white/20 dark:border-white/10 px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto"
+                className="flex items-center gap-2 bg-white/15 dark:bg-black/30 hover:bg-white/20 dark:hover:bg-black/40 border border-white/20 dark:border-white/10 px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto"
               >
                 <div className="text-right hidden sm:block">
                   <div className="text-white font-semibold text-xs">{userProfile.name}</div>
@@ -189,7 +189,7 @@ const Header: React.FC<HeaderProps> = ({
           <div className={`max-w-3xl mx-auto px-4 transform transition-all duration-700 ${isSearchFocused ? 'scale-[1.05]' : 'scale-100'}`}>
             <div className={`relative group transition-all duration-500 ${isSearchFocused ? 'ring-4 ring-white/10 rounded-[32px]' : ''}`}>
               <div className="absolute inset-0 bg-gradient-to-r from-detroit-500/30 to-cyan-500/30 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              <div className="relative flex items-center bg-white/5 backdrop-blur-[40px] rounded-[28px] border border-white/10 overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+              <div className="relative flex items-center bg-white/10 rounded-[28px] border border-white/10 overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
                 <div className="pl-5 sm:pl-8 text-slate-300">
                   <Search className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
                 </div>

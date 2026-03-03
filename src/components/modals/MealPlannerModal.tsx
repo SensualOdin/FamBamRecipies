@@ -115,15 +115,15 @@ END:VCALENDAR`;
   };
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 transition-all duration-300 ${isVisible ? 'bg-slate-900/60 backdrop-blur-md' : 'bg-transparent'}`} onClick={onClose}>
+    <div className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 transition-opacity duration-300 ${isVisible ? 'bg-slate-950/80 opacity-100' : 'bg-transparent opacity-0'}`} onClick={onClose}>
       <div
-        className={`bg-background dark:bg-slate-900 rounded-t-[40px] sm:rounded-[48px] shadow-2xl w-full sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100 translate-y-0' : 'sm:scale-95 opacity-0 translate-y-32'}`}
+        className={`bg-background dark:bg-slate-900 rounded-t-[40px] sm:rounded-[48px] shadow-2xl w-full sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-y-auto transition-[transform,opacity] duration-500 ${isVisible ? 'scale-100 opacity-100 translate-y-0' : 'sm:scale-95 opacity-0 translate-y-32'}`}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex flex-col lg:flex-row h-full bg-background dark:bg-slate-900 transition-colors">
+        <div className="flex flex-col lg:flex-row min-h-full lg:h-full bg-background dark:bg-slate-900 transition-colors">
           {/* Main Calendar View */}
           <div className="flex-1 flex flex-col p-4 sm:p-10 pt-safe bg-background dark:bg-slate-900 transition-colors">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex justify-between items-center mb-4 sm:mb-8">
               <div className="flex items-center gap-3">
                 <Button
                   variant="ghost"
@@ -133,13 +133,13 @@ END:VCALENDAR`;
                 >
                   <ChevronLeft className="w-6 h-6 text-slate-600 dark:text-slate-300" />
                 </Button>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-detroit-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-detroit-500/20">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-detroit-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-detroit-500/20">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black tracking-tight text-foreground leading-tight">Meal Planner</h2>
-                    <p className="text-muted-foreground text-[10px] font-black uppercase tracking-widest leading-none mt-1">Organize Your Family Menu</p>
+                    <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground leading-tight">Meal Planner</h2>
+                    <p className="text-muted-foreground text-[10px] font-black uppercase tracking-widest leading-none mt-1 hidden sm:block">Organize Your Family Menu</p>
                   </div>
                 </div>
               </div>
@@ -151,20 +151,20 @@ END:VCALENDAR`;
               </div>
             </div>
 
-              <div className="flex sm:hidden items-center justify-between gap-2 bg-slate-50 dark:bg-white/5 p-1 rounded-2xl mb-6">
+              <div className="flex sm:hidden items-center justify-between gap-2 bg-slate-50 dark:bg-white/5 p-1 rounded-2xl mb-3">
                 <button onClick={handlePrevMonth} className="p-2 hover:bg-white dark:hover:bg-white/10 hover:shadow-sm rounded-xl transition-all text-slate-400 hover:text-slate-900 dark:hover:text-white"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg></button>
                 <span className="px-4 font-black text-sm uppercase tracking-tighter text-slate-700 dark:text-slate-300 text-center">{currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
                 <button onClick={handleNextMonth} className="p-2 hover:bg-white dark:hover:bg-white/10 hover:shadow-sm rounded-xl transition-all text-slate-400 hover:text-slate-900 dark:hover:text-white"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg></button>
               </div>
 
-              <div className="grid grid-cols-7 gap-3 mb-4">
+              <div className="grid grid-cols-7 gap-1.5 sm:gap-3 mb-2 sm:mb-4">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
                 <div key={d} className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{d}</div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-3 flex-1 overflow-y-auto scrollbar-hide">
-              {padding.map(i => <div key={`pad-${i}`} className="aspect-square bg-slate-50/30 dark:bg-white/5 rounded-[20px]" />)}
+            <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
+              {padding.map(i => <div key={`pad-${i}`} className="aspect-square bg-slate-50/30 dark:bg-white/5 rounded-xl sm:rounded-[20px]" />)}
               {days.map(day => {
                 const dateStr = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0];
                 const meals = mealPlan[dateStr] || [];
@@ -176,7 +176,7 @@ END:VCALENDAR`;
                     key={day}
                     onClick={() => handleDateClick(day)}
                     className={`
-                      relative aspect-square rounded-[24px] p-3 cursor-pointer transition-all border-2 group
+                      relative aspect-square rounded-xl sm:rounded-[24px] p-1.5 sm:p-3 cursor-pointer transition-all border-2 group
                       ${isToday ? 'border-detroit-500 bg-detroit-50/30 dark:bg-detroit-500/10 shadow-lg shadow-detroit-500/10' :
                         isSelected ? 'border-detroit-500 dark:border-white bg-slate-950 dark:bg-white/10 text-white shadow-xl' :
                         'border-slate-100 dark:border-white/10 bg-white dark:bg-slate-800 hover:border-detroit-100 dark:hover:border-detroit-500/30 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none'}
@@ -205,7 +205,7 @@ END:VCALENDAR`;
           </div>
 
           {/* Selection & Planned Sidebar */}
-          <div className="lg:w-96 bg-slate-50 dark:bg-slate-800/50 p-8 sm:p-10 flex flex-col border-l border-slate-100 dark:border-white/10">
+          <div className="lg:w-96 bg-slate-50 dark:bg-slate-800/50 p-5 sm:p-10 flex flex-col border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-white/10">
             {selectedDate ? (
               <div className="flex flex-col h-full animate-fadeIn">
                 <div className="flex justify-between items-start mb-8">
@@ -290,7 +290,7 @@ END:VCALENDAR`;
 
         {/* Calendar Export Modal Layer */}
         {showCalendarExport && (
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] flex items-center justify-center p-6 animate-fadeIn" onClick={() => setShowCalendarExport(null)}>
+          <div className="fixed inset-0 bg-slate-950/90 z-[60] flex items-center justify-center p-6 animate-fadeIn" onClick={() => setShowCalendarExport(null)}>
             <div className="bg-white dark:bg-slate-800 rounded-[40px] p-10 max-w-sm w-full animate-scaleIn shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="text-center mb-8">
                 <div className="w-20 h-20 bg-detroit-50 dark:bg-detroit-900/30 rounded-[28px] flex items-center justify-center mx-auto mb-6 text-4xl shadow-sm">{showCalendarExport.meal.image}</div>

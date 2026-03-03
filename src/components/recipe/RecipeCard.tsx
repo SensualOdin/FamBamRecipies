@@ -84,7 +84,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     >
       <Card className="group relative flex flex-col h-full bg-card/70 dark:bg-slate-900/70 backdrop-blur-sm rounded-[32px] overflow-hidden transition-all duration-500 border border-border dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)]">
         {/* Image / Header Section */}
-        <div className="relative h-auto aspect-[4/3] sm:h-64 sm:aspect-auto overflow-hidden">
+        <div className="relative h-64 overflow-hidden">
           {/* Background Overlay */}
           <div className={`absolute inset-0 bg-slate-900 transition-opacity duration-700 ${isHovered ? 'opacity-20' : 'opacity-0'} z-10`} />
           
@@ -118,7 +118,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             size="icon"
             onClick={handleFavoriteClick}
             className={`
-              absolute top-4 left-5 z-20 w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl backdrop-blur-xl
+              absolute top-4 left-4 z-20 w-11 h-11 rounded-2xl backdrop-blur-xl
               transition-all duration-500
               ${recipe.isFavorite 
                 ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 hover:bg-rose-600 hover:text-white scale-110 border-none' 
@@ -144,12 +144,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           </div>
 
           {/* Floating Author */}
-          <div className="absolute bottom-4 left-5 z-20">
-            <Button
-              variant="ghost"
+          <div className="absolute bottom-4 left-4 z-20">
+            <Button 
+              variant="ghost" 
               size="sm"
-              onClick={handleAuthorClick}
-              className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-lg min-h-[44px] h-auto border-none hover:bg-white dark:hover:bg-slate-700"
+              onClick={handleAuthorClick} 
+              className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-lg h-auto border-none hover:bg-white dark:hover:bg-slate-700"
             >
               <Avatar className="w-6 h-6 border-none">
                 <AvatarFallback className="bg-detroit-500 text-[10px] text-white font-bold flex items-center justify-center">

@@ -84,7 +84,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       className="h-full cursor-pointer"
     >
-      <Card className="group relative flex flex-col h-full bg-card dark:bg-slate-900 rounded-[32px] overflow-hidden transition-shadow duration-300 border border-border dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)]">
+      <Card className="group relative flex flex-col h-full bg-card/70 dark:bg-slate-900/70 backdrop-blur-sm rounded-[32px] overflow-hidden transition-all duration-500 border border-border dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)]">
         {/* Image / Header Section */}
         <div className="relative h-auto aspect-[4/3] sm:h-64 sm:aspect-auto overflow-hidden">
           {/* Background Overlay */}
@@ -121,7 +121,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             onClick={handleFavoriteClick}
             aria-label={recipe.isFavorite ? "Remove from favorites" : "Add to favorites"}
             className={`
-              absolute top-4 left-5 z-20 w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl
+              absolute top-4 left-5 z-20 w-11 h-11 min-w-[44px] min-h-[44px] rounded-2xl backdrop-blur-xl
               transition-all duration-500
               ${recipe.isFavorite 
                 ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 hover:bg-rose-600 hover:text-white scale-110 border-none' 
@@ -134,13 +134,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
           {/* Category & Difficulty Badges */}
           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
-            <Badge variant="secondary" className="bg-black/40 dark:bg-black/50 px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-2 text-white border-none">
+            <Badge variant="secondary" className="bg-white/30 dark:bg-black/30 backdrop-blur-xl px-3 py-1.5 rounded-xl shadow-sm border border-white/20 flex items-center gap-2 hover:bg-white/50 dark:hover:bg-black/50 text-white border-none">
               <span className="text-sm">{categoryIcons[recipe.category as keyof typeof categoryIcons] || '🍽️'}</span>
               <span className="text-[11px] font-black uppercase tracking-[0.1em]">{recipe.category}</span>
             </Badge>
             <Badge 
               variant="outline"
-              className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm border-none ${difficultyColor[recipe.difficulty as keyof typeof difficultyColor]}`}
+              className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm border-none backdrop-blur-md ${difficultyColor[recipe.difficulty as keyof typeof difficultyColor]}`}
             >
               {recipe.difficulty}
             </Badge>
@@ -152,7 +152,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               variant="ghost"
               size="sm"
               onClick={handleAuthorClick}
-              className="bg-white/95 dark:bg-slate-800/95 pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-lg min-h-[44px] h-auto border-none hover:bg-white dark:hover:bg-slate-700"
+              className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-lg min-h-[44px] h-auto border-none hover:bg-white dark:hover:bg-slate-700"
             >
               <Avatar className="w-6 h-6 border-none">
                 <AvatarFallback className="bg-detroit-500 text-[11px] text-white font-bold flex items-center justify-center">
@@ -253,7 +253,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               whileHover={reducedMotion ? undefined : { opacity: 1, scale: 1 }}
               className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex justify-center pointer-events-none z-30 opacity-0 group-hover:opacity-100"
             >
-              <div className="bg-card dark:bg-slate-800 px-4 py-2 rounded-2xl shadow-xl border border-border dark:border-white/10 flex items-center gap-2">
+              <div className="bg-card/95 dark:bg-slate-800/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-border dark:border-white/10 flex items-center gap-2">
                 <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
                 <span className="text-sm font-bold text-foreground">{recipe.timesCooked} cooked</span>
               </div>

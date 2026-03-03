@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const RecipeSkeleton = () => {
   return (
-    <Card className="flex flex-col h-full bg-card dark:bg-slate-900 rounded-[32px] overflow-hidden border border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+    <Card className="flex flex-col h-full bg-white/70 backdrop-blur-sm rounded-[32px] overflow-hidden border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
       <div className="relative h-64 overflow-hidden">
         <Skeleton className="w-full h-full rounded-none bg-slate-200/50" />
       </div>

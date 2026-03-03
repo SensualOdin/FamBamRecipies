@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useStore } from '../store/useStore';
-import { getCurrentUser, ensureUserProfile, getUserProfileWithStats, onAuthStateChange, recordUserActivity, signOut as supabaseSignOut } from '../lib/supabase';
+import { getCurrentUser, ensureUserProfile, getUserProfileWithStats, onAuthStateChange, recordUserActivity, signOut as supabaseSignOut, supabase } from '../lib/supabase';
 import { initialUserProfile } from '../data/initialProfile';
 import { User, UserProfile } from '../types';
 
@@ -59,6 +59,21 @@ export const useAuth = () => {
       });
     }
   }, [profileQuery.data, setUser, setUserProfile, user]);
+
+  // Handle PKCE code exchange from password reset (and email confirm) redirects
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          console.error('Code exchange failed:', error);
+        }
+        // Clean the URL
+        window.history.replaceState({}, '', window.location.pathname);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const checkSession = async () => {

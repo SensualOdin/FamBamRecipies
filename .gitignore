@@ -34,3 +34,4 @@ lerna-debug.log*
 
 # OS files
 Thumbs.db
+.git_corrupt/

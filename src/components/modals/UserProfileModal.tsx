@@ -128,8 +128,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           <div className="relative bg-slate-950 p-8 sm:p-12 pt-safe text-white overflow-hidden transition-colors">
             {/* Animated background elements */}
             <div className="absolute inset-0">
-              <div className="absolute -top-24 -right-24 w-96 h-96 bg-detroit-600/20 rounded-full blur-[120px]" />
-              <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px]" />
+              <div className="absolute -top-24 -right-24 w-96 h-96 bg-michigan-blue/20 rounded-full blur-[120px]" />
+              <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-michigan-coral/10 rounded-full blur-[120px]" />
             </div>
 
             <div className="relative z-10">
@@ -188,7 +188,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     )}
                   </Button>
 
-                  <Badge className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-detroit-500 text-white px-5 py-2 rounded-2xl font-black text-xs sm:text-sm shadow-xl shadow-detroit-500/30 whitespace-nowrap border-none">
+                  <Badge className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-michigan-blue text-white px-5 py-2 rounded-2xl font-black text-xs sm:text-sm shadow-xl shadow-michigan-blue/30 whitespace-nowrap border-none">
                     Lvl {userProfile.level} Chef
                   </Badge>
                 </div>
@@ -200,13 +200,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <Input
                         value={editData.displayName}
                         onChange={(e) => setEditData(p => ({ ...p, displayName: e.target.value }))}
-                        className="w-full bg-white/10 border-white/20 rounded-2xl px-6 h-12 text-white placeholder:text-slate-500 focus-visible:ring-detroit-500"
+                        className="w-full bg-white/10 border-white/20 rounded-2xl px-6 h-12 text-white placeholder:text-slate-500 focus-visible:ring-michigan-blue"
                         placeholder="Display Name"
                       />
                       <Textarea
                         value={editData.bio}
                         onChange={(e) => setEditData(p => ({ ...p, bio: e.target.value }))}
-                        className="w-full bg-white/10 border-white/20 rounded-2xl px-6 py-3 text-white placeholder:text-slate-500 focus-visible:ring-detroit-500 resize-none min-h-[80px]"
+                        className="w-full bg-white/10 border-white/20 rounded-2xl px-6 py-3 text-white placeholder:text-slate-500 focus-visible:ring-michigan-blue resize-none min-h-[80px]"
                         placeholder="Your bio..."
                       />
                       <div className="flex gap-3">
@@ -228,9 +228,9 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <div className="max-w-md mx-auto md:mx-0">
                         <div className="flex justify-between items-end mb-3">
                           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Mastery Progress</span>
-                          <span className="text-xs font-black text-detroit-400">{userProfile.experience} <span className="text-slate-600">/ {userProfile.experienceToNextLevel} XP</span></span>
+                          <span className="text-xs font-black text-michigan-coral">{userProfile.experience} <span className="text-slate-600">/ {userProfile.experienceToNextLevel} XP</span></span>
                         </div>
-                        <Progress value={levelProgress} className="h-2.5 bg-white/5 p-0.5" indicatorClassName="bg-gradient-to-r from-detroit-600 to-cyan-400 rounded-full" />
+                        <Progress value={levelProgress} className="h-2.5 bg-white/5 p-0.5" indicatorClassName="bg-gradient-to-r from-michigan-blue to-michigan-coral rounded-full" />
                       </div>
                     </div>
                   )}

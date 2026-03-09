@@ -120,7 +120,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                 <ChevronLeft className="w-6 h-6 text-white" />
               </Button>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-detroit-500 rounded-2xl flex items-center justify-center shadow-lg shadow-detroit-500/20">
+                <div className="w-10 h-10 bg-michigan-coral rounded-2xl flex items-center justify-center shadow-lg shadow-michigan-coral/20">
                   <ShoppingBag className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -150,7 +150,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
               onChange={(e) => setNewItem(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
               placeholder="Add milk, eggs, flour..."
-              className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 h-12 text-white placeholder:text-slate-500 focus-visible:ring-detroit-500 transition-all text-base"
+              className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 h-12 text-white placeholder:text-slate-500 focus-visible:ring-michigan-coral transition-all text-base"
             />
             <Button
               onClick={handleAddItem}
@@ -179,7 +179,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                   className={`group flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-3xl transition-all border-2 ${
                     item.checked
                       ? 'bg-muted border-transparent opacity-50'
-                      : 'bg-card border-border hover:border-detroit-100 dark:hover:border-detroit-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none'
+                      : 'bg-card border-border hover:border-primary/50 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none'
                   }`}
                 >
                   <Button
@@ -189,7 +189,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                     className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all shrink-0 p-0 ${
                       item.checked 
                         ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:text-white' 
-                        : 'border-slate-200 bg-slate-50 hover:border-detroit-400'
+                        : 'border-slate-200 bg-slate-50 hover:border-michigan-coral'
                     }`}
                   >
                     {item.checked && (
@@ -214,7 +214,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                             variant="ghost"
                             size="icon"
                             onClick={() => openWalmartSearch(item)}
-                            className="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:text-detroit-600 hover:bg-detroit-50 transition-all flex items-center justify-center"
+                            className="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:text-michigan-coral hover:bg-michigan-coral/10 transition-all flex items-center justify-center"
                           >
                             <Search className="w-3.5 h-3.5" />
                           </Button>

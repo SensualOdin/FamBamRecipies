@@ -30,7 +30,7 @@ const MobileNav: React.FC<MobileNavProps> = ({
   onShowAuth
 }) => {
   return (
-    <div className="md:hidden fixed bottom-4 left-4 right-4 bg-background/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-border dark:border-white/10 px-2 py-3 pb-safe rounded-[32px] z-50 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-colors duration-500">
+    <div className="md:hidden fixed bottom-4 left-4 right-4 bg-background/80 dark:bg-card/95 backdrop-blur-2xl border border-border dark:border-white/10 px-2 py-3 pb-safe rounded-[32px] z-50 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-colors duration-500">
       <button 
         onClick={() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -47,9 +47,9 @@ const MobileNav: React.FC<MobileNavProps> = ({
           setShowFavoritesOnly(true);
           setSelectedCategory('All');
         }}
-        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${showFavoritesOnly ? 'text-rose-500 scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${showFavoritesOnly ? 'text-michigan-coral scale-110' : 'text-muted-foreground hover:text-foreground'}`}
       >
-        <Heart className={`w-6 h-6 ${showFavoritesOnly ? 'fill-rose-500' : ''}`} strokeWidth={showFavoritesOnly ? 2.5 : 2} />
+        <Heart className={`w-6 h-6 ${showFavoritesOnly ? 'fill-michigan-coral' : ''}`} strokeWidth={showFavoritesOnly ? 2.5 : 2} />
         <span className="text-[10px] font-black uppercase tracking-widest">Saved</span>
       </button>
       
@@ -64,12 +64,12 @@ const MobileNav: React.FC<MobileNavProps> = ({
 
       <button 
         onClick={onShowShoppingList}
-        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${shoppingListCount > 0 ? 'text-emerald-600' : 'text-muted-foreground'}`}
+        className={`flex flex-col items-center gap-1 transition-all flex-1 py-2 ${shoppingListCount > 0 ? 'text-michigan-blue' : 'text-muted-foreground'}`}
       >
         <div className="relative">
           <ShoppingCart className="w-6 h-6" strokeWidth={shoppingListCount > 0 ? 2.5 : 2} />
           {shoppingListCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 text-white text-[8px] flex items-center justify-center rounded-full font-black">
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-primary-foreground text-[8px] flex items-center justify-center rounded-full font-black">
               {shoppingListCount}
             </span>
           )}

@@ -268,7 +268,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                 className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-detroit-50 to-detroit-100 dark:from-detroit-950 dark:to-slate-900 flex items-center justify-center transition-colors">
+              <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/80 flex items-center justify-center transition-colors">
                 <span className="text-9xl animate-float opacity-80">{recipe.image || '🥘'}</span>
               </div>
             )}
@@ -276,7 +276,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
             
             {/* Floating Badges */}
             <div className="absolute bottom-12 left-6 sm:left-8 flex flex-wrap gap-2">
-              <Badge className="bg-detroit-600 text-white px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg border-none">
+              <Badge className="bg-primary text-primary-foreground px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg border-none">
                 {recipe.category}
               </Badge>
               <Badge className={`px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg border-none ${
@@ -298,12 +298,12 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                     {recipe.title}
                   </DialogTitle>
                   <Button variant="ghost" className="p-0 h-auto hover:bg-transparent flex items-center gap-3 group">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center group-hover:bg-detroit-100 dark:group-hover:bg-detroit-900/30 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                       <span className="text-sm">👨‍🍳</span>
                     </div>
                     <div className="text-left">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mb-1">Recipe by</p>
-                      <p className="text-sm font-bold text-foreground group-hover:text-detroit-600 transition-colors">{recipe.author}</p>
+                      <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{recipe.author}</p>
                     </div>
                   </Button>
                 </div>
@@ -324,7 +324,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
               </div>
             </div>
 
-            <p className="text-base sm:text-xl text-muted-foreground font-medium italic mb-8 sm:mb-10 leading-relaxed border-l-4 border-detroit-200 dark:border-detroit-800 pl-4 sm:pl-6 py-1 sm:py-2">
+            <p className="text-base sm:text-xl text-muted-foreground font-medium italic mb-8 sm:mb-10 leading-relaxed border-l-4 border-primary pl-4 sm:pl-6 py-1 sm:py-2">
               "{recipe.description}"
             </p>
 
@@ -361,7 +361,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
 
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1 text-center sm:text-left">Action</span>
-                  <Button onClick={() => setShowCookConfirm(true)} className="h-12 bg-detroit-500 hover:bg-detroit-400 text-white px-6 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-detroit-500/20 flex items-center justify-center gap-2 border-none">
+                  <Button onClick={() => setShowCookConfirm(true)} className="h-12 bg-michigan-coral hover:bg-michigan-coral/90 text-white px-6 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-michigan-coral/20 flex items-center justify-center gap-2 border-none">
                     <Flame className="w-4 h-4" />
                     Mark as Cooked
                   </Button>
@@ -402,7 +402,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                       {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
                     </span>
                     <div className="flex flex-col gap-1">
-                      <Button variant="ghost" onClick={toggleTimer} className="h-auto p-0 text-[10px] font-black uppercase text-detroit-600 hover:text-detroit-700 tracking-widest hover:bg-transparent">{timerRunning ? 'Pause' : 'Start'}</Button>
+                      <Button variant="ghost" onClick={toggleTimer} className="h-auto p-0 text-[10px] font-black uppercase text-michigan-blue hover:text-michigan-blue/80 tracking-widest hover:bg-transparent">{timerRunning ? 'Pause' : 'Start'}</Button>
                       <Button variant="ghost" onClick={resetTimer} className="h-auto p-0 text-[10px] font-black uppercase text-rose-500 hover:text-rose-600 tracking-widest hover:bg-transparent">Reset</Button>
                     </div>
                   </div>
@@ -438,9 +438,9 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
               <div className="min-h-[300px] sm:min-h-[400px]">
                 <TabsContent value="ingredients" className="grid gap-3 sm:gap-4 animate-in fade-in slide-in-from-right-4 duration-300">
                   {recipe.ingredients.map((ing, i) => (
-                    <div key={i} className="group flex items-center justify-between p-4 sm:p-5 bg-background border border-border rounded-[20px] sm:rounded-[24px] hover:border-detroit-200 dark:hover:border-detroit-800 hover:bg-muted/30 transition-all">
+                    <div key={i} className="group flex items-center justify-between p-4 sm:p-5 bg-background border border-border rounded-[20px] sm:rounded-[24px] hover:border-primary/50 hover:bg-muted/30 transition-all">
                       <div className="flex items-center gap-3 sm:gap-4">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-xs sm:text-sm group-hover:bg-background group-hover:text-detroit-500 transition-colors shrink-0">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-xs sm:text-sm group-hover:bg-background group-hover:text-primary transition-colors shrink-0">
                           {i + 1}
                         </div>
                         <span className="font-medium text-foreground text-sm sm:text-base">{parseIngredient(ing)}</span>
@@ -455,7 +455,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                         }}
                         className={`
                           w-10 h-10 sm:w-12 sm:h-12 rounded-xl transition-all shrink-0
-                          ${addedIngredients.includes(i) ? 'bg-emerald-500 text-white hover:bg-emerald-600 border-none' : 'bg-muted text-muted-foreground hover:bg-detroit-100 dark:hover:bg-detroit-900/30 hover:text-detroit-600 border-none'}
+                          ${addedIngredients.includes(i) ? 'bg-emerald-500 text-white hover:bg-emerald-600 border-none' : 'bg-muted text-muted-foreground hover:bg-primary/20 hover:text-primary border-none'}
                         `}
                       >
                         {addedIngredients.includes(i) ? (
@@ -491,7 +491,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                 </TabsContent>
 
                 <TabsContent value="story" className="animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="bg-detroit-50/50 dark:bg-detroit-900/10 rounded-[32px] sm:rounded-[40px] p-6 sm:p-10 border border-detroit-100 dark:border-detroit-900/30 transition-colors">
+                  <div className="bg-muted/50 dark:bg-muted/20 rounded-[32px] sm:rounded-[40px] p-6 sm:p-10 border border-border transition-colors">
                     <div className="w-12 h-12 sm:w-16 h-16 bg-background dark:bg-slate-900 rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl mb-6 sm:mb-8 shadow-sm">📜</div>
                     <h4 className="font-serif text-xl sm:text-2xl font-bold text-foreground mb-4 sm:mb-6">Behind the Recipe</h4>
                     <p className="text-muted-foreground text-base sm:text-xl leading-relaxed italic">"{recipe.story || "Every family recipe tells a story. This one is waiting to be written."}"</p>
@@ -504,7 +504,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
                     <h4 className="font-bold text-foreground mb-2">No memories shared yet</h4>
                     <p className="text-muted-foreground text-sm mb-6">Be the first to leave a comment or a tip for this recipe!</p>
                     <div className="max-w-xl mx-auto space-y-4">
-                      <Textarea placeholder="Write a memory or a tip..." className="w-full p-4 sm:p-6 rounded-[24px] sm:rounded-[32px] border-none bg-background focus-visible:ring-2 focus-visible:ring-detroit-500 outline-none transition-all resize-none shadow-sm min-h-[100px]" />
+                      <Textarea placeholder="Write a memory or a tip..." className="w-full p-4 sm:p-6 rounded-[24px] sm:rounded-[32px] border-none bg-background focus-visible:ring-2 focus-visible:ring-primary outline-none transition-all resize-none shadow-sm min-h-[100px]" />
                       <Button className="h-12 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white px-8 rounded-full font-bold border-none transition-all">Post Comment</Button>
                     </div>
                   </div>
@@ -533,17 +533,17 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
       {showCookConfirm && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[70] flex items-center justify-center p-6 animate-in fade-in duration-300" onClick={() => setShowCookConfirm(false)}>
           <div className="bg-background rounded-[40px] p-10 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-            <div className="w-20 h-20 bg-detroit-100 dark:bg-detroit-900/30 rounded-[24px] flex items-center justify-center text-4xl mb-6 mx-auto">🔥</div>
+            <div className="w-20 h-20 bg-michigan-coral/20 rounded-[24px] flex items-center justify-center text-4xl mb-6 mx-auto">🔥</div>
             <h3 className="text-2xl font-bold text-foreground mb-4 text-center">How was it?</h3>
             <div className="flex justify-center gap-3 mb-8">
               {[1, 2, 3, 4, 5].map(s => (
                 <button key={s} onClick={() => setCookRating(s)} className={`text-3xl transition-transform hover:scale-125 ${s <= cookRating ? 'grayscale-0' : 'grayscale opacity-30'}`}>⭐</button>
               ))}
             </div>
-            <Textarea value={cookNotes} onChange={(e) => setCookNotes(e.target.value)} placeholder="Any notes for next time?" className="w-full p-5 bg-muted rounded-[24px] border-none focus-visible:ring-2 focus-visible:ring-detroit-500 outline-none transition-all resize-none mb-6 min-h-[100px]" />
+            <Textarea value={cookNotes} onChange={(e) => setCookNotes(e.target.value)} placeholder="Any notes for next time?" className="w-full p-5 bg-muted rounded-[24px] border-none focus-visible:ring-2 focus-visible:ring-primary outline-none transition-all resize-none mb-6 min-h-[100px]" />
             <div className="flex gap-4">
               <Button variant="ghost" onClick={() => setShowCookConfirm(false)} className="flex-1 h-14 bg-muted text-muted-foreground rounded-[24px] font-bold hover:bg-muted/80 border-none transition-all">Later</Button>
-              <Button onClick={handleCookSubmit} className="flex-1 h-14 bg-detroit-500 text-white rounded-[24px] font-bold shadow-xl shadow-detroit-500/20 hover:bg-detroit-600 border-none transition-all">Finish!</Button>
+              <Button onClick={handleCookSubmit} className="flex-1 h-14 bg-michigan-coral text-white rounded-[24px] font-bold shadow-xl shadow-michigan-coral/20 hover:bg-michigan-coral/90 border-none transition-all">Finish!</Button>
             </div>
           </div>
         </div>

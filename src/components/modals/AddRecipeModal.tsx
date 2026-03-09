@@ -227,9 +227,9 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                   <p className="text-muted-foreground text-sm leading-relaxed font-normal whitespace-normal">Enter your recipe step-by-step using our guided form.</p>
                 </Button>
 
-                <div className="p-8 rounded-[32px] border-2 border-border hover:border-cyan-500 hover:bg-cyan-50/10 transition-all text-left group relative bg-card">
-                  <div className="w-16 h-16 bg-cyan-100 dark:bg-cyan-900/30 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Camera className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
+                <div className="p-8 rounded-[32px] border-2 border-border hover:border-michigan-blue hover:bg-michigan-blue/10 transition-all text-left group relative bg-card">
+                  <div className="w-16 h-16 bg-michigan-blue/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Camera className="w-8 h-8 text-michigan-blue" />
                   </div>
                   <h4 className="text-xl font-bold text-foreground mb-2">Scan with AI</h4>
                   <p className="text-muted-foreground text-sm mb-6 leading-relaxed">Upload photos of cards or books and let our AI do the work.</p>
@@ -237,7 +237,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                   <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" />
                   
                   {uploadedImages.length === 0 ? (
-                    <Button onClick={() => fileInputRef.current?.click()} className="w-full h-12 bg-cyan-500 hover:bg-cyan-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-cyan-500/20 border-none">
+                    <Button onClick={() => fileInputRef.current?.click()} className="w-full h-12 bg-michigan-blue hover:bg-michigan-blue/90 text-white rounded-2xl font-bold text-sm shadow-xl shadow-michigan-blue/20 border-none">
                       Select Photos
                     </Button>
                   ) : (

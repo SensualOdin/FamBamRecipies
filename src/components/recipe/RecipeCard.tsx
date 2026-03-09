@@ -152,7 +152,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-lg h-auto border-none hover:bg-white dark:hover:bg-slate-700"
             >
               <Avatar className="w-6 h-6 border-none">
-                <AvatarFallback className="bg-detroit-500 text-[10px] text-white font-bold flex items-center justify-center">
+                <AvatarFallback className="bg-primary text-[10px] text-primary-foreground font-bold flex items-center justify-center">
                   {recipe.author?.charAt(0) || 'C'}
                 </AvatarFallback>
               </Avatar>
@@ -167,14 +167,14 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mb-3">
               {recipe.tags?.slice(0, 2).map((tag, i) => (
-                <Badge key={i} variant="outline" className="text-[10px] font-bold text-detroit-600 dark:text-detroit-400 bg-detroit-50 dark:bg-detroit-900/30 px-2 py-0.5 rounded-md uppercase tracking-wide border-none whitespace-nowrap">
+                <Badge key={i} variant="outline" className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md uppercase tracking-wide border-none whitespace-nowrap">
                   #{tag}
                 </Badge>
               ))}
             </div>
 
             {/* Title */}
-            <h3 className="font-serif text-lg sm:text-xl font-bold text-card-foreground mb-2 leading-tight group-hover:text-detroit-600 dark:group-hover:text-detroit-400 transition-colors line-clamp-2">
+            <h3 className="font-serif text-lg sm:text-xl font-bold text-card-foreground mb-2 leading-tight group-hover:text-primary transition-colors line-clamp-2">
               {recipe.title}
             </h3>
 
@@ -211,7 +211,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                         variant="ghost"
                         size="icon"
                         onClick={handleEditClick}
-                        className="w-10 h-10 text-muted-foreground hover:text-detroit-600 dark:hover:text-detroit-400 hover:bg-muted rounded-xl shrink-0 border-none"
+                        className="w-10 h-10 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl shrink-0 border-none"
                       >
                         <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
                       </Button>

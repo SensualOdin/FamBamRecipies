@@ -507,25 +507,45 @@ export async function extractRecipeFromImage(imagesBase64: string | string[]): P
 
         if (response.ok) {
           const data = await response.json();
+          if (data.error) return { error: data.error };
+          
           if (data.recipe) {
             if (!baseRecipe) {
-              baseRecipe = data.recipe;
+              baseRecipe = { ...data.recipe };
               allIngredients = [...(data.recipe.ingredients || [])];
               allInstructions = [...(data.recipe.instructions || [])];
             } else {
+              // Merge all missing fields
+              for (const key of Object.keys(data.recipe)) {
+                if (key !== 'ingredients' && key !== 'instructions') {
+                  if (!baseRecipe[key] && data.recipe[key]) {
+                    baseRecipe[key] = data.recipe[key];
+                  }
+                }
+              }
+              
               const newIngredients = data.recipe.ingredients || [];
               newIngredients.forEach((ing: string) => {
                 if (!allIngredients.some(existing => existing.toLowerCase() === ing.toLowerCase())) {
                   allIngredients.push(ing);
                 }
               });
-              allInstructions.push(...(data.recipe.instructions || []));
+              
+              const newInstructions = data.recipe.instructions || [];
+              newInstructions.forEach((inst: string) => {
+                if (!allInstructions.some(existing => existing.toLowerCase() === inst.toLowerCase())) {
+                  allInstructions.push(inst);
+                }
+              });
             }
           }
+        } else {
+          const errorText = await response.text();
+          console.error('Edge function error:', errorText);
         }
       }
 
-      if (!baseRecipe) return { error: 'Failed to extract recipe' };
+      if (!baseRecipe) return { error: 'Failed to extract recipe from the provided images. Please try again with clearer photos.' };
       return { recipe: { ...baseRecipe, ingredients: allIngredients, instructions: allInstructions }, error: null };
     }
   } catch (err: any) {

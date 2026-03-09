@@ -70,17 +70,17 @@ const Header: React.FC<HeaderProps> = ({
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-slate-950 dark:bg-black transition-colors duration-700" />
         <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-        <div className="absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-detroit-900/40 via-transparent to-transparent" />
-        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-detroit-600/20 rounded-full blur-[120px] animate-pulse-slow" />
-        <div className="absolute top-[10%] -right-[5%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-michigan-navy/60 via-transparent to-transparent" />
+        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-michigan-blue/20 rounded-full blur-[120px] animate-pulse-slow" />
+        <div className="absolute top-[10%] -right-[5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
       </div>
       
       <div className="relative max-w-7xl mx-auto px-4 py-8 sm:py-16 md:py-24">
         {/* Top Navigation */}
         <nav className="flex justify-between items-center mb-12 sm:absolute sm:top-8 sm:left-6 sm:right-6">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-detroit-500 to-detroit-700 rounded-xl flex items-center justify-center shadow-lg shadow-detroit-500/20">
-              <ChefHat className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+              <ChefHat className="w-6 h-6 text-primary-foreground" />
             </div>
             <span className="font-serif text-white font-bold text-xl tracking-tight hidden sm:block">FamBam</span>
           </div>
@@ -129,7 +129,7 @@ const Header: React.FC<HeaderProps> = ({
                       >
                         {tool.icon}
                         {tool.count > 0 && (
-                          <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 bg-detroit-500 text-white text-[10px] flex items-center justify-center rounded-full font-bold border-none">
+                          <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 bg-primary text-primary-foreground text-[10px] flex items-center justify-center rounded-full font-bold border-none">
                             {tool.count}
                           </Badge>
                         )}
@@ -150,11 +150,11 @@ const Header: React.FC<HeaderProps> = ({
               >
                 <div className="text-right hidden sm:block">
                   <div className="text-white font-semibold text-xs">{userProfile.name}</div>
-                  <div className="text-detroit-400 text-[10px] font-medium">Lvl {userProfile.level} Chef</div>
+                  <div className="text-primary text-[10px] font-medium">Lvl {userProfile.level} Chef</div>
                 </div>
                 <Avatar className="w-8 h-8 border-none shadow-inner">
                   <AvatarImage src={userProfile.avatarUrl} />
-                  <AvatarFallback className="bg-gradient-to-br from-detroit-400 to-detroit-600 text-xs text-white border-none">
+                  <AvatarFallback className="bg-primary text-xs text-primary-foreground border-none font-bold">
                     {userProfile.avatar}
                   </AvatarFallback>
                 </Avatar>
@@ -173,7 +173,7 @@ const Header: React.FC<HeaderProps> = ({
         <div className={`text-center max-w-5xl mx-auto transform transition-all duration-1000 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
           <h1 className="font-serif text-4xl sm:text-6xl md:text-8xl font-extrabold text-white mb-6 sm:mb-8 tracking-tighter leading-[0.85] px-4">
             Our Family <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-detroit-400 via-white to-cyan-300 drop-shadow-2xl">Cookbook</span>
+            <span className="text-primary drop-shadow-2xl">Cookbook</span>
           </h1>
           <p className="text-slate-400 text-sm sm:text-lg md:text-xl mb-8 sm:mb-14 font-light tracking-[0.2em] uppercase max-w-3xl mx-auto px-6 opacity-80">
             Preserving traditions, one meal at a time.
@@ -181,8 +181,8 @@ const Header: React.FC<HeaderProps> = ({
           
           {/* Search Bar Container */}
           <div className={`max-w-3xl mx-auto px-4 transform transition-all duration-700 ${isSearchFocused ? 'scale-[1.05]' : 'scale-100'}`}>
-            <div className={`relative group transition-all duration-500 ${isSearchFocused ? 'ring-4 ring-white/10 rounded-[32px]' : ''}`}>
-              <div className="absolute inset-0 bg-gradient-to-r from-detroit-500/30 to-cyan-500/30 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className={`relative group transition-all duration-500 ${isSearchFocused ? 'ring-4 ring-primary/30 rounded-[32px]' : ''}`}>
+              <div className="absolute inset-0 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative flex items-center bg-white/5 backdrop-blur-[40px] rounded-[28px] border border-white/10 overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
                 <div className="pl-5 sm:pl-8 text-slate-300">
                   <Search className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />

@@ -43,6 +43,12 @@ export default {
   				'900': '#2d382d',
   				'950': '#181e18'
   			},
+			michigan: {
+				navy: '#00274C',
+				maize: '#FFCB05',
+				coral: '#FF8C42',
+				blue: '#4DB8FF',
+			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

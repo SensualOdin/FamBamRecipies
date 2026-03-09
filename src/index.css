@@ -31,27 +31,27 @@
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  --background: 211 100% 10%;
+  --foreground: 210 25% 96%;
+  --card: 209 100% 15%;
+  --card-foreground: 210 25% 96%;
+  --popover: 209 100% 21%;
+  --popover-foreground: 210 25% 96%;
+  --primary: 47 100% 51%;
+  --primary-foreground: 211 100% 10%;
+  --secondary: 209 100% 21%;
+  --secondary-foreground: 210 25% 96%;
+  --muted: 209 100% 21%;
+  --muted-foreground: 210 25% 72%;
+  --accent: 209 100% 21%;
+  --accent-foreground: 210 25% 96%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
-  --glass-bg: rgba(15, 23, 42, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --border: 209 100% 21%;
+  --input: 209 100% 21%;
+  --ring: 47 100% 51%;
+  --glass-bg: rgba(0, 24, 49, 0.7);
+  --glass-border: rgba(255, 203, 5, 0.2);
 }
 
 @layer base {
@@ -93,10 +93,10 @@
 }
 
 .glass-morphism-dark {
-  background: rgba(15, 23, 42, 0.7);
+  background: rgba(0, 24, 49, 0.7);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 203, 5, 0.2);
 }
 
 /* Detroit Blue Gradient Text */

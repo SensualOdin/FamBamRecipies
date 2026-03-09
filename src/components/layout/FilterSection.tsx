@@ -57,7 +57,7 @@ const FilterSection = ({
             onClick={() => setShowFilters(!showFilters)}
             className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-4 sm:px-6 py-3 sm:py-5 rounded-[20px] sm:rounded-[24px] font-black text-[10px] sm:text-xs transition-all h-auto uppercase tracking-[0.2em] border-none ${
               showFilters 
-                ? 'bg-detroit-50 dark:bg-detroit-900/30 text-detroit-700 dark:text-detroit-300' 
+                ? 'bg-michigan-navy/20 dark:bg-michigan-navy/50 text-primary' 
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
           >

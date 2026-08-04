@@ -40,7 +40,11 @@ const Header: React.FC<HeaderProps> = ({
   onPrefetch,
   isLoaded
 }) => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  // Initialize from the DOM: index.html ships with class="dark" on <html>,
+  // so defaulting to 'light' here would desync the toggle on first visit.
+  const [theme, setTheme] = useState<'light' | 'dark'>(() =>
+    document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+  );
 
   useEffect(() => {
     try {

@@ -18,7 +18,30 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
   const [showIngredients, setShowIngredients] = useState(false);
   const recognitionRef = useRef<any>(null);
   
-  const steps = recipe.instructions || [];
+  const steps = recipe.instructions?.length
+    ? recipe.instructions
+    : ['This recipe has no instructions yet. Add some steps to cook along!'];
+
+  // Keep the screen awake while cooking (hands are messy, screen shouldn't sleep)
+  useEffect(() => {
+    let lock: any = null;
+    const request = async () => {
+      try {
+        lock = await (navigator as any).wakeLock?.request('screen');
+      } catch {
+        // Wake lock unsupported or denied — nothing to do
+      }
+    };
+    request();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') request();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      lock?.release?.().catch(() => {});
+    };
+  }, []);
 
   // Text to Speech
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -127,8 +150,8 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
 
   // Voice Control Setup - Stable Effect
   useEffect(() => {
-    if (isVoiceActive && ('WebkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).WebkitSpeechRecognition;
+    if (isVoiceActive && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognitionRef.current = recognition;
       
@@ -222,9 +245,10 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
           >
             <Volume2 className={`w-5 h-5 sm:w-6 sm:h-6 ${isSpeaking ? 'animate-pulse' : ''}`} />
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="icon"
+            disabled={!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)}
             onClick={() => {
               setIsVoiceActive(!isVoiceActive);
             }}

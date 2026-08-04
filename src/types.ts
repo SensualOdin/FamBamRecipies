@@ -33,6 +33,7 @@ export interface User {
 
 export interface UserProfile extends User {
   name: string;
+  avatarUrl?: string;
   level: number;
   experience: number;
   experienceToNextLevel: number;
@@ -44,10 +45,11 @@ export interface UserProfile extends User {
 
 export interface Achievement {
   id: string;
-  title: string;
+  name: string;
   description: string;
   icon: string;
   unlocked: boolean;
+  date?: string;
 }
 
 export interface UserStats {

@@ -6,6 +6,14 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// The recipes.servings column is an integer, but form/AI values arrive as
+// strings like "4-6" or "serves 8" — take the first number, or null.
+function toServingsInt(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return Math.round(value);
+  const match = String(value ?? '').match(/\d+/);
+  return match ? parseInt(match[0], 10) : null;
+}
+
 // Helper function to fetch all recipes with related data
 export async function fetchRecipes(): Promise<any[]> {
   const { data, error } = await supabase
@@ -70,7 +78,7 @@ export async function updateRecipe(recipeId: string | number, recipe: Partial<Re
       image: recipe.image,
       prep_time: recipe.prepTime,
       cook_time: recipe.cookTime,
-      servings: recipe.servings,
+      servings: toServingsInt(recipe.servings),
       difficulty: recipe.difficulty,
       ingredients: recipe.ingredients,
       instructions: recipe.instructions,
@@ -114,7 +122,7 @@ export async function createRecipe(recipe: Partial<Recipe>, userId: string | nul
       image: recipe.image,
       prep_time: recipe.prepTime,
       cook_time: recipe.cookTime,
-      servings: recipe.servings,
+      servings: toServingsInt(recipe.servings),
       difficulty: recipe.difficulty,
       ingredients: recipe.ingredients,
       instructions: recipe.instructions,

@@ -31,6 +31,7 @@ export const useAuth = () => {
         ...prev,
         name: profileWithStats.display_name || 'Chef',
         avatar: profileWithStats.avatar || '👨‍🍳',
+        avatarUrl: profileWithStats.avatar_url || undefined,
         bio: profileWithStats.bio || 'Passionate home cook keeping family traditions alive',
         level: profileWithStats.level || 1,
         experience: profileWithStats.experience || 0,

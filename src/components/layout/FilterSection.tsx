@@ -101,7 +101,7 @@ const FilterSection = ({
               <div className="space-y-4">
                 <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">Difficulty Level</label>
                 <div className="flex p-1.5 bg-muted rounded-[20px] shadow-inner">
-                  {['All', 'Easy', 'Hard'].map(diff => (
+                  {['All', 'Easy', 'Medium', 'Hard'].map(diff => (
                     <Button
                       key={diff}
                       variant="ghost"

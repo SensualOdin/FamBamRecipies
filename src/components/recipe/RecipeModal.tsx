@@ -46,11 +46,11 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
   const [justCooked, setJustCooked] = useState(false);
   const [addedIngredients, setAddedIngredients] = useState<number[]>([]);
   const [servingMultiplier, setServingMultiplier] = useState(1);
-  const [timerMinutes, setTimerMinutes] = useState(0);
-  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [timerSecondsLeft, setTimerSecondsLeft] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
-  const timerInterval = useRef<NodeJS.Timeout | null>(null);
+  const timerMinutes = Math.floor(timerSecondsLeft / 60);
+  const timerSeconds = timerSecondsLeft % 60;
 
   // Real-time Presence
   const [activeUsers, setActiveUsers] = useState<any[]>([]);
@@ -85,8 +85,7 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
   };
 
   const startTimer = (minutes: number) => {
-    setTimerMinutes(minutes);
-    setTimerSeconds(0);
+    setTimerSecondsLeft(minutes * 60);
     setTimerRunning(true);
     setShowTimer(true);
   };
@@ -96,10 +95,8 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
   };
 
   const resetTimer = () => {
-    setTimerMinutes(0);
-    setTimerSeconds(0);
+    setTimerSecondsLeft(0);
     setTimerRunning(false);
-    if (timerInterval.current) clearInterval(timerInterval.current);
   };
 
   const handleCookSubmit = async () => {
@@ -122,25 +119,18 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
   };
 
   useEffect(() => {
-    if (timerRunning) {
-      timerInterval.current = setInterval(() => {
-        setTimerSeconds(prev => {
-          if (prev > 0) return prev - 1;
-          if (timerMinutes > 0) {
-            setTimerMinutes(m => m - 1);
-            return 59;
-          }
-          setTimerRunning(false);
-          return 0;
-        });
-      }, 1000);
-    } else {
-      if (timerInterval.current) clearInterval(timerInterval.current);
+    if (!timerRunning) return;
+    const id = setInterval(() => setTimerSecondsLeft(prev => Math.max(prev - 1, 0)), 1000);
+    return () => clearInterval(id);
+  }, [timerRunning]);
+
+  // Stop (and gently notify) when the countdown reaches zero
+  useEffect(() => {
+    if (timerRunning && timerSecondsLeft === 0) {
+      setTimerRunning(false);
+      if ('vibrate' in navigator) navigator.vibrate?.([200, 100, 200]);
     }
-    return () => {
-      if (timerInterval.current) clearInterval(timerInterval.current);
-    };
-  }, [timerRunning, timerMinutes]);
+  }, [timerRunning, timerSecondsLeft]);
 
   const adjustedServings = Math.round(Number(recipe.servings) * servingMultiplier);
 

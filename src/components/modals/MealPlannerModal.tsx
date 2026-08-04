@@ -99,9 +99,13 @@ END:VCALENDAR`;
   const handlePrevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
   const handleNextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
 
+  // Build YYYY-MM-DD from local date parts — toISOString() converts to UTC
+  // and can shift the key to the previous/next day depending on timezone.
+  const toDateKey = (year, month, day) =>
+    `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
   const handleDateClick = (day) => {
-    const dateStr = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0];
-    setSelectedDate(dateStr);
+    setSelectedDate(toDateKey(currentMonth.getFullYear(), currentMonth.getMonth(), day));
     setShowRecipePicker(false);
   };
 
@@ -166,9 +170,10 @@ END:VCALENDAR`;
             <div className="grid grid-cols-7 gap-3 flex-1 overflow-y-auto scrollbar-hide">
               {padding.map(i => <div key={`pad-${i}`} className="aspect-square bg-slate-50/30 rounded-[20px]" />)}
               {days.map(day => {
-                const dateStr = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split('T')[0];
+                const dateStr = toDateKey(currentMonth.getFullYear(), currentMonth.getMonth(), day);
                 const meals = mealPlan[dateStr] || [];
-                const isToday = new Date().toISOString().split('T')[0] === dateStr;
+                const now = new Date();
+                const isToday = toDateKey(now.getFullYear(), now.getMonth(), now.getDate()) === dateStr;
                 const isSelected = selectedDate === dateStr;
 
                 return (
@@ -212,7 +217,7 @@ END:VCALENDAR`;
                   <div>
                     <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-1">Planning For</h3>
                     <p className="text-xl font-black text-slate-900 tracking-tighter">
-                      {new Date(selectedDate).toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}
+                      {new Date(`${selectedDate}T00:00:00`).toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </p>
                   </div>
                   {!showRecipePicker && (

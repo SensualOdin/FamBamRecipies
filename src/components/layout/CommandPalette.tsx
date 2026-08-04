@@ -25,7 +25,7 @@ import { useRecipes } from "@/hooks/useRecipes";
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
-  const { setModal, setSelectedRecipe, setFilter, filters } = useStore();
+  const { setModal, setSelectedRecipe, setFilter, user } = useStore();
   const { recipes } = useRecipes();
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export function CommandPalette() {
         <CommandEmpty>No results found.</CommandEmpty>
         
         <CommandGroup heading="Actions">
-          <CommandItem onSelect={() => runCommand(() => setModal("addRecipe", true))}>
+          <CommandItem onSelect={() => runCommand(() => setModal(user ? "addRecipe" : "auth", true))}>
             <Plus className="mr-2 h-4 w-4" />
             <span>Add New Recipe</span>
           </CommandItem>

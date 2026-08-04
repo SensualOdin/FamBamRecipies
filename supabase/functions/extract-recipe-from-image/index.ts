@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Edge function v4 called');
+    console.log('Edge function v5 called');
     
     const body = await req.json();
     console.log('Request body keys:', Object.keys(body));
@@ -132,6 +132,7 @@ IMPORTANT:
 - Merge any duplicate information intelligently
 - Keep the instructions in the correct order
 - If information is missing, make reasonable assumptions or leave empty
+- The "servings" field MUST be a single integer, never a range or text
 - Return ONLY the JSON object, no additional text`
           },
           {
@@ -149,6 +150,7 @@ IMPORTANT:
         ],
         max_tokens: 4096,
         temperature: 0.3,
+        response_format: { type: 'json_object' },
       }),
     });
 
@@ -192,6 +194,13 @@ IMPORTANT:
         JSON.stringify({ error: 'Failed to parse recipe data' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // The recipes.servings DB column is an integer; the model sometimes
+    // returns strings like "4-6" — coerce to the first number found.
+    if (typeof (recipe as any).servings !== 'number') {
+      const match = String((recipe as any).servings ?? '').match(/\d+/);
+      (recipe as any).servings = match ? parseInt(match[0], 10) : null;
     }
 
     return new Response(

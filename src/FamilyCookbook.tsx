@@ -196,15 +196,21 @@ export default function FamilyCookbook() {
 
     if (typeof item === 'string') {
       const parsed = parseIngredientForList(item);
-      setShoppingList((prev: any[]) => [...prev, { ...parsed, checked: false, id: Date.now() }]);
+      setShoppingList((prev: any[]) => [...prev, { ...parsed, checked: false, id: crypto.randomUUID() }]);
     } else if (item && item.ingredients) {
-      const ingredients = item.ingredients.map((ing: string, i: number) => ({ ...parseIngredientForList(ing), checked: false, id: Date.now() + i }));
+      const ingredients = item.ingredients.map((ing: string) => ({ ...parseIngredientForList(ing), checked: false, id: crypto.randomUUID() }));
       setShoppingList((prev: any[]) => [...prev, ...ingredients]);
     }
     setModal('shoppingList', true);
   }, [setShoppingList, setModal]);
 
   const shoppingListCount = useMemo(() => shoppingList.filter(i => !i.checked).length, [shoppingList]);
+
+  // Recipe writes require a signed-in user (RLS) — prompt sign-in instead of
+  // failing at save time.
+  const handleOpenAddRecipe = useCallback(() => {
+    setModal(user ? 'addRecipe' : 'auth', true);
+  }, [user, setModal]);
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-detroit-100 selection:text-detroit-900 transition-colors duration-500">
@@ -226,7 +232,7 @@ export default function FamilyCookbook() {
         setShowFavoritesOnly={(val: boolean) => setFilter('showFavoritesOnly', val)}
         selectedCategory={selectedCategory}
         setSelectedCategory={(val: string) => setFilter('selectedCategory', val)}
-        onAddRecipe={() => setModal('addRecipe', true)}
+        onAddRecipe={handleOpenAddRecipe}
         onShowShoppingList={() => setModal('shoppingList', true)}
         shoppingListCount={shoppingListCount}
         user={user}
@@ -260,7 +266,7 @@ export default function FamilyCookbook() {
             setSelectedCategory={(val: string) => setFilter('selectedCategory', val)}
             showFilters={showFilters}
             setShowFilters={setShowFilters}
-            onAddRecipe={() => setModal('addRecipe', true)}
+            onAddRecipe={handleOpenAddRecipe}
             sortBy={sortBy}
             setSortBy={(val: string) => setFilter('sortBy', val)}
             selectedDifficulty={selectedDifficulty}
@@ -307,6 +313,10 @@ export default function FamilyCookbook() {
             onAddToShoppingList={addToShoppingList}
             onAuthorClick={(val: string) => setFilter('selectedAuthor', val)}
             onEditRecipe={(recipe: Recipe) => {
+              if (!user) {
+                setModal('auth', true);
+                return;
+              }
               setEditingRecipe(recipe);
               setModal('addRecipe', true);
             }}

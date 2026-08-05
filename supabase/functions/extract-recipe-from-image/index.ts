@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Edge function v5 called');
+    console.log('Edge function v7 called');
     
     const body = await req.json();
     console.log('Request body keys:', Object.keys(body));
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5.6-terra',
         messages: [
           {
             role: 'system',
@@ -148,8 +148,9 @@ IMPORTANT:
             ]
           }
         ],
-        max_tokens: 4096,
-        temperature: 0.3,
+        // GPT-5.x rejects the legacy max_tokens param, and some tiers only
+        // accept the default temperature — so neither is sent here.
+        max_completion_tokens: 8192,
         response_format: { type: 'json_object' },
       }),
     });

@@ -52,11 +52,14 @@ const FeaturedRecipe: React.FC<FeaturedRecipeProps> = ({ recipe, onOpen, onPrefe
       ) : (
         <div className="relative min-h-[220px] md:min-h-[300px] index-card-lines border-b md:border-b-0 md:border-r border-border">
           <div className="absolute inset-0 index-card-margin" />
-          <div className="absolute top-9 left-12 right-5 font-hand text-3xl font-semibold text-foreground -rotate-1">
-            {recipe.title}
-          </div>
-          <div className="absolute top-[4.6rem] left-12 font-hand text-lg text-muted-foreground">
-            from {recipe.author}'s kitchen
+          {/* Flow layout so long titles push the byline down instead of overlapping it */}
+          <div className="relative pl-12 pr-5 pt-9 pb-6">
+            <div className="font-hand text-3xl font-semibold text-foreground -rotate-1 leading-tight mb-2">
+              {recipe.title}
+            </div>
+            <div className="font-hand text-lg text-muted-foreground">
+              from {recipe.author}'s kitchen
+            </div>
           </div>
         </div>
       )}

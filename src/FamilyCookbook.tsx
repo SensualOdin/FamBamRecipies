@@ -29,12 +29,12 @@ import { Recipe, UserProfile } from './types';
 
 // Lazy loaded modals
 const RecipePage = lazy(() => import('./components/recipe/RecipePage'));
+const ShoppingListPage = lazy(() => import('./components/pages/ShoppingListPage'));
+const MealPlannerPage = lazy(() => import('./components/pages/MealPlannerPage'));
 const AddRecipeModal = lazy(() => import('./components/modals/AddRecipeModal'));
-const ShoppingListModal = lazy(() => import('./components/modals/ShoppingListModal'));
 const UnitConverterModal = lazy(() => import('./components/modals/UnitConverterModal'));
 const IngredientSubstitutionsModal = lazy(() => import('./components/modals/IngredientSubstitutionsModal'));
 const UserProfileModal = lazy(() => import('./components/modals/UserProfileModal'));
-const MealPlannerModal = lazy(() => import('./components/modals/MealPlannerModal'));
 const AuthModal = lazy(() => import('./components/modals/AuthModal'));
 const KitchenMode = lazy(() => import('./components/recipe/KitchenMode'));
 
@@ -43,7 +43,7 @@ const prefetchModal = (modalName: string) => {
   const modMap: Record<string, () => Promise<any>> = {
     recipe: () => import('./components/recipe/RecipePage'),
     add: () => import('./components/modals/AddRecipeModal'),
-    shopping: () => import('./components/modals/ShoppingListModal'),
+    shopping: () => import('./components/pages/ShoppingListPage'),
     profile: () => import('./components/modals/UserProfileModal')
   };
   if (modMap[modalName]) modMap[modalName]();
@@ -202,8 +202,9 @@ export default function FamilyCookbook() {
       const ingredients = item.ingredients.map((ing: string) => ({ ...parseIngredientForList(ing), checked: false, id: crypto.randomUUID() }));
       setShoppingList((prev: any[]) => [...prev, ...ingredients]);
     }
-    setModal('shoppingList', true);
-  }, [setShoppingList, setModal]);
+    // Deliberately no navigation — the list badge in the nav ticks up,
+    // and jumping to a different page mid-recipe would be jarring.
+  }, [setShoppingList]);
 
   const shoppingListCount = useMemo(() => shoppingList.filter(i => !i.checked).length, [shoppingList]);
 
@@ -256,21 +257,62 @@ export default function FamilyCookbook() {
     }
   }, [setSelectedRecipe]);
 
+  // Full-page views (shopping list / meal planner) get history entries too
+  useEffect(() => {
+    if (modals.shoppingList && window.history.state?.view !== 'list') {
+      const st = window.history.state || {};
+      if (!st.recipeId && !st.view) scrollPosRef.current = window.scrollY;
+      window.history.pushState({ ...st, view: 'list' }, '', st.recipeId ? `?recipe=${st.recipeId}&view=list` : '?view=list');
+      window.scrollTo(0, 0);
+    }
+  }, [modals.shoppingList]);
+
+  useEffect(() => {
+    if (modals.mealPlanner && window.history.state?.view !== 'planner') {
+      const st = window.history.state || {};
+      if (!st.recipeId && !st.view) scrollPosRef.current = window.scrollY;
+      window.history.pushState({ ...st, view: 'planner' }, '', st.recipeId ? `?recipe=${st.recipeId}&view=planner` : '?view=planner');
+      window.scrollTo(0, 0);
+    }
+  }, [modals.mealPlanner]);
+
+  const closeView = useCallback(() => {
+    if (window.history.state?.view) {
+      window.history.back();
+    } else {
+      setModal('shoppingList', false);
+      setModal('mealPlanner', false);
+      const st = window.history.state || {};
+      window.history.replaceState(st, '', st.recipeId ? `?recipe=${st.recipeId}` : window.location.pathname);
+    }
+  }, [setModal]);
+
+  // Bottom-nav Home: exit any page back to the binder
+  const goHome = useCallback(() => {
+    setModal('shoppingList', false);
+    setModal('mealPlanner', false);
+    setSelectedRecipe(null);
+    window.history.replaceState({}, '', window.location.pathname);
+  }, [setModal, setSelectedRecipe]);
+
   // Browser back/forward
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
-      const rid = e.state?.recipeId;
-      if (rid != null) {
-        const r = allRecipesRef.current.find(x => String(x.id) === String(rid));
+      const st = e.state || ({} as any);
+      if (st.modal) return; // per-modal entries manage themselves
+      setModal('shoppingList', st.view === 'list');
+      setModal('mealPlanner', st.view === 'planner');
+      if (st.recipeId != null) {
+        const r = allRecipesRef.current.find(x => String(x.id) === String(st.recipeId));
         if (r) setSelectedRecipe(r);
-      } else if (!e.state?.modal) {
+      } else {
         setSelectedRecipe(null);
-        requestAnimationFrame(() => window.scrollTo(0, scrollPosRef.current));
+        if (!st.view) requestAnimationFrame(() => window.scrollTo(0, scrollPosRef.current));
       }
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
-  }, [setSelectedRecipe]);
+  }, [setSelectedRecipe, setModal]);
 
   // Shared links: open ?recipe=<id> once recipes have loaded
   const deepLinkDone = React.useRef(false);
@@ -291,8 +333,16 @@ export default function FamilyCookbook() {
         return;
       }
     }
+    const view = new URLSearchParams(window.location.search).get('view');
+    if (view === 'planner' || view === 'list') {
+      deepLinkDone.current = true;
+      window.history.replaceState({}, '', window.location.pathname);
+      window.history.pushState({ view }, '', `?view=${view}`);
+      setModal(view === 'planner' ? 'mealPlanner' : 'shoppingList', true);
+      return;
+    }
     deepLinkDone.current = true;
-  }, [allRecipes, recipesLoading, setSelectedRecipe]);
+  }, [allRecipes, recipesLoading, setSelectedRecipe, setModal]);
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-detroit-100 selection:text-detroit-900 transition-colors duration-500">
@@ -320,10 +370,37 @@ export default function FamilyCookbook() {
         userProfile={userProfile}
         onShowProfile={() => setModal('profile', true)}
         onShowAuth={() => setModal('auth', true)}
-        onHome={selectedRecipe ? closeRecipe : undefined}
+        onHome={goHome}
       />
 
-      {selectedRecipe ? (
+      {modals.mealPlanner ? (
+        <Suspense fallback={
+          <div className="fixed inset-0 bg-background flex flex-col items-center justify-center z-[100]">
+            <div className="w-16 h-16 border-4 border-primary/25 border-t-primary rounded-full animate-spin mb-4" />
+            <p className="font-hand text-xl text-muted-foreground animate-pulse">Checking the calendar...</p>
+          </div>
+        }>
+          <MealPlannerPage
+            onBack={closeView}
+            recipes={allRecipes}
+            mealPlan={mealPlan}
+            setMealPlan={setMealPlan}
+          />
+        </Suspense>
+      ) : modals.shoppingList ? (
+        <Suspense fallback={
+          <div className="fixed inset-0 bg-background flex flex-col items-center justify-center z-[100]">
+            <div className="w-16 h-16 border-4 border-primary/25 border-t-primary rounded-full animate-spin mb-4" />
+            <p className="font-hand text-xl text-muted-foreground animate-pulse">Grabbing the list...</p>
+          </div>
+        }>
+          <ShoppingListPage
+            onBack={closeView}
+            shoppingList={shoppingList}
+            setShoppingList={setShoppingList}
+          />
+        </Suspense>
+      ) : selectedRecipe ? (
         <Suspense fallback={
           <div className="fixed inset-0 bg-background flex flex-col items-center justify-center z-[100]">
             <div className="w-16 h-16 border-4 border-primary/25 border-t-primary rounded-full animate-spin mb-4" />
@@ -487,14 +564,6 @@ export default function FamilyCookbook() {
           />
         )}
 
-        {modals.shoppingList && (
-          <ShoppingListModal 
-            onClose={() => setModal('shoppingList', false)} 
-            shoppingList={shoppingList}
-            setShoppingList={setShoppingList}
-          />
-        )}
-
         {modals.unitConverter && (
           <UnitConverterModal onClose={() => setModal('unitConverter', false)} />
         )}
@@ -513,15 +582,6 @@ export default function FamilyCookbook() {
             onProfileUpdate={(updates: Partial<UserProfile>) => {
               setUserProfile((prev: UserProfile) => ({ ...prev, ...updates }));
             }}
-          />
-        )}
-
-        {modals.mealPlanner && (
-          <MealPlannerModal
-            onClose={() => setModal('mealPlanner', false)}
-            recipes={allRecipes}
-            mealPlan={mealPlan}
-            setMealPlan={setMealPlan}
           />
         )}
 

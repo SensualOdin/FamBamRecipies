@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Mic, MicOff, CheckCircle2, ListChecks, Volume2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { synthesizeSpeech } from '../../lib/supabase';
 import { Recipe } from '../../types';
 
 interface KitchenModeProps {
@@ -43,12 +44,25 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
     };
   }, []);
 
-  // Text to Speech
+  // Text to Speech — ElevenLabs first (via edge function), browser fallback
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioCache = useRef<Map<string, string>>(new Map());
+  const speakToken = useRef(0);
 
-  const speak = useCallback((text: string) => {
+  const stopSpeaking = useCallback(() => {
+    speakToken.current += 1;
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setIsSpeaking(false);
+  }, []);
+
+  const browserSpeak = useCallback((text: string) => {
     if (!('speechSynthesis' in window)) return;
-    
+
     // Stop any current speech
     window.speechSynthesis.cancel();
 
@@ -85,6 +99,56 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
 
     window.speechSynthesis.speak(utterance);
   }, []);
+
+  const speak = useCallback(async (text: string) => {
+    stopSpeaking();
+    const token = speakToken.current;
+
+    try {
+      // Serve from cache or fetch from the ElevenLabs edge function
+      let url = audioCache.current.get(text) || null;
+      if (!url) {
+        const blob = await synthesizeSpeech(text);
+        if (blob) {
+          url = URL.createObjectURL(blob);
+          audioCache.current.set(text, url);
+        }
+      }
+      // A newer speak/stop superseded this request while fetching
+      if (token !== speakToken.current) return;
+
+      if (url) {
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.onplay = () => setIsSpeaking(true);
+        audio.onended = () => {
+          setIsSpeaking(false);
+          if (audioRef.current === audio) audioRef.current = null;
+        };
+        audio.onerror = () => {
+          setIsSpeaking(false);
+          if (audioRef.current === audio) audioRef.current = null;
+          browserSpeak(text);
+        };
+        await audio.play();
+        return;
+      }
+    } catch {
+      // fall through to the browser voice
+    }
+
+    if (token === speakToken.current) browserSpeak(text);
+  }, [stopSpeaking, browserSpeak]);
+
+  // Release cached audio URLs and stop any narration on unmount
+  useEffect(() => {
+    const cache = audioCache.current;
+    return () => {
+      stopSpeaking();
+      cache.forEach(url => URL.revokeObjectURL(url));
+      cache.clear();
+    };
+  }, [stopSpeaking]);
 
   // Initialize voices
   useEffect(() => {
@@ -238,7 +302,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
             variant="ghost" 
             size="icon"
             onClick={() => {
-              if (isSpeaking) window.speechSynthesis.cancel();
+              if (isSpeaking) stopSpeaking();
               else speak(showIngredients ? "Reading ingredients" : steps[currentStep]);
             }}
             className={`rounded-full h-10 w-10 sm:h-12 sm:w-12 transition-all ${isSpeaking ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}

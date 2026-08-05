@@ -609,6 +609,32 @@ export async function uploadAvatar(file: File, userId: string): Promise<{ data?:
   };
 }
 
+// Kitchen Mode narration: fetch ElevenLabs audio via the text-to-speech
+// edge function. Returns null when unavailable (signed out, no key,
+// API error) so the caller can fall back to the browser voice.
+export async function synthesizeSpeech(text: string): Promise<Blob | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return null;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/text-to-speech`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return blob.type.startsWith('audio/') ? blob : null;
+  } catch {
+    return null;
+  }
+}
+
 // Real-time Presence Helper
 export function subscribeToRecipePresence(recipeId: string | number, user: any, onSync: (users: any[]) => void) {
   const channel = supabase.channel(`recipe:${recipeId}`, {

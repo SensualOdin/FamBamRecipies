@@ -14,6 +14,7 @@ interface MobileNavProps {
   userProfile: UserProfile;
   onShowProfile: () => void;
   onShowAuth: () => void;
+  onHome?: () => void;
 }
 
 const MobileNav: React.FC<MobileNavProps> = ({ 
@@ -27,12 +28,14 @@ const MobileNav: React.FC<MobileNavProps> = ({
   user,
   userProfile,
   onShowProfile,
-  onShowAuth
+  onShowAuth,
+  onHome
 }) => {
   return (
     <div className="md:hidden fixed bottom-4 left-4 right-4 bg-background/80 dark:bg-card/95 backdrop-blur-2xl border border-border dark:border-white/10 px-2 py-3 pb-safe rounded-[32px] z-50 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-colors duration-500">
       <button 
         onClick={() => {
+          if (onHome) onHome();
           window.scrollTo({ top: 0, behavior: 'smooth' });
           setSelectedCategory('All');
           setShowFavoritesOnly(false);

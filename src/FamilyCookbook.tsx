@@ -28,7 +28,7 @@ import { markRecipeAsCooked, uploadRecipeImage } from './lib/supabase';
 import { Recipe, UserProfile } from './types';
 
 // Lazy loaded modals
-const RecipeModal = lazy(() => import('./components/recipe/RecipeModal'));
+const RecipePage = lazy(() => import('./components/recipe/RecipePage'));
 const AddRecipeModal = lazy(() => import('./components/modals/AddRecipeModal'));
 const ShoppingListModal = lazy(() => import('./components/modals/ShoppingListModal'));
 const UnitConverterModal = lazy(() => import('./components/modals/UnitConverterModal'));
@@ -41,7 +41,7 @@ const KitchenMode = lazy(() => import('./components/recipe/KitchenMode'));
 // Prefetch functions
 const prefetchModal = (modalName: string) => {
   const modMap: Record<string, () => Promise<any>> = {
-    recipe: () => import('./components/recipe/RecipeModal'),
+    recipe: () => import('./components/recipe/RecipePage'),
     add: () => import('./components/modals/AddRecipeModal'),
     shopping: () => import('./components/modals/ShoppingListModal'),
     profile: () => import('./components/modals/UserProfileModal')
@@ -231,6 +231,69 @@ export default function FamilyCookbook() {
     [hasActiveFilters, allRecipes]
   );
 
+  // --- Recipe page routing (?recipe=<id> + browser history) ---
+  const scrollPosRef = React.useRef(0);
+  const allRecipesRef = React.useRef(allRecipes);
+  useEffect(() => { allRecipesRef.current = allRecipes; }, [allRecipes]);
+
+  // Push a history entry when a recipe opens (card click, palette, featured)
+  useEffect(() => {
+    if (selectedRecipe) {
+      if (window.history.state?.recipeId !== selectedRecipe.id) {
+        scrollPosRef.current = window.scrollY;
+        window.history.pushState({ recipeId: selectedRecipe.id }, '', `?recipe=${selectedRecipe.id}`);
+      }
+      window.scrollTo(0, 0);
+    }
+  }, [selectedRecipe]);
+
+  const closeRecipe = useCallback(() => {
+    if (window.history.state?.recipeId) {
+      window.history.back();
+    } else {
+      window.history.replaceState({}, '', window.location.pathname);
+      setSelectedRecipe(null);
+    }
+  }, [setSelectedRecipe]);
+
+  // Browser back/forward
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const rid = e.state?.recipeId;
+      if (rid != null) {
+        const r = allRecipesRef.current.find(x => String(x.id) === String(rid));
+        if (r) setSelectedRecipe(r);
+      } else if (!e.state?.modal) {
+        setSelectedRecipe(null);
+        requestAnimationFrame(() => window.scrollTo(0, scrollPosRef.current));
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [setSelectedRecipe]);
+
+  // Shared links: open ?recipe=<id> once recipes have loaded
+  const deepLinkDone = React.useRef(false);
+  useEffect(() => {
+    // Wait for the real recipe list — allRecipes falls back to sample
+    // data while loading, which would make the lookup miss and bail.
+    if (deepLinkDone.current || recipesLoading || allRecipes.length === 0) return;
+    const rid = new URLSearchParams(window.location.search).get('recipe');
+    if (rid) {
+      const r = allRecipes.find(x => String(x.id) === String(rid));
+      if (r) {
+        deepLinkDone.current = true;
+        // Put a "home" entry underneath so Back returns to the binder
+        // instead of leaving the site.
+        window.history.replaceState({}, '', window.location.pathname);
+        window.history.pushState({ recipeId: r.id }, '', `?recipe=${r.id}`);
+        setSelectedRecipe(r);
+        return;
+      }
+    }
+    deepLinkDone.current = true;
+  }, [allRecipes, recipesLoading, setSelectedRecipe]);
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-detroit-100 selection:text-detroit-900 transition-colors duration-500">
       {saveError && (
@@ -245,7 +308,7 @@ export default function FamilyCookbook() {
       )}
       <CommandPalette />
       
-      <MobileNav 
+      <MobileNav
         showFavoritesOnly={showFavoritesOnly}
         setShowFavoritesOnly={(val: boolean) => setFilter('showFavoritesOnly', val)}
         selectedCategory={selectedCategory}
@@ -257,9 +320,27 @@ export default function FamilyCookbook() {
         userProfile={userProfile}
         onShowProfile={() => setModal('profile', true)}
         onShowAuth={() => setModal('auth', true)}
+        onHome={selectedRecipe ? closeRecipe : undefined}
       />
 
-      <Header 
+      {selectedRecipe ? (
+        <Suspense fallback={
+          <div className="fixed inset-0 bg-background flex flex-col items-center justify-center z-[100]">
+            <div className="w-16 h-16 border-4 border-primary/25 border-t-primary rounded-full animate-spin mb-4" />
+            <p className="font-hand text-xl text-muted-foreground animate-pulse">Opening the binder...</p>
+          </div>
+        }>
+          <RecipePage
+            recipe={selectedRecipe}
+            onBack={closeRecipe}
+            onAddToShoppingList={addToShoppingList}
+            onMarkAsCooked={handleMarkAsCooked}
+            user={user}
+          />
+        </Suspense>
+      ) : (
+      <>
+      <Header
         user={user}
         userProfile={userProfile}
         searchQuery={localSearch}
@@ -383,6 +464,8 @@ export default function FamilyCookbook() {
           </p>
         </footer>
       </main>
+      </>
+      )}
 
       <Suspense fallback={
         <div className="fixed inset-0 bg-background flex flex-col items-center justify-center z-[100]">
@@ -390,19 +473,6 @@ export default function FamilyCookbook() {
           <p className="font-hand text-xl text-muted-foreground animate-pulse">Setting the table...</p>
         </div>
       }>
-        {selectedRecipe && !modals.kitchenMode && (
-          <RecipeModal 
-            recipe={selectedRecipe} 
-            onClose={() => setSelectedRecipe(null)} 
-            onAddToShoppingList={addToShoppingList}
-            onMarkAsCooked={handleMarkAsCooked}
-            user={user}
-            onUpdateRecipeImage={(recipeId: string | number, photoUrl: string) => {
-              updateRecipe({ id: recipeId, recipe: { ...selectedRecipe, image: photoUrl } });
-            }}
-          />
-        )}
-        
         {modals.addRecipe && (
           <AddRecipeModal 
             onClose={() => {

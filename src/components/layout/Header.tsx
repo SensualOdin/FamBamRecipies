@@ -80,19 +80,19 @@ const Header: React.FC<HeaderProps> = ({
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-2 sm:pt-7">
         {/* Top Navigation */}
         <nav className="flex justify-between items-center gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 shrink-0 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/30 -rotate-3">
-              <ChefHat className="w-6 h-6 text-primary-foreground" />
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/30 -rotate-3">
+              <ChefHat className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
             </div>
-            <span className="font-serif font-bold text-lg sm:text-xl tracking-tight text-foreground truncate">
+            <span className="font-serif font-bold text-base sm:text-xl tracking-tight text-foreground truncate">
               The <em className="not-italic text-[hsl(var(--accent))]">Ge-winning</em>
-              <span className="hidden xs:inline"> Family Cookbook</span>
+              <span className="hidden lg:inline"> Family Cookbook</span>
             </span>
           </div>
 
           {/* Tools & Auth */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="flex bg-card rounded-full p-1 border border-border shadow-sm">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <div className="flex bg-card rounded-full p-0.5 sm:p-1 border border-border shadow-sm">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -101,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({
                       size="icon"
                       onClick={toggleTheme}
                       aria-label="Switch theme"
-                      className="relative text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all border-none"
+                      className="relative h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all border-none"
                     >
                       <AnimatePresence mode="wait">
                         <motion.div
@@ -122,7 +122,7 @@ const Header: React.FC<HeaderProps> = ({
                 {[
                   { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: onShowShoppingList, label: 'Shopping List', count: shoppingListCount, mobile: false, prefetch: 'shopping' },
                   { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: onShowMealPlanner, label: 'Meal Planner', mobile: true },
-                  { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: onShowUnitConverter, label: 'Unit Converter', mobile: true }
+                  { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: onShowUnitConverter, label: 'Unit Converter', mobile: false }
                 ].map((tool) => (
                   <Tooltip key={tool.id}>
                     <TooltipTrigger asChild>
@@ -132,7 +132,7 @@ const Header: React.FC<HeaderProps> = ({
                         onClick={tool.onClick}
                         onMouseEnter={() => tool.prefetch && onPrefetch && onPrefetch(tool.prefetch)}
                         aria-label={tool.label}
-                        className={`relative text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all group border-none ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
+                        className={`relative h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all group border-none ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
                       >
                         {tool.icon}
                         {tool.count > 0 && (

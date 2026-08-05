@@ -4,11 +4,12 @@ import { motion, LayoutGroup } from 'framer-motion';
 import { X } from 'lucide-react';
 
 // Components
-import FloatingParticles from './components/layout/FloatingParticles';
 import RecipeGrid from './components/recipe/RecipeGrid';
 import Header from './components/layout/Header';
 import FilterSection from './components/layout/FilterSection';
 import MobileNav from './components/layout/MobileNav';
+import CooksRow from './components/layout/CooksRow';
+import FeaturedRecipe, { pickFeatured } from './components/recipe/FeaturedRecipe';
 import { CommandPalette } from './components/layout/CommandPalette';
 import { Badge } from "@/components/ui/badge";
 
@@ -212,6 +213,24 @@ export default function FamilyCookbook() {
     setModal(user ? 'addRecipe' : 'auth', true);
   }, [user, setModal]);
 
+  // Hero copy pulls real family stats
+  const cookCount = useMemo(
+    () => new Set(allRecipes.map(r => r.author).filter(Boolean)).size,
+    [allRecipes]
+  );
+  const topRecipe = useMemo(() => {
+    const cooked = allRecipes.filter(r => (r.timesCooked || 0) > 0);
+    if (!cooked.length) return null;
+    const top = cooked.reduce((a, b) => ((b.timesCooked || 0) > (a.timesCooked || 0) ? b : a));
+    return { title: top.title, author: top.author };
+  }, [allRecipes]);
+
+  const hasActiveFilters = !!searchQuery || selectedCategory !== 'All' || showFavoritesOnly || !!selectedAuthor || selectedDifficulty !== 'All' || cookTimeFilter !== 'All';
+  const featuredRecipe = useMemo(
+    () => (hasActiveFilters ? null : pickFeatured(allRecipes)),
+    [hasActiveFilters, allRecipes]
+  );
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-detroit-100 selection:text-detroit-900 transition-colors duration-500">
       {saveError && (
@@ -224,7 +243,6 @@ export default function FamilyCookbook() {
           </div>
         </div>
       )}
-      <FloatingParticles />
       <CommandPalette />
       
       <MobileNav 
@@ -256,11 +274,35 @@ export default function FamilyCookbook() {
         onShowAuth={() => setModal('auth', true)}
         onPrefetch={prefetchModal}
         isLoaded={true}
+        recipeCount={allRecipes.length}
+        cookCount={cookCount}
+        topRecipe={topRecipe}
       />
 
-      <main className="relative max-w-7xl mx-auto px-4 pb-28 sm:pb-20 -mt-4 sm:-mt-16 z-20">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pb-28 sm:pb-20 z-20">
+        <CooksRow
+          recipes={allRecipes}
+          selectedAuthor={selectedAuthor}
+          onAuthorClick={(name) => setFilter('selectedAuthor', name)}
+        />
+
+        {featuredRecipe && (
+          <section className="mt-8">
+            <div className="flex items-baseline gap-4 mb-5">
+              <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground tracking-tight">On the table this week</h2>
+              <div className="flex-1 border-b-2 border-dotted border-border -translate-y-1.5" />
+              <span className="font-hand text-lg text-muted-foreground -rotate-1 hidden sm:block">worth a try ↓</span>
+            </div>
+            <FeaturedRecipe
+              recipe={featuredRecipe}
+              onOpen={setSelectedRecipe}
+              onPrefetch={() => prefetchModal('recipe')}
+            />
+          </section>
+        )}
+
         <LayoutGroup>
-          <FilterSection 
+          <FilterSection
             categories={categories}
             selectedCategory={selectedCategory}
             setSelectedCategory={(val: string) => setFilter('selectedCategory', val)}
@@ -278,27 +320,37 @@ export default function FamilyCookbook() {
             initialRecipes={initialRecipes}
           />
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 px-2">
-            <div className="flex items-center gap-3">
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">
-                {showFavoritesOnly ? 'Saved Recipes' : (selectedCategory === 'All' ? 'All Recipes' : selectedCategory)}
-              </h2>
-              <Badge variant="secondary" className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-bold border-none">
-                {filteredRecipes.length}
-              </Badge>
-            </div>
-            
-            {selectedAuthor && (
-              <motion.div layout initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 self-start sm:self-auto">
-                <Badge variant="outline" className="flex items-center gap-2 bg-detroit-50 dark:bg-detroit-900/20 text-detroit-700 dark:text-detroit-300 px-4 py-2 rounded-xl border-detroit-100 dark:border-detroit-800">
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Author: {selectedAuthor}</span>
-                  <button onClick={() => setFilter('selectedAuthor', null)} className="hover:text-detroit-900 dark:hover:text-detroit-100">
-                    <X className="w-4 h-4" />
-                  </button>
-                </Badge>
-              </motion.div>
+          <div className="flex items-baseline gap-4 mb-8 px-1">
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground tracking-tight shrink-0">
+              {showFavoritesOnly ? 'The saved stack' : selectedAuthor ? `${selectedAuthor}'s recipes` : (selectedCategory === 'All' ? 'The whole binder' : selectedCategory)}
+            </h2>
+            <Badge variant="secondary" className="px-2.5 py-0.5 bg-muted text-muted-foreground rounded-full text-xs font-bold border-none translate-y-[-2px]">
+              {filteredRecipes.length}
+            </Badge>
+            <div className="flex-1 border-b-2 border-dotted border-border -translate-y-1.5 hidden sm:block" />
+            {selectedAuthor ? (
+              <button
+                onClick={() => setFilter('selectedAuthor', null)}
+                className="font-hand text-lg text-[hsl(var(--accent))] -rotate-1 shrink-0 hidden sm:flex items-center gap-1 hover:underline"
+              >
+                back to everyone <X className="w-4 h-4" />
+              </button>
+            ) : (
+              <span className="font-hand text-lg text-muted-foreground -rotate-1 shrink-0 hidden sm:block">
+                {sortBy === 'newest' ? 'newest first' : sortBy === 'oldest' ? 'oldest first' : sortBy === 'popular' ? 'most cooked first' : 'a to z'}
+              </span>
             )}
           </div>
+          {selectedAuthor && (
+            <div className="sm:hidden mb-6 px-1">
+              <button
+                onClick={() => setFilter('selectedAuthor', null)}
+                className="font-hand text-lg text-[hsl(var(--accent))] flex items-center gap-1"
+              >
+                back to everyone <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           <RecipeGrid 
             recipes={filteredRecipes}
@@ -324,6 +376,12 @@ export default function FamilyCookbook() {
             onClearFilters={resetFilters}
           />
         </LayoutGroup>
+
+        <footer className="text-center pt-4 pb-6">
+          <p className="font-hand text-xl sm:text-2xl text-muted-foreground">
+            Made with love &amp; butter in Frisco, TX — <span className="text-[hsl(var(--accent))] font-semibold">Gewinning</span> since forever.
+          </p>
+        </footer>
       </main>
 
       <Suspense fallback={

@@ -1,14 +1,13 @@
 import React, { useState, memo } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Heart, Plus, Edit2, 
+import {
+  Heart, Plus, Edit2,
   Clock, Users, Flame
 } from 'lucide-react';
-import { categoryIcons } from '../../data/constants';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Recipe } from '../../types';
 
@@ -23,28 +22,43 @@ interface RecipeCardProps {
   onMouseEnter?: () => void;
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ 
-  recipe, 
-  index, 
-  onClick, 
-  onToggleFavorite, 
-  onAddToShoppingList, 
-  onAuthorClick, 
-  onEdit, 
-  onMouseEnter 
+const hasPhoto = (r: Recipe) =>
+  !!r.image && typeof r.image === 'string' && (r.image.startsWith('data:') || r.image.startsWith('http'));
+
+/* Small hand-drawn pot doodle for index cards */
+const PotDoodle = () => (
+  <svg width="46" height="46" viewBox="0 0 54 54" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+    <ellipse cx="27" cy="34" rx="18" ry="9" />
+    <path d="M9 34 Q 4 34 5 29" /><path d="M45 34 Q 50 34 49 29" />
+    <path d="M18 22 q 2 -6 0 -10 M27 20 q 2 -6 0 -10 M36 22 q 2 -6 0 -10" />
+  </svg>
+);
+
+const RecipeCard: React.FC<RecipeCardProps> = ({
+  recipe,
+  index,
+  onClick,
+  onToggleFavorite,
+  onAddToShoppingList,
+  onAuthorClick,
+  onEdit,
+  onMouseEnter
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  
+  const photo = hasPhoto(recipe);
+  // Cards sit slightly askew, like they were laid on the table
+  const tilt = index % 2 === 0 ? 0.6 : -0.7;
+
   const handleMouseEnter = () => {
     setIsHovered(true);
     if (onMouseEnter) onMouseEnter();
   };
-  
+
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleFavorite(recipe.id);
   };
-  
+
   const handleShoppingListClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onAddToShoppingList(recipe);
@@ -60,149 +74,148 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     if (onEdit) onEdit(recipe);
   };
 
-  const difficultyColor = {
-    Easy: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    Medium: "bg-amber-50 text-amber-600 border-amber-100",
-    Hard: "bg-rose-50 text-rose-600 border-rose-100"
-  };
+  const storyLine = recipe.story && recipe.story.trim().length > 20
+    ? `“${recipe.story.trim().slice(0, 64)}${recipe.story.trim().length > 64 ? '…' : ''}”`
+    : null;
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        delay: index * 0.05,
+      initial={{ opacity: 0, y: 20, rotate: tilt }}
+      animate={{ opacity: 1, y: 0, rotate: tilt }}
+      transition={{
+        delay: Math.min(index * 0.04, 0.4),
         layout: { type: "spring", stiffness: 300, damping: 30 }
       }}
-      whileHover={{ y: -8, scale: 1.02 }}
+      whileHover={{ y: -6, rotate: 0, scale: 1.01 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onClick(recipe)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
       className="h-full cursor-pointer"
     >
-      <Card className="group relative flex flex-col h-full bg-card/70 dark:bg-slate-900/70 backdrop-blur-sm rounded-[32px] overflow-hidden transition-all duration-500 border border-border dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)]">
-        {/* Image / Header Section */}
-        <div className="relative h-64 overflow-hidden">
-          {/* Background Overlay */}
-          <div className={`absolute inset-0 bg-slate-900 transition-opacity duration-700 ${isHovered ? 'opacity-20' : 'opacity-0'} z-10`} />
-          
-          {/* Image Content */}
-          <div className="absolute inset-0 bg-muted flex items-center justify-center">
-            {recipe.image && (typeof recipe.image === 'string') && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
-              <motion.img 
-                animate={{ scale: isHovered ? 1.1 : 1 }}
-                transition={{ duration: 0.7 }}
-                src={recipe.image} 
-                alt={recipe.title} 
+      <Card className="group relative flex flex-col h-full bg-card rounded-2xl overflow-hidden transition-shadow duration-300 border border-border shadow-[0_10px_30px_-14px_rgba(29,42,68,0.18)] hover:shadow-[0_22px_44px_-16px_rgba(29,42,68,0.3)]">
+        {/* Image / index-card section */}
+        <div className="relative h-52 overflow-hidden shrink-0">
+          {photo ? (
+            <>
+              <motion.img
+                animate={{ scale: isHovered ? 1.06 : 1 }}
+                transition={{ duration: 0.6 }}
+                src={recipe.image}
+                alt={recipe.title}
                 loading="lazy"
                 className="w-full h-full object-cover"
               />
-            ) : (
-              <div className="relative flex items-center justify-center w-full h-full bg-gradient-to-br from-muted to-muted/50">
-                <motion.span 
-                  animate={{ scale: isHovered ? 1.25 : 1, rotate: isHovered ? 6 : 0 }}
-                  transition={{ duration: 0.7 }}
-                  className="text-8xl"
-                >
-                  {recipe.image || '🥘'}
-                </motion.span>
+              {/* Badges over photo */}
+              <div className="absolute top-3 right-3 z-20 flex flex-col gap-1.5 items-end">
+                <Badge variant="secondary" className="bg-black/45 text-white backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-[0.08em] border-none">
+                  {recipe.category}
+                </Badge>
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="relative w-full h-full index-card-lines border-b border-border">
+              <div className="absolute inset-0 index-card-margin" />
+              <div className="absolute top-8 left-11 right-4 font-hand text-[1.55rem] leading-tight font-semibold text-card-foreground -rotate-1 line-clamp-2">
+                {recipe.title}
+              </div>
+              <div className="absolute bottom-10 left-11 font-hand text-base text-muted-foreground">
+                from {recipe.author}'s kitchen
+              </div>
+              <div className="absolute right-3.5 bottom-3 text-muted-foreground/50">
+                <PotDoodle />
+              </div>
+              <Badge variant="secondary" className="absolute top-3 right-3 bg-muted text-muted-foreground px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-[0.08em] border-none">
+                {recipe.category}
+              </Badge>
+            </div>
+          )}
 
-          {/* Favorite Button */}
+          {/* Favorite */}
           <Button
             variant="ghost"
             size="icon"
             onClick={handleFavoriteClick}
+            aria-label={recipe.isFavorite ? 'Remove from saved' : 'Save recipe'}
             className={`
-              absolute top-4 left-4 z-20 w-11 h-11 rounded-2xl backdrop-blur-xl
-              transition-all duration-500
-              ${recipe.isFavorite 
-                ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 hover:bg-rose-600 hover:text-white scale-110 border-none' 
-                : 'bg-white/40 dark:bg-black/40 text-white hover:text-rose-500 hover:bg-white dark:hover:bg-slate-800 shadow-sm border border-white/20'
+              absolute top-3 left-3 z-20 w-10 h-10 rounded-xl transition-all duration-300
+              ${recipe.isFavorite
+                ? 'bg-[hsl(var(--accent))] text-white shadow-md hover:bg-[hsl(var(--accent))]/90 hover:text-white border-none'
+                : photo
+                  ? 'bg-black/35 backdrop-blur-sm text-white hover:text-[hsl(var(--accent))] hover:bg-white border border-white/20'
+                  : 'bg-muted text-muted-foreground hover:text-[hsl(var(--accent))] hover:bg-border border-none'
               }
             `}
           >
-            <Heart className={`w-5 h-5 ${recipe.isFavorite ? 'fill-current' : ''}`} />
+            <Heart className={`w-4.5 h-4.5 ${recipe.isFavorite ? 'fill-current' : ''}`} />
           </Button>
 
-          {/* Category & Difficulty Badges */}
-          <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
-            <Badge variant="secondary" className="bg-white/30 dark:bg-black/30 backdrop-blur-xl px-3 py-1.5 rounded-xl shadow-sm border border-white/20 flex items-center gap-2 hover:bg-white/50 dark:hover:bg-black/50 text-white border-none">
-              <span className="text-sm">{categoryIcons[recipe.category as keyof typeof categoryIcons] || '🍽️'}</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.1em]">{recipe.category}</span>
-            </Badge>
-            <Badge 
-              variant="outline"
-              className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] shadow-sm border-none backdrop-blur-md ${difficultyColor[recipe.difficulty as keyof typeof difficultyColor]}`}
-            >
-              {recipe.difficulty}
-            </Badge>
-          </div>
-
-          {/* Floating Author */}
-          <div className="absolute bottom-4 left-4 z-20">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleAuthorClick} 
-              className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-lg h-auto border-none hover:bg-white dark:hover:bg-slate-700"
-            >
-              <Avatar className="w-6 h-6 border-none">
-                <AvatarFallback className="bg-primary text-[10px] text-primary-foreground font-bold flex items-center justify-center">
-                  {recipe.author?.charAt(0) || 'C'}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">by {recipe.author}</span>
-            </Button>
-          </div>
+          {/* Author pill over photo */}
+          {photo && (
+            <div className="absolute bottom-3 left-3 z-20">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleAuthorClick}
+                className="bg-card/95 backdrop-blur-sm pl-1 pr-3 py-1 rounded-full flex items-center gap-2 shadow-md h-auto border-none hover:bg-card"
+              >
+                <Avatar className="w-6 h-6 border-none">
+                  <AvatarFallback className="bg-primary text-[10px] text-primary-foreground font-bold flex items-center justify-center font-serif">
+                    {recipe.author?.charAt(0) || 'C'}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-[11px] font-bold text-card-foreground">{recipe.author}</span>
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Content Section */}
-        <CardContent className="p-4 sm:p-6 flex flex-col flex-1">
+        {/* Content */}
+        <CardContent className="p-5 flex flex-col flex-1">
           <div className="flex-1">
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2 mb-3">
-              {recipe.tags?.slice(0, 2).map((tag, i) => (
-                <Badge key={i} variant="outline" className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md uppercase tracking-wide border-none whitespace-nowrap">
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-
-            {/* Title */}
-            <h3 className="font-serif text-lg sm:text-xl font-bold text-card-foreground mb-2 leading-tight group-hover:text-primary transition-colors line-clamp-2">
+            <h3 className="font-serif text-lg font-semibold text-card-foreground mb-1.5 leading-snug group-hover:text-[hsl(var(--accent))] transition-colors line-clamp-2 tracking-tight">
               {recipe.title}
             </h3>
 
-            {/* Description */}
-            <p className="text-muted-foreground text-xs sm:text-sm line-clamp-2 leading-relaxed mb-4">
-              {recipe.description}
-            </p>
+            {storyLine ? (
+              <p className="font-hand text-lg leading-snug text-[hsl(var(--accent))] -rotate-[0.5deg] line-clamp-2 mb-3">
+                {storyLine}
+              </p>
+            ) : recipe.description ? (
+              <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed mb-3">
+                {recipe.description}
+              </p>
+            ) : null}
 
-            {/* Meta Info Bar */}
-            <div className="flex items-center gap-3 sm:gap-4 py-4 border-y border-border mb-4">
-              <div className="flex items-center gap-1.5 shrink-0">
-                <div className="p-1.5 bg-muted rounded-lg text-muted-foreground">
-                  <Clock className="w-3.5 h-3.5" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-bold text-muted-foreground whitespace-nowrap">{recipe.cookTime}</span>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <div className="p-1.5 bg-muted rounded-lg text-muted-foreground">
-                  <Users className="w-3.5 h-3.5" />
-                </div>
-                <span className="text-[10px] sm:text-xs font-bold text-muted-foreground whitespace-nowrap">{recipe.servings} serving</span>
-              </div>
+            {/* Meta */}
+            <div className="flex items-center flex-wrap gap-x-3 gap-y-1.5 py-3 border-t border-dashed border-border text-muted-foreground">
+              {!photo && (
+                <button onClick={handleAuthorClick} className="text-xs font-bold hover:text-[hsl(var(--accent))] transition-colors">
+                  {recipe.author}
+                </button>
+              )}
+              {recipe.cookTime && (
+                <span className="flex items-center gap-1 text-xs font-semibold">
+                  <Clock className="w-3.5 h-3.5" /> {recipe.cookTime}
+                </span>
+              )}
+              {recipe.servings ? (
+                <span className="flex items-center gap-1 text-xs font-semibold">
+                  <Users className="w-3.5 h-3.5" /> serves {recipe.servings}
+                </span>
+              ) : null}
+              {recipe.timesCooked && recipe.timesCooked > 0 ? (
+                <span className="flex items-center gap-1 bg-secondary rounded-full px-2.5 py-0.5 text-[11px] font-extrabold text-secondary-foreground">
+                  <Flame className="w-3 h-3 text-[hsl(var(--accent))]" /> Made {recipe.timesCooked}×
+                </span>
+              ) : null}
             </div>
           </div>
 
-          {/* Footer Actions */}
+          {/* Actions */}
           <div className="flex items-center justify-between gap-3 pt-2">
-            <div className="flex items-center gap-1 sm:gap-1.5">
+            <div className="flex items-center gap-1">
               <TooltipProvider>
                 {onEdit && (
                   <Tooltip>
@@ -211,24 +224,26 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                         variant="ghost"
                         size="icon"
                         onClick={handleEditClick}
-                        className="w-10 h-10 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl shrink-0 border-none"
+                        aria-label="Edit recipe"
+                        className="w-9 h-9 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg shrink-0 border-none"
                       >
-                        <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <Edit2 className="w-4 h-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Edit Recipe</TooltipContent>
                   </Tooltip>
                 )}
-                
+
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={handleShoppingListClick}
-                      className="w-10 h-10 text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-muted rounded-xl shrink-0 border-none"
+                      aria-label="Add ingredients to shopping list"
+                      className="w-9 h-9 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg shrink-0 border-none"
                     >
-                      <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <Plus className="w-4 h-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Add to Shopping List</TooltipContent>
@@ -236,26 +251,18 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               </TooltipProvider>
             </div>
 
-            <Button 
-              className="bg-primary text-primary-foreground px-4 sm:px-6 h-9 sm:h-11 rounded-xl sm:rounded-2xl font-bold text-[10px] sm:text-xs hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 shrink-0 whitespace-nowrap border-none"
+            {!photo ? (
+              <span className="font-hand text-base text-[hsl(var(--accent))] -rotate-1 mr-auto ml-2 hidden xs:block">
+                needs a photo!
+              </span>
+            ) : null}
+
+            <Button
+              className="bg-foreground text-background px-5 h-9 rounded-full font-extrabold text-xs hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] transition-colors shrink-0 whitespace-nowrap border-none"
             >
-              Cook Now
+              Cook this
             </Button>
           </div>
-
-          {/* Times Cooked Overlay */}
-          {recipe.timesCooked && recipe.timesCooked > 0 ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileHover={{ opacity: 1, scale: 1 }}
-              className="absolute top-1/2 left-0 right-0 -translate-y-1/2 flex justify-center pointer-events-none z-30 opacity-0 group-hover:opacity-100"
-            >
-              <div className="bg-card/95 dark:bg-slate-800/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl border border-border dark:border-white/10 flex items-center gap-2">
-                <Flame className="w-5 h-5 text-orange-500 fill-orange-500" />
-                <span className="text-sm font-bold text-foreground">{recipe.timesCooked} cooked</span>
-              </div>
-            </motion.div>
-          ) : null}
         </CardContent>
       </Card>
     </motion.div>

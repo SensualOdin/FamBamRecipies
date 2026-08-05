@@ -24,7 +24,7 @@ const FilterSection = ({
   initialRecipes
 }) => {
   return (
-    <div className={`bg-card/70 dark:bg-slate-900/70 backdrop-blur-3xl rounded-[28px] sm:rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] dark:shadow-none p-3 sm:p-6 mb-8 sm:mb-12 transform transition-all duration-1000 delay-500 border border-border dark:border-white/10 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+    <div className={`bg-card rounded-2xl shadow-[0_12px_36px_-16px_rgba(29,42,68,0.18)] p-3 sm:p-5 my-8 sm:my-10 transform transition-all duration-700 delay-300 border border-border ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         {/* Categories Tabs */}
         <div className="flex-1 overflow-x-auto scrollbar-hide -mx-2 px-2 pb-1">
@@ -35,15 +35,12 @@ const FilterSection = ({
                   key={category}
                   value={category}
                   className={`
-                    px-5 sm:px-8 py-3 sm:py-4 rounded-[20px] font-black text-[10px] sm:text-xs transition-all whitespace-nowrap flex items-center gap-3 border border-transparent uppercase tracking-[0.15em]
-                    data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-2xl data-[state=active]:shadow-primary/20 data-[state=active]:scale-105
+                    px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-bold text-xs sm:text-sm transition-all whitespace-nowrap border border-transparent
+                    data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:-rotate-1
                     bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground
                   `}
                 >
-                  <span className="text-lg sm:text-xl grayscale group-data-[state=active]:grayscale-0">
-                    {category === 'All' ? '👨‍🍳' : (initialRecipes.find(r => r.category === category)?.image || '🍽️')}
-                  </span>
-                  {category}
+                  {category === 'All' ? 'Everything' : category}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -55,21 +52,21 @@ const FilterSection = ({
           <Button
             variant="ghost"
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-4 sm:px-6 py-3 sm:py-5 rounded-[20px] sm:rounded-[24px] font-black text-[10px] sm:text-xs transition-all h-auto uppercase tracking-[0.2em] border-none ${
-              showFilters 
-                ? 'bg-michigan-navy/20 dark:bg-michigan-navy/50 text-primary' 
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full font-bold text-xs sm:text-sm transition-all h-auto border-none ${
+              showFilters
+                ? 'bg-foreground text-background'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
           >
-            <Filter className="w-5 h-5" strokeWidth={2.5} />
+            <Filter className="w-4 h-4" strokeWidth={2.5} />
             Filters
           </Button>
           <Button
             onClick={onAddRecipe}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-5 bg-primary text-primary-foreground rounded-[20px] sm:rounded-[24px] font-black text-[10px] sm:text-xs shadow-2xl shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all h-auto uppercase tracking-[0.2em] border-none"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-foreground text-background rounded-full font-extrabold text-xs sm:text-sm hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] active:scale-[0.98] transition-all h-auto border-none shadow-md"
           >
-            <Plus className="w-5 h-5" strokeWidth={3} />
-            Add Recipe
+            <Plus className="w-4 h-4" strokeWidth={3} />
+            Add a Tradition
           </Button>
         </div>
       </div>

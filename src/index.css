@@ -1,57 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* "Heirloom binder" theme
+   Light (default): warm paper, ink navy, maize accent
+   Dark: midnight kitchen navy, same maize */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
+  --background: 41 62% 95%;        /* warm paper #faf5ea */
+  --foreground: 220 40% 19%;       /* ink navy #1d2a44 */
+  --card: 43 100% 99%;             /* card stock #fffdf8 */
+  --card-foreground: 220 40% 19%;
+  --popover: 43 100% 99%;
+  --popover-foreground: 220 40% 19%;
+  --primary: 44 89% 61%;           /* maize #f5c542 */
+  --primary-foreground: 220 40% 19%;
+  --secondary: 42 49% 91%;         /* deep paper #f3ecdc */
+  --secondary-foreground: 220 40% 19%;
+  --muted: 42 49% 91%;
+  --muted-foreground: 222 20% 37%; /* soft ink #4a5670 */
+  --accent: 13 63% 48%;            /* tomato #c8502e */
+  --accent-foreground: 43 100% 99%;
+  --destructive: 0 74% 50%;
   --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-  --radius: 0.5rem;
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.4);
+  --border: 42 36% 84%;            /* paper line #e4dbc6 */
+  --input: 42 36% 84%;
+  --ring: 44 89% 51%;
+  --radius: 0.75rem;
+  --glass-bg: rgba(255, 253, 248, 0.8);
+  --glass-border: rgba(228, 219, 198, 0.6);
   --glass-blur: 16px;
 }
 
 .dark {
-  --background: 211 100% 10%;
-  --foreground: 210 25% 96%;
-  --card: 209 100% 15%;
-  --card-foreground: 210 25% 96%;
-  --popover: 209 100% 21%;
-  --popover-foreground: 210 25% 96%;
-  --primary: 47 100% 51%;
-  --primary-foreground: 211 100% 10%;
-  --secondary: 209 100% 21%;
-  --secondary-foreground: 210 25% 96%;
-  --muted: 209 100% 21%;
-  --muted-foreground: 210 25% 72%;
-  --accent: 209 100% 21%;
-  --accent-foreground: 210 25% 96%;
-  --destructive: 0 62.8% 30.6%;
+  --background: 222 45% 10%;       /* midnight kitchen */
+  --foreground: 42 45% 93%;        /* warm paper text */
+  --card: 222 40% 14%;
+  --card-foreground: 42 45% 93%;
+  --popover: 222 40% 16%;
+  --popover-foreground: 42 45% 93%;
+  --primary: 44 89% 61%;           /* same maize, both themes */
+  --primary-foreground: 222 45% 10%;
+  --secondary: 222 35% 18%;
+  --secondary-foreground: 42 45% 93%;
+  --muted: 222 35% 18%;
+  --muted-foreground: 222 15% 72%;
+  --accent: 13 70% 58%;
+  --accent-foreground: 222 45% 10%;
+  --destructive: 0 62.8% 40%;
   --destructive-foreground: 210 40% 98%;
-  --border: 209 100% 21%;
-  --input: 209 100% 21%;
-  --ring: 47 100% 51%;
-  --glass-bg: rgba(0, 24, 49, 0.7);
-  --glass-border: rgba(255, 203, 5, 0.2);
+  --border: 222 30% 21%;
+  --input: 222 30% 21%;
+  --ring: 44 89% 61%;
+  --glass-bg: rgba(15, 23, 42, 0.75);
+  --glass-border: rgba(245, 197, 66, 0.15);
 }
 
 @layer base {
@@ -61,6 +62,8 @@
   body {
     @apply bg-background text-foreground;
     padding-bottom: env(safe-area-inset-bottom);
+    /* subtle paper grain, both themes */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.02 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }
 
@@ -81,7 +84,22 @@
 }
 
 .font-serif {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Fraunces', Georgia, serif;
+  font-optical-sizing: auto;
+}
+
+.font-hand {
+  font-family: 'Caveat', cursive;
+}
+
+/* Ruled index-card backdrop for recipes without a photo */
+.index-card-lines {
+  background:
+    repeating-linear-gradient(transparent, transparent 25px, hsl(var(--border)) 26px),
+    linear-gradient(hsl(var(--card)), hsl(var(--card)));
+}
+.index-card-margin {
+  background: linear-gradient(to right, transparent 33px, rgba(200, 80, 46, 0.35) 34px, transparent 35px);
 }
 
 /* Glass Morphism Effect */

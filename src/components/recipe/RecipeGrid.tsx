@@ -43,14 +43,13 @@ const RecipeGrid: React.FC<RecipeGridProps> = memo(({
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-20 bg-card rounded-[40px] shadow-sm border border-border mx-1 px-6 transition-colors"
+        className="text-center py-20 bg-card rounded-2xl shadow-sm border border-border mx-1 px-6 transition-colors"
       >
-        <div className="w-20 h-20 bg-muted rounded-[28px] flex items-center justify-center mx-auto mb-6 text-4xl">🥣</div>
-        <h3 className="text-2xl font-bold text-foreground mb-3 font-serif">Kitchen's Empty!</h3>
-        <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm leading-relaxed">We couldn't find any recipes matching your filters. Try something else or add a new favorite!</p>
+        <h3 className="text-2xl font-semibold text-foreground mb-2 font-serif">Nothing on this page of the binder.</h3>
+        <p className="font-hand text-xl text-muted-foreground mb-8 max-w-sm mx-auto -rotate-1">Try clearing the filters — or add the recipe everyone keeps asking for.</p>
         <Button
           onClick={onClearFilters}
-          className="px-8 py-6 bg-primary text-primary-foreground rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-xl shadow-primary/10 h-auto border-none"
+          className="px-8 py-5 bg-foreground text-background rounded-full font-bold hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] transition-all shadow-md h-auto border-none"
         >
           Clear All Filters
         </Button>

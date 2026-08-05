@@ -250,16 +250,22 @@ const RecipeModal: React.FC<RecipeModalProps> = ({ recipe, onClose, onAddToShopp
 
         <div className="overflow-y-auto flex-1 scrollbar-hide">
           {/* Header Section */}
-          <div className="relative h-64 sm:h-[400px] overflow-hidden">
+          <div className={`relative overflow-hidden ${recipe.image && (typeof recipe.image === 'string') && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? 'h-64 sm:h-[400px]' : 'h-52 sm:h-64'}`}>
             {recipe.image && (typeof recipe.image === 'string') && (recipe.image.startsWith('data:') || recipe.image.startsWith('http')) ? (
-              <img 
-                src={recipe.image} 
-                alt={recipe.title} 
+              <img
+                src={recipe.image}
+                alt={recipe.title}
                 className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/80 flex items-center justify-center transition-colors">
-                <span className="text-9xl animate-float opacity-80">{recipe.image || '🥘'}</span>
+              <div className="absolute inset-0 index-card-lines transition-colors">
+                <div className="absolute inset-0 index-card-margin" />
+                <div className="absolute top-16 sm:top-14 left-14 right-6 font-hand text-3xl sm:text-4xl font-semibold text-foreground -rotate-1 line-clamp-2">
+                  {recipe.title}
+                </div>
+                <div className="absolute top-[7.5rem] sm:top-[7rem] left-14 font-hand text-xl text-muted-foreground">
+                  from {recipe.author}'s kitchen — needs a photo!
+                </div>
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent transition-colors" />

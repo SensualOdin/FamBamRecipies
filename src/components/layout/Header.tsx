@@ -22,14 +22,17 @@ interface HeaderProps {
   onShowAuth: () => void;
   onPrefetch: (modal: string) => void;
   isLoaded: boolean;
+  recipeCount?: number;
+  cookCount?: number;
+  topRecipe?: { title: string; author: string } | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
-  user, 
-  userProfile, 
-  searchQuery, 
-  setSearchQuery, 
-  isSearchFocused, 
+const Header: React.FC<HeaderProps> = ({
+  user,
+  userProfile,
+  searchQuery,
+  setSearchQuery,
+  isSearchFocused,
   setIsSearchFocused,
   shoppingListCount,
   onShowShoppingList,
@@ -38,10 +41,13 @@ const Header: React.FC<HeaderProps> = ({
   onShowProfile,
   onShowAuth,
   onPrefetch,
-  isLoaded
+  isLoaded,
+  recipeCount = 0,
+  cookCount = 0,
+  topRecipe = null,
 }) => {
-  // Initialize from the DOM: index.html ships with class="dark" on <html>,
-  // so defaulting to 'light' here would desync the toggle on first visit.
+  // Initialize from the DOM: an inline script in index.html applies the saved
+  // theme class before paint, so the DOM is the source of truth here.
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
     document.documentElement.classList.contains('dark') ? 'dark' : 'light'
   );
@@ -70,28 +76,23 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className={`relative transition-all duration-1000 z-10 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-slate-950 dark:bg-black transition-colors duration-700" />
-        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-        <div className="absolute top-0 left-0 right-0 h-full bg-gradient-to-b from-michigan-navy/60 via-transparent to-transparent" />
-        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-michigan-blue/20 rounded-full blur-[120px] animate-pulse-slow" />
-        <div className="absolute top-[10%] -right-[5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
-      </div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 py-8 sm:py-16 md:py-24">
+    <header className={`relative z-10 transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-2 sm:pt-7">
         {/* Top Navigation */}
-        <nav className="flex justify-between items-center mb-12 sm:absolute sm:top-8 sm:left-6 sm:right-6">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+        <nav className="flex justify-between items-center gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-10 h-10 shrink-0 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/30 -rotate-3">
               <ChefHat className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="font-serif text-white font-bold text-xl tracking-tight hidden sm:block">FamBam</span>
+            <span className="font-serif font-bold text-lg sm:text-xl tracking-tight text-foreground truncate">
+              The <em className="not-italic text-[hsl(var(--accent))]">Ge-winning</em>
+              <span className="hidden xs:inline"> Family Cookbook</span>
+            </span>
           </div>
 
           {/* Tools & Auth */}
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="flex bg-white/5 dark:bg-black/20 backdrop-blur-md rounded-full p-1 border border-white/10 dark:border-white/5 transition-colors">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="flex bg-card rounded-full p-1 border border-border shadow-sm">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -99,7 +100,8 @@ const Header: React.FC<HeaderProps> = ({
                       variant="ghost"
                       size="icon"
                       onClick={toggleTheme}
-                      className="relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all border-none"
+                      aria-label="Switch theme"
+                      className="relative text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all border-none"
                     >
                       <AnimatePresence mode="wait">
                         <motion.div
@@ -118,9 +120,9 @@ const Header: React.FC<HeaderProps> = ({
                 </Tooltip>
 
                 {[
-                  { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: onShowShoppingList, label: 'Shopping', count: shoppingListCount, mobile: false, prefetch: 'shopping' },
-                  { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: onShowMealPlanner, label: 'Planner', mobile: true },
-                  { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: onShowUnitConverter, label: 'Units', mobile: true }
+                  { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: onShowShoppingList, label: 'Shopping List', count: shoppingListCount, mobile: false, prefetch: 'shopping' },
+                  { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: onShowMealPlanner, label: 'Meal Planner', mobile: true },
+                  { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: onShowUnitConverter, label: 'Unit Converter', mobile: true }
                 ].map((tool) => (
                   <Tooltip key={tool.id}>
                     <TooltipTrigger asChild>
@@ -129,11 +131,12 @@ const Header: React.FC<HeaderProps> = ({
                         size="icon"
                         onClick={tool.onClick}
                         onMouseEnter={() => tool.prefetch && onPrefetch && onPrefetch(tool.prefetch)}
-                        className={`relative text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all group border-none ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
+                        aria-label={tool.label}
+                        className={`relative text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all group border-none ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
                       >
                         {tool.icon}
                         {tool.count > 0 && (
-                          <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 bg-primary text-primary-foreground text-[10px] flex items-center justify-center rounded-full font-bold border-none">
+                          <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] text-[10px] flex items-center justify-center rounded-full font-bold border-none">
                             {tool.count}
                           </Badge>
                         )}
@@ -146,15 +149,15 @@ const Header: React.FC<HeaderProps> = ({
             </div>
 
             {user ? (
-              <Button 
+              <Button
                 variant="ghost"
                 onClick={onShowProfile}
                 onMouseEnter={() => onPrefetch && onPrefetch('profile')}
-                className="flex items-center gap-2 bg-white/10 dark:bg-black/20 hover:bg-white/15 dark:hover:bg-black/30 backdrop-blur-md border border-white/20 dark:border-white/10 px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto"
+                className="flex items-center gap-2 bg-card hover:bg-muted border border-border px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto shadow-sm"
               >
                 <div className="text-right hidden sm:block">
-                  <div className="text-white font-semibold text-xs">{userProfile.name}</div>
-                  <div className="text-primary text-[10px] font-medium">Lvl {userProfile.level} Chef</div>
+                  <div className="text-foreground font-semibold text-xs">{userProfile.name}</div>
+                  <div className="text-[hsl(var(--accent))] text-[10px] font-medium">Lvl {userProfile.level} Chef</div>
                 </div>
                 <Avatar className="w-8 h-8 border-none shadow-inner">
                   <AvatarImage src={userProfile.avatarUrl} />
@@ -164,9 +167,9 @@ const Header: React.FC<HeaderProps> = ({
                 </Avatar>
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={onShowAuth}
-                className="px-5 sm:px-6 py-2 bg-white dark:bg-slate-100 text-slate-900 rounded-full hover:bg-slate-100 dark:hover:bg-white transition-all font-bold text-sm shadow-xl shadow-white/5 border-none"
+                className="px-5 sm:px-6 py-2 bg-foreground text-background rounded-full hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] transition-all font-bold text-sm shadow-md border-none"
               >
                 Sign In
               </Button>
@@ -174,43 +177,58 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         </nav>
 
-        <div className={`text-center max-w-5xl mx-auto transform transition-all duration-1000 delay-300 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
-          <h1 className="font-serif text-4xl sm:text-6xl md:text-8xl font-extrabold text-white mb-6 sm:mb-8 tracking-tighter leading-[0.85] px-4">
-            Our Family <br className="hidden md:block" />
-            <span className="text-primary drop-shadow-2xl">Cookbook</span>
+        {/* Editorial hero */}
+        <div className={`max-w-4xl pt-10 sm:pt-16 pb-4 transform transition-all duration-700 delay-150 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
+          <h1 className="font-serif text-[2.6rem] leading-[1.02] sm:text-6xl md:text-7xl font-semibold text-foreground tracking-tight">
+            Recipes worth{' '}
+            <span className="relative inline-block whitespace-nowrap">
+              arguing about
+              <svg className="absolute left-0 -bottom-[0.08em] w-full h-[0.24em]" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M2 8 C 40 2, 80 10, 120 5 S 180 4, 198 7" fill="none" stroke="hsl(var(--primary))" strokeWidth="5" strokeLinecap="round" />
+              </svg>
+            </span>{' '}
+            at the table.
           </h1>
-          <p className="text-slate-400 text-sm sm:text-lg md:text-xl mb-8 sm:mb-14 font-light tracking-[0.2em] uppercase max-w-3xl mx-auto px-6 opacity-80">
-            Preserving traditions, one meal at a time.
-          </p>
-          
-          {/* Search Bar Container */}
-          <div className={`max-w-3xl mx-auto px-4 transform transition-all duration-700 ${isSearchFocused ? 'scale-[1.05]' : 'scale-100'}`}>
-            <div className={`relative group transition-all duration-500 ${isSearchFocused ? 'ring-4 ring-primary/30 rounded-[32px]' : ''}`}>
-              <div className="absolute inset-0 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              <div className="relative flex items-center bg-white/5 backdrop-blur-[40px] rounded-[28px] border border-white/10 overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
-                <div className="pl-5 sm:pl-8 text-slate-300">
-                  <Search className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
-                </div>
-                <Input
-                  type="text"
-                  placeholder="Search our secret recipes..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                  className="w-full px-4 sm:px-6 py-5 sm:py-7 bg-transparent text-white placeholder-slate-500 text-base sm:text-lg outline-none font-light tracking-wide border-none h-auto focus-visible:ring-0"
-                />
-                {searchQuery && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSearchQuery('')}
-                    className="mr-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all w-8 h-8"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
+
+          {(recipeCount > 0 || cookCount > 0) && (
+            <p className="font-hand text-2xl sm:text-[1.7rem] leading-snug text-muted-foreground mt-6 -rotate-1 origin-left max-w-xl">
+              {recipeCount} recipes from {cookCount} cooks
+              {topRecipe ? (
+                <>
+                  {' '}— and <span className="text-[hsl(var(--accent))] font-semibold">{topRecipe.author}'s {topRecipe.title.toLowerCase()}</span> is currently in the lead. Somebody step up.
+                </>
+              ) : (
+                <> — and counting.</>
+              )}
+            </p>
+          )}
+
+          {/* Search Bar */}
+          <div className={`max-w-2xl mt-8 sm:mt-10 transform transition-transform duration-300 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'}`}>
+            <div className={`relative flex items-center bg-card rounded-2xl border border-border overflow-hidden shadow-[0_10px_30px_-12px_rgba(29,42,68,0.18)] transition-shadow ${isSearchFocused ? 'ring-2 ring-primary/60' : ''}`}>
+              <div className="pl-5 text-muted-foreground">
+                <Search className="w-5 h-5" strokeWidth={1.75} />
               </div>
+              <Input
+                type="text"
+                placeholder="Search the family binder..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
+                className="w-full px-4 py-5 bg-transparent text-foreground placeholder:text-muted-foreground/70 text-base outline-none border-none h-auto focus-visible:ring-0"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
+                  className="mr-3 p-2 bg-muted hover:bg-border rounded-full text-foreground transition-all w-8 h-8"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </div>
         </div>

@@ -10,8 +10,9 @@ export default {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-  			serif: ['"Playfair Display"', 'serif'],
+  			sans: ['"Nunito Sans"', 'sans-serif'],
+  			serif: ['Fraunces', 'Georgia', 'serif'],
+  			hand: ['Caveat', 'cursive'],
   		},
   		screens: {
   			xs: '475px'

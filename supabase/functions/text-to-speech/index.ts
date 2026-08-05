@@ -14,7 +14,7 @@ const json = (body: unknown, status = 200) =>
 
 // Kitchen Mode "sous chef" narration via ElevenLabs.
 // Requires ELEVENLABS_API_KEY secret; voice/model overridable via secrets.
-const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel — warm, clear
+const DEFAULT_VOICE_ID = 'goT3UYdM9bhm0n2lmKQx'; // George's pick from the voice library
 const DEFAULT_MODEL_ID = 'eleven_flash_v2_5';    // low latency, cheap
 
 Deno.serve(async (req) => {
@@ -28,10 +28,12 @@ Deno.serve(async (req) => {
     // Public health check: booleans only, burns no credits.
     if (req.method === 'GET') {
       if (!apiKey) return json({ configured: false });
-      const r = await fetch('https://api.elevenlabs.io/v1/user', {
-        headers: { 'xi-api-key': apiKey },
-      });
-      return json({ configured: true, keyValid: r.ok });
+      const voiceId = Deno.env.get('ELEVENLABS_VOICE_ID') || DEFAULT_VOICE_ID;
+      const [userRes, voiceRes] = await Promise.all([
+        fetch('https://api.elevenlabs.io/v1/user', { headers: { 'xi-api-key': apiKey } }),
+        fetch(`https://api.elevenlabs.io/v1/voices/${voiceId}`, { headers: { 'xi-api-key': apiKey } }),
+      ]);
+      return json({ configured: true, keyValid: userRes.ok, voiceAccessible: voiceRes.ok });
     }
 
     // Synthesis requires a signed-in user (auth validated here since

@@ -1,9 +1,16 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
 
 // Kitchen Mode "sous chef" narration via ElevenLabs.
 // Requires ELEVENLABS_API_KEY secret; voice/model overridable via secrets.
@@ -17,20 +24,37 @@ Deno.serve(async (req) => {
 
   try {
     const apiKey = Deno.env.get('ELEVENLABS_API_KEY');
+
+    // Public health check: booleans only, burns no credits.
+    if (req.method === 'GET') {
+      if (!apiKey) return json({ configured: false });
+      const r = await fetch('https://api.elevenlabs.io/v1/user', {
+        headers: { 'xi-api-key': apiKey },
+      });
+      return json({ configured: true, keyValid: r.ok });
+    }
+
+    // Synthesis requires a signed-in user (auth validated here since
+    // verify_jwt is off to allow the public GET health check above).
+    const authHeader = req.headers.get('Authorization') || '';
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return json({ error: 'Sign in to use narration' }, 401);
+    }
+
     if (!apiKey) {
       // Client treats this as "use the browser voice instead"
-      return new Response(
-        JSON.stringify({ error: 'TTS not configured' }),
-        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return json({ error: 'TTS not configured' }, 503);
     }
 
     const { text } = await req.json();
     if (!text || typeof text !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'text is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return json({ error: 'text is required' }, 400);
     }
 
     // Recipe steps are short; cap length to protect the credit balance.
@@ -57,10 +81,7 @@ Deno.serve(async (req) => {
     if (!elRes.ok) {
       const detail = await elRes.text();
       console.error('ElevenLabs error:', elRes.status, detail);
-      return new Response(
-        JSON.stringify({ error: 'TTS failed' }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return json({ error: 'TTS failed' }, 502);
     }
 
     return new Response(elRes.body, {
@@ -72,9 +93,6 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Unexpected error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return json({ error: error.message || 'Unexpected error' }, 500);
   }
 });

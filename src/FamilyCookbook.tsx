@@ -385,9 +385,9 @@ export default function FamilyCookbook() {
       </main>
 
       <Suspense fallback={
-        <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[100]">
-          <div className="w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
-          <p className="text-slate-400 font-medium animate-pulse">Setting the table...</p>
+        <div className="fixed inset-0 bg-background flex flex-col items-center justify-center z-[100]">
+          <div className="w-16 h-16 border-4 border-primary/25 border-t-primary rounded-full animate-spin mb-4" />
+          <p className="font-hand text-xl text-muted-foreground animate-pulse">Setting the table...</p>
         </div>
       }>
         {selectedRecipe && !modals.kitchenMode && (

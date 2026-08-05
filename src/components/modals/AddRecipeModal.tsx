@@ -187,14 +187,14 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors duration-500 flex flex-col">
-        <div className={`shrink-0 p-8 sm:p-10 pt-safe text-white transition-colors duration-500 ${isEditMode ? 'bg-slate-900' : 'bg-primary'}`}>
+      <DialogContent className="p-0 sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-3xl sm:rounded-2xl shadow-2xl gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors duration-500 flex flex-col">
+        <div className={`shrink-0 p-8 sm:p-10 pt-safe transition-colors duration-500 ${isEditMode ? 'bg-[hsl(220,40%,19%)] text-white' : 'bg-primary text-primary-foreground'}`}>
           <div className="flex justify-between items-start mb-8">
             <div>
-              <DialogTitle className="font-serif text-3xl font-extrabold mb-2 text-white">
+              <DialogTitle className="font-serif text-3xl font-semibold mb-2 text-current">
                 {isEditMode ? 'Refine Recipe' : 'Add a Tradition'}
               </DialogTitle>
-              <p className="text-white/60 text-sm font-medium">
+              <p className="font-hand text-lg text-current opacity-70">
                 {isEditMode ? 'Update the details of your family recipe' : 'Share your culinary secrets with the family'}
               </p>
             </div>
@@ -202,11 +202,11 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
 
           {step > 0 && (
             <div className="space-y-2">
-              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-white/40">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-current opacity-50">
                 <span>Progress</span>
                 <span>Step {step} of 5</span>
               </div>
-              <Progress value={(step / 5) * 100} className="h-1.5 bg-white/20" />
+              <Progress value={(step / 5) * 100} className="h-1.5 bg-black/15" />
             </div>
           )}
         </div>
@@ -218,7 +218,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                 <Button 
                   variant="outline" 
                   onClick={() => setStep(1)} 
-                  className="h-auto p-8 rounded-[32px] border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left flex flex-col items-start group bg-card"
+                  className="h-auto p-8 rounded-2xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left flex flex-col items-start group bg-card"
                 >
                   <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     <PenTool className="w-8 h-8 text-primary" />
@@ -227,9 +227,9 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                   <p className="text-muted-foreground text-sm leading-relaxed font-normal whitespace-normal">Enter your recipe step-by-step using our guided form.</p>
                 </Button>
 
-                <div className="p-8 rounded-[32px] border-2 border-border hover:border-michigan-blue hover:bg-michigan-blue/10 transition-all text-left group relative bg-card">
-                  <div className="w-16 h-16 bg-michigan-blue/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    <Camera className="w-8 h-8 text-michigan-blue" />
+                <div className="p-8 rounded-2xl border-2 border-border hover:border-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/5 transition-all text-left group relative bg-card">
+                  <div className="w-16 h-16 bg-[hsl(var(--accent))]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <Camera className="w-8 h-8 text-[hsl(var(--accent))]" />
                   </div>
                   <h4 className="text-xl font-bold text-foreground mb-2">Scan with AI</h4>
                   <p className="text-muted-foreground text-sm mb-6 leading-relaxed">Upload photos of cards or books and let our AI do the work.</p>
@@ -237,7 +237,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                   <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" />
                   
                   {uploadedImages.length === 0 ? (
-                    <Button onClick={() => fileInputRef.current?.click()} className="w-full h-12 bg-michigan-blue hover:bg-michigan-blue/90 text-white rounded-2xl font-bold text-sm shadow-xl shadow-michigan-blue/20 border-none">
+                    <Button onClick={() => fileInputRef.current?.click()} className="w-full h-12 bg-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/90 text-white rounded-xl font-bold text-sm shadow-md border-none">
                       Select Photos
                     </Button>
                   ) : (
@@ -360,7 +360,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                   <Button 
                     variant="outline"
                     onClick={() => recipePhotoInputRef.current?.click()} 
-                    className={`min-w-[100px] h-12 px-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-2 transition-all ${usePhotoAsImage ? 'border-emerald-500 bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'border-border text-muted-foreground hover:border-primary'}`}
+                    className={`min-w-[100px] h-12 px-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-2 transition-all ${usePhotoAsImage ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20' : 'border-border text-muted-foreground hover:border-primary'}`}
                   >
                     <Plus className="w-5 h-5" />
                     <span className="text-[10px] font-black uppercase tracking-widest">Photo</span>
@@ -415,7 +415,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                   <Textarea 
                     value={ins} 
                     onChange={e => updateListItem('instructions', i, e.target.value)} 
-                    className="flex-1 bg-muted border-2 border-transparent focus-visible:border-primary focus-visible:bg-background rounded-[32px] px-8 py-6 outline-none transition-all resize-none min-h-[100px]" 
+                    className="flex-1 bg-muted border-2 border-transparent focus-visible:border-primary focus-visible:bg-background rounded-2xl px-8 py-6 outline-none transition-all resize-none min-h-[100px]" 
                     placeholder="Mix the dry ingredients..." 
                   />
                   <Button 
@@ -431,7 +431,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
               <Button 
                 variant="outline" 
                 onClick={() => addListItem('instructions')} 
-                className="w-full py-7 rounded-[32px] border-2 border-dashed border-border text-muted-foreground font-bold text-sm hover:border-primary hover:text-primary transition-all h-auto"
+                className="w-full py-7 rounded-2xl border-2 border-dashed border-border text-muted-foreground font-bold text-sm hover:border-primary hover:text-primary transition-all h-auto"
               >
                 + Add Next Step
               </Button>

@@ -223,13 +223,13 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-slate-900 text-white flex flex-col overflow-hidden"
+      className="fixed inset-0 z-[100] bg-[hsl(222,45%,8%)] text-[hsl(42,45%,93%)] flex flex-col overflow-hidden"
     >
       {/* Header */}
-      <div className="p-6 flex items-center justify-between border-b border-white/10 bg-slate-900/80 backdrop-blur-md z-20">
+      <div className="p-6 flex items-center justify-between border-b border-white/10 bg-[hsl(222,45%,8%)]/80 backdrop-blur-md z-20">
         <div className="flex flex-col">
-          <h2 className="text-xl font-bold font-serif text-emerald-400 truncate max-w-[200px] sm:max-w-md">{recipe.title}</h2>
-          <span className="text-[10px] text-slate-400 uppercase tracking-[0.3em] font-black">
+          <h2 className="text-xl font-semibold font-serif text-primary truncate max-w-[200px] sm:max-w-md">{recipe.title}</h2>
+          <span className="text-[10px] text-[hsl(222,15%,60%)] uppercase tracking-[0.3em] font-black">
             Cooking Mode • {showIngredients ? 'Ingredients' : `Step ${currentStep + 1} of ${steps.length}`}
           </span>
         </div>
@@ -241,7 +241,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
               if (isSpeaking) window.speechSynthesis.cancel();
               else speak(showIngredients ? "Reading ingredients" : steps[currentStep]);
             }}
-            className={`rounded-full h-10 w-10 sm:h-12 sm:w-12 transition-all ${isSpeaking ? 'bg-emerald-500 text-white shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
+            className={`rounded-full h-10 w-10 sm:h-12 sm:w-12 transition-all ${isSpeaking ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
           >
             <Volume2 className={`w-5 h-5 sm:w-6 sm:h-6 ${isSpeaking ? 'animate-pulse' : ''}`} />
           </Button>
@@ -252,7 +252,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
             onClick={() => {
               setIsVoiceActive(!isVoiceActive);
             }}
-            className={`rounded-full h-10 w-10 sm:h-12 sm:w-12 transition-all ${isVoiceActive ? 'bg-emerald-500 text-white shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
+            className={`rounded-full h-10 w-10 sm:h-12 sm:w-12 transition-all ${isVoiceActive ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
           >
             {isVoiceActive ? <Mic className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" /> : <MicOff className="w-5 h-5 sm:w-6 sm:h-6" />}
           </Button>
@@ -270,7 +270,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
       </div>
 
       {/* Progress Bar */}
-      <Progress value={progress} className="h-1 rounded-none bg-white/5 z-20" indicatorClassName="bg-emerald-500" />
+      <Progress value={progress} className="h-1 rounded-none bg-white/5 z-20" indicatorClassName="bg-primary" />
 
       {/* Main Content */}
       <div className="flex-1 relative overflow-hidden flex flex-col items-center bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)]">
@@ -285,7 +285,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
           >
             {showIngredients ? (
               <div className="w-full">
-                <h3 className="text-3xl font-black text-emerald-400 mb-8 flex items-center justify-center gap-4">
+                <h3 className="font-serif text-3xl font-semibold text-primary mb-8 flex items-center justify-center gap-4">
                   <ListChecks className="w-10 h-10" />
                   Ingredients
                 </h3>
@@ -298,10 +298,10 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
                       transition={{ delay: i * 0.03 }}
                       className="bg-white/5 p-4 rounded-[20px] border border-white/10 flex items-center gap-3"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                        <span className="text-xs font-black text-emerald-500">{i + 1}</span>
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
+                        <span className="text-xs font-black text-primary">{i + 1}</span>
                       </div>
-                      <span className="text-base sm:text-lg font-medium text-slate-200 truncate">{ing}</span>
+                      <span className="text-base sm:text-lg font-medium text-[hsl(42,45%,90%)] truncate">{ing}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -311,7 +311,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
                 <motion.div 
                   initial={{ rotate: -10, scale: 0.8 }}
                   animate={{ rotate: 0, scale: 1 }}
-                  className="shrink-0 inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-[24px] sm:rounded-[30px] bg-emerald-500/10 text-emerald-500 text-2xl sm:text-3xl font-black border border-emerald-500/20 shadow-2xl shadow-emerald-500/10"
+                  className="shrink-0 inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary/10 text-primary text-2xl sm:text-3xl font-black border border-primary/25 shadow-xl"
                 >
                   {currentStep + 1}
                 </motion.div>
@@ -331,13 +331,13 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
       </div>
 
       {/* Footer Navigation */}
-      <div className="p-4 sm:p-8 md:p-12 pb-safe border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 bg-slate-950/80 backdrop-blur-2xl z-20">
+      <div className="p-4 sm:p-8 md:p-12 pb-safe border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 bg-[hsl(222,50%,6%)]/85 backdrop-blur-2xl z-20">
         <Button 
           variant="ghost" 
           onClick={() => {
             handleToggleIngredients();
           }}
-          className="text-white hover:bg-white/10 rounded-[28px] h-14 sm:h-16 px-6 sm:px-10 font-black text-base sm:text-lg border border-white/10 group w-full sm:w-auto"
+          className="text-white hover:bg-white/10 rounded-full h-14 sm:h-16 px-6 sm:px-10 font-black text-base sm:text-lg border border-white/10 group w-full sm:w-auto"
         >
           <div className="flex items-center gap-3">
             <ListChecks className="w-6 h-6 group-hover:rotate-12 transition-transform" />
@@ -363,7 +363,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
               onClick={() => {
                 onFinish();
               }}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-[36px] h-16 sm:h-20 px-8 sm:px-12 font-black text-xl sm:text-2xl shadow-2xl shadow-emerald-500/40 border-none group transition-all hover:scale-105 active:scale-95"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-16 sm:h-20 px-8 sm:px-12 font-black text-xl sm:text-2xl shadow-2xl shadow-primary/30 border-none group transition-all hover:scale-105 active:scale-95"
             >
               <CheckCircle2 className="w-8 h-8 mr-4 group-hover:scale-110 transition-transform" />
               Done!
@@ -375,7 +375,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
                 handleNext();
               }}
               disabled={currentStep === steps.length - 1 || showIngredients}
-              className="rounded-full bg-emerald-50 text-emerald-600 hover:bg-white h-16 w-16 sm:h-20 sm:w-20 shadow-2xl shadow-emerald-500/40 border-none transition-all hover:scale-105 active:scale-95"
+              className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-16 w-16 sm:h-20 sm:w-20 shadow-2xl shadow-primary/30 border-none transition-all hover:scale-105 active:scale-95"
             >
               <ChevronRight className="w-10 h-10" />
             </Button>
@@ -389,7 +389,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
             <motion.div 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="flex items-center gap-3 px-8 py-4 bg-emerald-500 rounded-full shadow-[0_0_40px_rgba(16,185,129,0.4)]"
+              className="flex items-center gap-3 px-8 py-4 bg-primary rounded-full shadow-[0_0_40px_rgba(245,197,66,0.35)]"
             >
               <div className="flex gap-1">
                 {[1, 2, 3].map(i => (
@@ -397,7 +397,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
                     key={i}
                     animate={{ height: [8, 16, 8] }}
                     transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.2 }}
-                    className="w-1 bg-white rounded-full"
+                    className="w-1 bg-primary-foreground rounded-full"
                   />
                 ))}
               </div>

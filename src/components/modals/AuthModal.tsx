@@ -24,7 +24,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    setTimeout(() => setIsVisible(true), 50);
+    const timer = setTimeout(() => setIsVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Close on Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync if store authMode changes while modal is open
@@ -127,15 +138,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
     setSuccessMessage(null);
   };
 
-  const getIcon = () => {
-    switch (mode) {
-      case 'signup': return '👨‍🍳';
-      case 'forgot': return '🔑';
-      case 'reset': return '🔒';
-      default: return '🥘';
-    }
-  };
-
   const getTitle = () => {
     switch (mode) {
       case 'signup': return 'Join the Family';
@@ -147,10 +149,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
 
   const getSubtitle = () => {
     switch (mode) {
-      case 'signup': return 'Start Your Collection';
-      case 'forgot': return "We'll Email You a Link";
-      case 'reset': return 'Choose a New Password';
-      default: return 'Your Kitchen Awaits';
+      case 'signup': return 'grab an apron, add your recipes';
+      case 'forgot': return "we'll email you a link";
+      case 'reset': return 'choose a new password';
+      default: return 'the binder missed you';
     }
   };
 
@@ -165,29 +167,34 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
 
   return (
     <div
-      className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? 'bg-slate-950/60 backdrop-blur-md' : 'bg-transparent'}`}
+      className={`fixed inset-0 z-[60] flex items-center justify-center p-4 transition-all duration-300 ${isVisible ? 'bg-black/50 backdrop-blur-sm' : 'bg-transparent'}`}
       onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={getTitle()}
     >
       <div
-        className={`bg-background dark:bg-slate-900 rounded-[40px] shadow-2xl max-w-md w-full overflow-hidden transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+        className={`bg-card border border-border rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transition-all duration-300 ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
         onClick={e => e.stopPropagation()}
       >
-        <div className="bg-slate-950 p-6 sm:p-10 text-white text-center relative overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-40 h-40 bg-detroit-500/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        {/* Index-card header */}
+        <div className="relative index-card-lines border-b border-border px-8 pt-10 pb-7 overflow-hidden">
+          <div className="absolute inset-0 index-card-margin pointer-events-none" />
+          <div className="absolute -top-2 left-8 w-20 h-5 bg-primary/55 rounded-[2px] -rotate-3 shadow-sm pointer-events-none" />
 
-          <button onClick={handleClose} className="absolute top-6 right-6 z-20 w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center transition-all border border-white/10">
-            <X className="w-5 h-5" strokeWidth={2.5} />
+          <button
+            onClick={handleClose}
+            aria-label="Close"
+            className="absolute top-4 right-4 z-20 w-9 h-9 bg-muted hover:bg-border rounded-lg flex items-center justify-center transition-all text-foreground"
+          >
+            <X className="w-4 h-4" strokeWidth={2.5} />
           </button>
 
-          <div className="relative z-10">
-            <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-4xl shadow-2xl mx-auto mb-6">
-              {getIcon()}
-            </div>
-            <h2 className="text-3xl font-black tracking-tight mb-2">
+          <div className="relative z-10 pl-6">
+            <h2 className="font-hand text-4xl font-semibold text-foreground -rotate-1 mb-1">
               {getTitle()}
             </h2>
-            <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">
+            <p className="font-hand text-lg text-muted-foreground">
               {getSubtitle()}
             </p>
           </div>
@@ -197,12 +204,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
           <form onSubmit={handleSubmit} className="space-y-6">
             {mode === 'signup' && (
               <div className="group">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">Chef Name</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-[hsl(var(--accent))] transition-colors">Chef Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-muted border-2 border-transparent focus:border-detroit-500 focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
+                  className="w-full bg-muted border-2 border-transparent focus:border-primary focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
                   placeholder="George Winner"
                   required={mode === 'signup'}
                 />
@@ -211,12 +218,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
 
             {mode !== 'reset' && (
               <div className="group">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">Email Address</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-[hsl(var(--accent))] transition-colors">Email Address</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-muted border-2 border-transparent focus:border-detroit-500 focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
+                  className="w-full bg-muted border-2 border-transparent focus:border-primary focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
                   placeholder="george@example.com"
                   required={mode !== 'reset'}
                 />
@@ -225,12 +232,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
 
             {(mode === 'signin' || mode === 'signup') && (
               <div className="group">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">Security Key</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-[hsl(var(--accent))] transition-colors">Password</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-muted border-2 border-transparent focus:border-detroit-500 focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
+                  className="w-full bg-muted border-2 border-transparent focus:border-primary focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
                   placeholder="••••••••"
                   required
                 />
@@ -240,24 +247,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
             {mode === 'reset' && (
               <>
                 <div className="group">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">New Password</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-[hsl(var(--accent))] transition-colors">New Password</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-muted border-2 border-transparent focus:border-detroit-500 focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
+                    className="w-full bg-muted border-2 border-transparent focus:border-primary focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
                     placeholder="••••••••"
                     required
                     minLength={6}
                   />
                 </div>
                 <div className="group">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-detroit-500 transition-colors">Confirm Password</label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-2 block group-focus-within:text-[hsl(var(--accent))] transition-colors">Confirm Password</label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-muted border-2 border-transparent focus:border-detroit-500 focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
+                    className="w-full bg-muted border-2 border-transparent focus:border-primary focus:bg-background rounded-2xl px-6 py-4 font-bold outline-none transition-all text-foreground"
                     placeholder="••••••••"
                     required
                     minLength={6}
@@ -281,10 +288,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary text-primary-foreground py-5 rounded-[24px] font-black uppercase tracking-widest text-xs hover:bg-primary/90 transition-all shadow-xl shadow-primary/10 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95 border-none"
+              className="w-full bg-primary text-primary-foreground py-5 rounded-full font-extrabold text-sm hover:bg-primary/90 transition-all shadow-xl shadow-primary/10 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95 border-none"
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
               ) : (
                 getButtonLabel()
               )}
@@ -295,7 +302,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
             <div className="mt-4 text-center">
               <button
                 onClick={() => switchMode('forgot')}
-                className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-detroit-600 transition-colors"
+                className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-[hsl(var(--accent))] transition-colors"
               >
                 Forgot your password?
               </button>
@@ -307,14 +314,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onSignIn, onError }) => 
               {mode === 'forgot' ? (
                 <button
                   onClick={() => switchMode('signin')}
-                  className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-detroit-600 transition-colors"
+                  className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-[hsl(var(--accent))] transition-colors"
                 >
                   Back to Sign In
                 </button>
               ) : (
                 <button
                   onClick={() => switchMode(mode === 'signup' ? 'signin' : 'signup')}
-                  className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-detroit-600 transition-colors"
+                  className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-[hsl(var(--accent))] transition-colors"
                 >
                   {mode === 'signup' ? 'Already a Chef? Sign In' : "No account? Join the family"}
                 </button>

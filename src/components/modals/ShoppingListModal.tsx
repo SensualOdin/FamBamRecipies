@@ -83,7 +83,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
       text: listText,
     };
 
-    if (navigator.share && navigator.canShare(shareData)) {
+    if (navigator.share && navigator.canShare?.(shareData)) {
       try {
         await navigator.share(shareData);
       } catch (err) {
@@ -106,26 +106,26 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-md h-[92vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border-none rounded-t-[40px] sm:rounded-[40px] shadow-2xl gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors">
+      <DialogContent className="p-0 sm:max-w-md h-[92vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden border-none rounded-t-3xl sm:rounded-2xl shadow-2xl gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors">
         {/* Header */}
-        <div className="bg-slate-950 p-6 sm:p-8 pt-safe text-white shrink-0">
+        <div className="bg-secondary p-6 sm:p-8 pt-safe text-foreground border-b border-border shrink-0">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => handleOpenChange(false)}
-                className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 shrink-0"
+                className="w-10 h-10 bg-card hover:bg-muted rounded-xl border border-border shrink-0"
               >
-                <ChevronLeft className="w-6 h-6 text-white" />
+                <ChevronLeft className="w-6 h-6 text-foreground" />
               </Button>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-michigan-coral rounded-2xl flex items-center justify-center shadow-lg shadow-michigan-coral/20">
-                  <ShoppingBag className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-[hsl(var(--accent))] rounded-2xl flex items-center justify-center shadow-md">
+                  <ShoppingBag className="w-5 h-5 text-foreground" />
                 </div>
                 <div>
-                  <DialogTitle className="text-xl font-black tracking-tight text-white leading-tight">Shopping List</DialogTitle>
-                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest leading-none mt-1">Kitchen Essentials</p>
+                  <DialogTitle className="font-serif text-xl font-semibold tracking-tight text-foreground leading-tight">Shopping List</DialogTitle>
+                  <p className="font-hand text-base text-muted-foreground leading-none mt-1">don't forget the butter</p>
                 </div>
               </div>
             </div>
@@ -135,9 +135,9 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                   variant="ghost" 
                   size="icon"
                   onClick={handleShare}
-                  className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl flex items-center justify-center transition-all border border-white/10 group"
+                  className="w-10 h-10 bg-card hover:bg-muted rounded-xl flex items-center justify-center transition-all border border-border group"
                 >
-                  <Share2 className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                  <Share2 className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
                 </Button>
               )}
             </div>
@@ -148,13 +148,13 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
               type="text"
               value={newItem}
               onChange={(e) => setNewItem(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddItem()}
               placeholder="Add milk, eggs, flour..."
-              className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 h-12 text-white placeholder:text-slate-500 focus-visible:ring-michigan-coral transition-all text-base"
+              className="flex-1 bg-card border border-border rounded-xl px-5 h-12 text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-primary transition-all text-base"
             />
             <Button
               onClick={handleAddItem}
-              className="bg-white text-slate-950 h-12 px-6 rounded-2xl font-black text-sm hover:bg-slate-100 transition-all shadow-xl border-none"
+              className="bg-foreground text-background h-12 px-6 rounded-xl font-extrabold text-sm hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] transition-all shadow-md border-none"
             >
               Add
             </Button>
@@ -165,21 +165,21 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 scrollbar-hide bg-background transition-colors">
           {shoppingList.length === 0 ? (
             <div className="text-center py-12 sm:py-16">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-50 rounded-[28px] sm:rounded-[32px] flex items-center justify-center mx-auto mb-6">
-                <ShoppingCart className="w-8 h-8 sm:w-10 sm:h-10 text-slate-200" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <ShoppingCart className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground/40" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">List is empty</h3>
-              <p className="text-slate-400 text-sm max-w-[200px] mx-auto">Add ingredients directly from recipes or type them in above!</p>
+              <h3 className="font-serif text-lg font-semibold text-foreground mb-2">List is empty</h3>
+              <p className="font-hand text-lg text-muted-foreground max-w-[220px] mx-auto -rotate-1">Add ingredients directly from recipes or type them in above!</p>
             </div>
           ) : (
             <div className="space-y-3">
               {shoppingList.map((item) => (
                 <div 
                   key={item.id}
-                  className={`group flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-3xl transition-all border-2 ${
+                  className={`group flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl transition-all border-2 ${
                     item.checked
                       ? 'bg-muted border-transparent opacity-50'
-                      : 'bg-card border-border hover:border-primary/50 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none'
+                      : 'bg-card border-border hover:border-primary/50 hover:shadow-md'
                   }`}
                 >
                   <Button
@@ -189,7 +189,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                     className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all shrink-0 p-0 ${
                       item.checked 
                         ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:text-white' 
-                        : 'border-slate-200 bg-slate-50 hover:border-michigan-coral'
+                        : 'border-border bg-muted hover:border-[hsl(var(--accent))]'
                     }`}
                   >
                     {item.checked && (
@@ -197,11 +197,11 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                     )}
                   </Button>
                   <div className="flex-1 flex flex-col min-w-0">
-                    <span className={`font-bold text-sm truncate transition-all ${item.checked ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                    <span className={`font-bold text-sm truncate transition-all ${item.checked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                       {item.item || item.text}
                     </span>
                     {(item.quantity) && (
-                      <span className={`text-[10px] font-medium transition-all ${item.checked ? 'text-slate-300' : 'text-slate-400'}`}>
+                      <span className={`text-[10px] font-medium transition-all ${item.checked ? 'text-muted-foreground/50' : 'text-muted-foreground'}`}>
                         Need: {item.quantity}
                       </span>
                     )}
@@ -214,7 +214,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                             variant="ghost"
                             size="icon"
                             onClick={() => openWalmartSearch(item)}
-                            className="w-8 h-8 rounded-lg bg-slate-50 text-slate-400 hover:text-michigan-coral hover:bg-michigan-coral/10 transition-all flex items-center justify-center"
+                            className="w-8 h-8 rounded-lg bg-muted text-muted-foreground hover:text-[hsl(var(--accent))] hover:bg-[hsl(var(--accent))]/10 transition-all flex items-center justify-center"
                           >
                             <Search className="w-3.5 h-3.5" />
                           </Button>
@@ -227,7 +227,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                             variant="ghost"
                             size="icon"
                             onClick={() => removeItem(item.id)}
-                            className="w-8 h-8 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
+                            className="w-8 h-8 rounded-lg text-muted-foreground/60 hover:text-rose-500 hover:bg-rose-500/10 transition-all"
                           >
                             <Trash2 className="w-4 h-4 mx-auto" />
                           </Button>
@@ -248,7 +248,7 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
             <div className="flex justify-between items-center py-4">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                   {shoppingList.filter(i => i.checked).length} of {shoppingList.length} Collected
                 </span>
               </div>
@@ -256,14 +256,14 @@ const ShoppingListModal = ({ onClose, shoppingList, setShoppingList }) => {
                 <Button
                   variant="ghost"
                   onClick={clearChecked}
-                  className="text-emerald-600 text-[10px] font-black uppercase tracking-widest hover:text-emerald-700 transition-colors bg-emerald-50 px-3 h-8 rounded-xl border-none"
+                  className="text-emerald-600 text-[10px] font-black uppercase tracking-widest hover:text-emerald-700 transition-colors bg-emerald-500/10 px-3 h-8 rounded-xl border-none"
                 >
                   Clear Checked
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={clearAll}
-                  className="text-rose-500 text-[10px] font-black uppercase tracking-widest hover:text-rose-600 transition-colors bg-rose-50 px-3 h-8 rounded-xl border-none"
+                  className="text-rose-500 text-[10px] font-black uppercase tracking-widest hover:text-rose-600 transition-colors bg-rose-500/10 px-3 h-8 rounded-xl border-none"
                 >
                   Delete All
                 </Button>

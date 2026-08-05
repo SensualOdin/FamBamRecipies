@@ -78,12 +78,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
     setIsUploading(true);
     try {
-      const { avatarUrl, error } = await uploadAvatar(user.id, file);
-      if (error) {
+      const { data, error } = await uploadAvatar(file, user.id);
+      if (error || !data?.publicUrl) {
         console.error('Error uploading avatar:', error);
         alert('Failed to upload avatar. Please try again.');
-      } else if (avatarUrl && onProfileUpdate) {
-        onProfileUpdate({ avatarUrl });
+      } else {
+        // Persist so the avatar survives reloads, then update local state
+        await updateUserProfile(user.id, { avatar_url: data.publicUrl });
+        if (onProfileUpdate) onProfileUpdate({ avatarUrl: data.publicUrl });
       }
     } catch (err) {
       console.error('Error:', err);
@@ -96,7 +98,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
     if (!user?.id) return;
 
     try {
-      const { error } = await updateUserProfile(user.id, editData);
+      const { error } = await updateUserProfile(user.id, {
+        display_name: editData.displayName,
+        bio: editData.bio,
+        avatar: editData.avatar,
+      });
       if (error) {
         console.error('Error updating profile:', error);
         alert('Failed to update profile. Please try again.');
@@ -117,20 +123,16 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="p-0 sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-[40px] sm:rounded-[48px] shadow-2xl flex flex-col gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors duration-500">
+      <DialogContent className="p-0 sm:max-w-4xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden border-none rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col gap-0 bg-background top-[auto] bottom-0 translate-y-0 translate-x-[-50%] transition-colors duration-500">
         <DialogHeader className="sr-only">
           <DialogTitle>User Profile</DialogTitle>
           <DialogDescription>View and edit your family cookbook profile</DialogDescription>
         </DialogHeader>
         
         <div className="flex-1 overflow-y-auto scrollbar-hide">
-          {/* Header with gradient background */}
-          <div className="relative bg-slate-950 p-8 sm:p-12 pt-safe text-white overflow-hidden transition-colors">
-            {/* Animated background elements */}
-            <div className="absolute inset-0">
-              <div className="absolute -top-24 -right-24 w-96 h-96 bg-michigan-blue/20 rounded-full blur-[120px]" />
-              <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-michigan-coral/10 rounded-full blur-[120px]" />
-            </div>
+          {/* Header — paper with a tape strip */}
+          <div className="relative bg-secondary p-8 sm:p-12 pt-safe text-foreground overflow-hidden transition-colors border-b border-border">
+            <div className="absolute -top-2.5 left-12 w-24 h-6 bg-primary/55 rounded-[2px] -rotate-3 shadow-sm pointer-events-none" />
 
             <div className="relative z-10">
               {/* Top Navigation */}
@@ -143,7 +145,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       handleOpenChange(false);
                     }
                   }}
-                  className="px-5 h-10 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center gap-2 border border-white/10 text-slate-300 hover:text-white font-bold text-xs uppercase tracking-widest"
+                  className="px-5 h-10 bg-card hover:bg-muted rounded-full flex items-center gap-2 border border-border text-muted-foreground hover:text-foreground font-bold text-xs uppercase tracking-widest"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out
@@ -153,19 +155,19 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   variant="ghost" 
                   size="icon" 
                   onClick={() => handleOpenChange(false)}
-                  className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10"
+                  className="w-10 h-10 bg-card hover:bg-muted rounded-full border border-border"
                 >
-                  <X className="w-5 h-5 text-white" />
+                  <X className="w-5 h-5 text-foreground" />
                 </Button>
               </div>
 
               <div className="flex flex-col md:flex-row items-center md:items-end gap-8 sm:gap-10">
                 {/* Avatar Section */}
                 <div className="relative group shrink-0">
-                  <div className="w-32 h-32 sm:w-44 sm:h-44 bg-white rounded-[32px] sm:rounded-[48px] flex items-center justify-center text-6xl sm:text-7xl shadow-2xl overflow-hidden ring-4 ring-white/10">
+                  <div className="w-32 h-32 sm:w-44 sm:h-44 bg-card rounded-2xl flex items-center justify-center text-6xl sm:text-7xl shadow-lg overflow-hidden ring-1 ring-border rotate-1">
                     <Avatar className="w-full h-full rounded-none">
                       <AvatarImage src={userProfile.avatarUrl} className="object-cover" />
-                      <AvatarFallback className="bg-white rounded-none text-6xl sm:text-7xl flex items-center justify-center">
+                      <AvatarFallback className="bg-card rounded-none text-6xl sm:text-7xl flex items-center justify-center">
                         {userProfile.avatar || '👨‍🍳'}
                       </AvatarFallback>
                     </Avatar>
@@ -176,7 +178,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   <Button
                     variant="ghost"
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute inset-0 bg-slate-950/60 rounded-[32px] sm:rounded-[48px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm h-full w-full border-none"
+                    className="absolute inset-0 bg-black/60 rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-sm h-full w-full border-none"
                   >
                     {isUploading ? (
                       <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
@@ -188,7 +190,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     )}
                   </Button>
 
-                  <Badge className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-michigan-blue text-white px-5 py-2 rounded-2xl font-black text-xs sm:text-sm shadow-xl shadow-michigan-blue/30 whitespace-nowrap border-none">
+                  <Badge className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-5 py-2 rounded-full font-extrabold text-xs sm:text-sm shadow-md whitespace-nowrap border-none">
                     Lvl {userProfile.level} Chef
                   </Badge>
                 </div>
@@ -200,37 +202,37 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       <Input
                         value={editData.displayName}
                         onChange={(e) => setEditData(p => ({ ...p, displayName: e.target.value }))}
-                        className="w-full bg-white/10 border-white/20 rounded-2xl px-6 h-12 text-white placeholder:text-slate-500 focus-visible:ring-michigan-blue"
+                        className="w-full bg-card border-border rounded-xl px-6 h-12 text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-primary"
                         placeholder="Display Name"
                       />
                       <Textarea
                         value={editData.bio}
                         onChange={(e) => setEditData(p => ({ ...p, bio: e.target.value }))}
-                        className="w-full bg-white/10 border-white/20 rounded-2xl px-6 py-3 text-white placeholder:text-slate-500 focus-visible:ring-michigan-blue resize-none min-h-[80px]"
+                        className="w-full bg-card border-border rounded-xl px-6 py-3 text-foreground placeholder:text-muted-foreground/60 focus-visible:ring-primary resize-none min-h-[80px]"
                         placeholder="Your bio..."
                       />
                       <div className="flex gap-3">
-                        <Button onClick={handleSaveProfile} className="flex-1 sm:flex-none bg-white text-slate-950 hover:bg-slate-100 rounded-2xl font-bold h-10 px-8 text-sm border-none">Save</Button>
-                        <Button variant="ghost" onClick={() => setIsEditing(false)} className="flex-1 sm:flex-none bg-white/10 text-white hover:bg-white/20 rounded-2xl font-bold h-10 px-8 text-sm border-none">Cancel</Button>
+                        <Button onClick={handleSaveProfile} className="flex-1 sm:flex-none bg-foreground text-background hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] rounded-full font-bold h-10 px-8 text-sm border-none">Save</Button>
+                        <Button variant="ghost" onClick={() => setIsEditing(false)} className="flex-1 sm:flex-none bg-muted text-foreground hover:bg-border rounded-full font-bold h-10 px-8 text-sm border-none">Cancel</Button>
                       </div>
                     </div>
                   ) : (
                     <div>
                       <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
-                        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">{userProfile.name}</h2>
-                        <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10">
-                          <Edit2 className="w-4 h-4 text-slate-400" />
+                        <h2 className="font-serif text-3xl sm:text-5xl font-semibold tracking-tight">{userProfile.name}</h2>
+                        <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="w-10 h-10 bg-card hover:bg-muted rounded-xl border border-border">
+                          <Edit2 className="w-4 h-4 text-muted-foreground" />
                         </Button>
                       </div>
-                      <p className="text-slate-400 text-base sm:text-xl font-medium mb-8 max-w-xl">{userProfile.bio}</p>
+                      <p className="font-hand text-xl sm:text-2xl text-muted-foreground mb-8 max-w-xl -rotate-[0.5deg]">{userProfile.bio}</p>
                       
                       {/* XP Progress */}
                       <div className="max-w-md mx-auto md:mx-0">
                         <div className="flex justify-between items-end mb-3">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Mastery Progress</span>
-                          <span className="text-xs font-black text-michigan-coral">{userProfile.experience} <span className="text-slate-600">/ {userProfile.experienceToNextLevel} XP</span></span>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Mastery Progress</span>
+                          <span className="text-xs font-black text-[hsl(var(--accent))]">{userProfile.experience} <span className="text-muted-foreground">/ {userProfile.experienceToNextLevel} XP</span></span>
                         </div>
-                        <Progress value={levelProgress} className="h-2.5 bg-white/5 p-0.5" indicatorClassName="bg-gradient-to-r from-michigan-blue to-michigan-coral rounded-full" />
+                        <Progress value={levelProgress} className="h-2.5 bg-muted p-0.5" indicatorClassName="bg-gradient-to-r from-primary to-[hsl(var(--accent))] rounded-full" />
                       </div>
                     </div>
                   )}
@@ -275,7 +277,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     <motion.div 
                       key={i}
                       whileHover={{ scale: 1.02 }}
-                      className={`${stat.color} rounded-[28px] sm:rounded-[32px] p-6 flex flex-col items-center justify-center text-center transition-all shadow-sm`}
+                      className={`${stat.color} rounded-2xl p-6 flex flex-col items-center justify-center text-center transition-all shadow-sm`}
                     >
                       <div className="mb-2 opacity-80">{stat.icon}</div>
                       <span className="text-2xl sm:text-3xl font-black mb-1">{stat.value}</span>
@@ -284,7 +286,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   ))}
                 </div>
                 
-                <div className="bg-muted rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 transition-colors">
+                <div className="bg-muted rounded-2xl p-6 sm:p-8 transition-colors">
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-6 text-center sm:text-left">Recent Badges</h3>
                   <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
                     {userProfile.achievements?.filter(a => a.unlocked).slice(0, 4).map(a => (
@@ -301,7 +303,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
               <TabsContent value="achievements" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {userProfile.achievements?.map(a => (
-                  <div key={a.id} className={`p-5 sm:p-6 rounded-[28px] sm:rounded-[32px] border-2 transition-all flex gap-4 sm:gap-6 ${a.unlocked ? 'bg-card border-border shadow-xl' : 'bg-muted border-transparent opacity-60 grayscale'}`}>
+                  <div key={a.id} className={`p-5 sm:p-6 rounded-2xl border-2 transition-all flex gap-4 sm:gap-6 ${a.unlocked ? 'bg-card border-border shadow-xl' : 'bg-muted border-transparent opacity-60 grayscale'}`}>
                     <div className="w-14 h-14 sm:w-16 sm:h-16 bg-muted rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shrink-0">
                       {a.icon}
                     </div>
@@ -320,7 +322,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
               <TabsContent value="recipes" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {userRecipes.map(r => (
-                  <div key={r.id} className="group p-4 bg-card border border-border rounded-[24px] sm:rounded-[28px] hover:border-primary transition-all flex gap-4">
+                  <div key={r.id} className="group p-4 bg-card border border-border rounded-xl hover:border-primary transition-all flex gap-4">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
                       <Avatar className="w-full h-full rounded-none">
                         <AvatarImage src={r.image && (typeof r.image === 'string') && (r.image.startsWith('http') || r.image.startsWith('data:')) ? r.image : undefined} className="object-cover" />
@@ -340,7 +342,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </div>
                 ))}
                 {userRecipes.length === 0 && (
-                  <div className="col-span-full py-12 text-center bg-muted rounded-[32px]">
+                  <div className="col-span-full py-12 text-center bg-muted rounded-2xl">
                     <BookOpen className="w-10 h-10 text-muted-foreground/30 mx-auto mb-4" />
                     <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest">No recipes created yet</p>
                   </div>
@@ -349,7 +351,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
               <TabsContent value="favorites" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {favoriteRecipes.map(r => (
-                  <div key={r.id} className="group p-4 bg-card border border-border rounded-[24px] sm:rounded-[28px] hover:border-rose-100 dark:hover:border-rose-900/30 transition-all flex gap-4">
+                  <div key={r.id} className="group p-4 bg-card border border-border rounded-xl hover:border-rose-100 dark:hover:border-rose-900/30 transition-all flex gap-4">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-rose-50 dark:bg-rose-950/20 rounded-xl sm:rounded-2xl overflow-hidden shrink-0">
                       <Avatar className="w-full h-full rounded-none">
                         <AvatarImage src={r.image && (typeof r.image === 'string') && (r.image.startsWith('http') || r.image.startsWith('data:')) ? r.image : undefined} className="object-cover" />
@@ -371,7 +373,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </div>
                 ))}
                 {favoriteRecipes.length === 0 && (
-                  <div className="col-span-full py-12 text-center bg-muted rounded-[32px]">
+                  <div className="col-span-full py-12 text-center bg-muted rounded-2xl">
                     <Heart className="w-10 h-10 text-muted-foreground/30 mx-auto mb-4" />
                     <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest">No favorites saved yet</p>
                   </div>

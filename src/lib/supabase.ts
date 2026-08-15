@@ -561,6 +561,59 @@ export async function extractRecipeFromImage(imagesBase64: string | string[]): P
   }
 }
 
+export interface RecipeSource {
+  url: string;
+  name: string;
+  author: string;
+  image: string | null;
+}
+
+// Import a recipe from a web page using the Edge Function. The page is fetched
+// server-side (browsers can't read cross-origin recipe sites) and handed to the
+// same model that reads recipe photos.
+export async function extractRecipeFromUrl(
+  url: string
+): Promise<{ recipe?: any; source?: RecipeSource; error?: string | null }> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      return { error: 'Please sign in to import recipes from a link' };
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/extract-recipe-from-url`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    let payload: any = null;
+    try {
+      payload = await response.json();
+    } catch {
+      payload = null;
+    }
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return { error: 'Link import isn\'t switched on yet — use a photo for now.' };
+      }
+      return { error: payload?.error || `Failed to import recipe (error ${response.status})` };
+    }
+
+    if (payload?.error) return { error: payload.error };
+    if (!payload?.recipe) return { error: 'No recipe came back from that link.' };
+
+    return { recipe: payload.recipe, source: payload.source, error: null };
+  } catch (err: any) {
+    return { error: err.message || 'Failed to import recipe from that link' };
+  }
+}
+
 // Update user profile
 export async function updateUserProfile(userId: string, updates: any): Promise<{ data: any; error: any }> {
   const { data, error } = await supabase

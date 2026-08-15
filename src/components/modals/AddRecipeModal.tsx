@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { extractRecipeFromImage } from '../../lib/supabase';
+import { extractRecipeFromImage, extractRecipeFromUrl } from '../../lib/supabase';
 import { 
   Dialog, 
   DialogContent, 
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, Camera, PenTool, Check, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { X, Plus, Camera, PenTool, Link2, Check, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Recipe } from '../../types';
 
 interface AddRecipeModalProps {
@@ -23,7 +23,26 @@ interface AddRecipeModalProps {
   defaultAuthor?: string;
 }
 
-const AddRecipeModal: React.FC<AddRecipeModalProps> = ({ 
+// An imported photo is hotlinked from the source site, so check it actually
+// renders here before adopting it — plenty of sites block off-site loads.
+const imageLoads = (src: string): Promise<boolean> =>
+  new Promise(resolve => {
+    const img = new Image();
+    let settled = false;
+    const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      img.onload = null;
+      img.onerror = null;
+      resolve(ok);
+    };
+    const timer = setTimeout(() => finish(false), 6000);
+    img.onload = () => { clearTimeout(timer); finish(true); };
+    img.onerror = () => { clearTimeout(timer); finish(false); };
+    img.src = src;
+  });
+
+const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
   onClose, 
   onSave, 
   onUpdate, 
@@ -39,6 +58,9 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
   const [uploadedImages, setUploadedImages] = useState<any[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [tagInput, setTagInput] = useState('');
+  const [recipeUrl, setRecipeUrl] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [recipePhotoFile, setRecipePhotoFile] = useState<File | null>(null);
@@ -159,6 +181,54 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
     }
   };
 
+  const handleImportFromUrl = async () => {
+    const url = recipeUrl.trim();
+    if (!url || isImporting) return;
+    setIsImporting(true);
+    setImportError(null);
+    try {
+      const { recipe, source, error } = await extractRecipeFromUrl(url);
+      if (error) {
+        setImportError(error);
+        return;
+      }
+      if (!recipe) return;
+
+      const credit = source ? `Adapted from ${source.author || source.name} — ${source.url}` : '';
+      const usableImage = source?.image && (await imageLoads(source.image)) ? source.image : null;
+
+      setFormData(prev => ({
+        ...prev,
+        title: recipe.title || prev.title,
+        // The chef stays whoever brought the recipe into the binder — the
+        // original site is credited in the story instead.
+        author: prev.author || recipe.author || '',
+        category: recipe.category || prev.category,
+        prepTime: recipe.prepTime || prev.prepTime,
+        cookTime: recipe.cookTime || prev.cookTime,
+        servings: recipe.servings?.toString() || prev.servings,
+        description: recipe.description || prev.description,
+        ingredients: recipe.ingredients?.length > 0 ? recipe.ingredients : prev.ingredients,
+        instructions: recipe.instructions?.length > 0 ? recipe.instructions : prev.instructions,
+        difficulty: recipe.difficulty || prev.difficulty,
+        dietary: recipe.dietary || prev.dietary,
+        tags: recipe.tags || prev.tags,
+        story: [recipe.story, credit].filter(Boolean).join('\n\n') || prev.story,
+        image: usableImage || prev.image,
+      }));
+
+      if (usableImage) {
+        setRecipePhotoPreview(usableImage);
+        setUsePhotoAsImage(true);
+      }
+      setStep(1);
+    } catch (err) {
+      setImportError('Failed to read that link. Please try again.');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const handleSubmit = () => {
     const imageValue = usePhotoAsImage && recipePhotoPreview ? recipePhotoPreview : formData.image;
     const recipeData = {
@@ -264,6 +334,50 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
                     </div>
                   )}
                 </div>
+              </div>
+
+              <div className="p-8 rounded-2xl border-2 border-border hover:border-foreground/30 transition-all bg-card group">
+                <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-6">
+                  <div className="w-16 h-16 shrink-0 bg-foreground/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Link2 className="w-8 h-8 text-foreground" />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-bold text-foreground mb-2">Paste a link</h4>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Found it online? Drop the address in and the same AI reads the page for you — the source gets credited in the story.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Input
+                    type="url"
+                    inputMode="url"
+                    value={recipeUrl}
+                    onChange={e => { setRecipeUrl(e.target.value); setImportError(null); }}
+                    onKeyDown={e => { if (e.key === 'Enter') handleImportFromUrl(); }}
+                    placeholder="https://smittenkitchen.com/..."
+                    className="flex-1 min-w-0 bg-muted border-2 border-transparent focus-visible:border-primary focus-visible:bg-background rounded-2xl px-5 h-14 font-medium outline-none transition-all"
+                  />
+                  <Button
+                    onClick={handleImportFromUrl}
+                    disabled={!recipeUrl.trim() || isImporting}
+                    className="h-14 px-8 shrink-0 bg-foreground text-background hover:bg-foreground/90 rounded-2xl font-bold text-sm disabled:opacity-40 border-none"
+                  >
+                    {isImporting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Reading...
+                      </>
+                    ) : 'Import'}
+                  </Button>
+                </div>
+
+                {importError && (
+                  <div className="mt-4 p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl">
+                    <p className="text-rose-600 dark:text-rose-400 text-sm font-medium">{importError}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

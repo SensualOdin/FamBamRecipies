@@ -83,7 +83,7 @@ export const useRecipes = () => {
 
   return {
     recipes,
-    isLoading: recipesQuery.isLoading || favoritesQuery.isLoading,
+    isLoading: recipesQuery.isLoading,
     isError: recipesQuery.isError || favoritesQuery.isError,
     createRecipe: createRecipeMutation.mutateAsync,
     updateRecipe: updateRecipeMutation.mutateAsync,

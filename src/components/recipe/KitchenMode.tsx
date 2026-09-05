@@ -301,9 +301,11 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
           <Button 
             variant="ghost" 
             size="icon"
+            aria-label={isSpeaking ? "Stop narration" : "Read aloud"}
+            aria-pressed={isSpeaking}
             onClick={() => {
               if (isSpeaking) stopSpeaking();
-              else speak(showIngredients ? "Reading ingredients" : steps[currentStep]);
+              else speak(showIngredients ? recipe.ingredients.join(". ") : steps[currentStep]);
             }}
             className={`rounded-full h-10 w-10 sm:h-12 sm:w-12 transition-all ${isSpeaking ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
           >
@@ -312,6 +314,8 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Toggle voice commands"
+            aria-pressed={isVoiceActive}
             disabled={!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)}
             onClick={() => {
               setIsVoiceActive(!isVoiceActive);
@@ -323,6 +327,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
           <Button 
             variant="ghost" 
             size="icon"
+            aria-label="Close Kitchen Mode"
             onClick={() => {
               onClose();
             }}
@@ -337,7 +342,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
       <Progress value={progress} className="h-1 rounded-none bg-white/5 z-20" indicatorClassName="bg-primary" />
 
       {/* Main Content */}
-      <div className="flex-1 relative overflow-hidden flex flex-col items-center bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)]">
+      <div className="flex-1 min-h-0 relative overflow-y-auto flex flex-col items-center bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05)_0%,transparent_70%)]">
         <AnimatePresence mode="wait">
           <motion.div
             key={showIngredients ? 'ingredients' : currentStep}
@@ -345,7 +350,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="max-w-6xl w-full px-6 sm:px-12 py-12 pb-32 flex-1 flex flex-col justify-center relative z-10"
+            className="max-w-6xl w-full px-6 sm:px-12 py-8 pb-10 flex flex-col my-auto shrink-0 relative z-10"
           >
             {showIngredients ? (
               <div className="w-full">
@@ -365,7 +370,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
                       <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
                         <span className="text-xs font-black text-primary">{i + 1}</span>
                       </div>
-                      <span className="text-base sm:text-lg font-medium text-[hsl(42,45%,90%)] truncate">{ing}</span>
+                      <span className="text-base sm:text-lg font-medium text-[hsl(42,45%,90%)] break-words">{ing}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -413,6 +418,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
           <Button 
             variant="ghost" 
             size="icon"
+            aria-label="Previous step"
             onClick={() => {
               handlePrev();
             }}
@@ -435,6 +441,7 @@ const KitchenMode: React.FC<KitchenModeProps> = ({ recipe, onClose, onFinish }) 
           ) : (
             <Button 
               size="icon"
+              aria-label="Next step"
               onClick={() => {
                 handleNext();
               }}

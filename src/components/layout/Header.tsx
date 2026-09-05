@@ -1,240 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { ChefHat, Search, X, ShoppingCart, Calendar, UtensilsCrossed, Moon, Sun } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { BookOpen, Search, X, ShoppingBag, CalendarDays, Moon, Sun, ArrowUpRight, ArrowRight, Shuffle, SlidersHorizontal, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Recipe } from '../../types';
 
-interface HeaderProps {
-  user: any;
-  userProfile: any;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  isSearchFocused: boolean;
-  setIsSearchFocused: (focused: boolean) => void;
-  shoppingListCount: number;
-  onShowShoppingList: () => void;
-  onShowMealPlanner: () => void;
-  onShowUnitConverter: () => void;
-  onShowProfile: () => void;
-  onShowAuth: () => void;
-  onPrefetch: (modal: string) => void;
-  isLoaded: boolean;
-  recipeCount?: number;
-  cookCount?: number;
-  topRecipe?: { title: string; author: string } | null;
-}
-
-const Header: React.FC<HeaderProps> = ({
-  user,
-  userProfile,
-  searchQuery,
-  setSearchQuery,
-  isSearchFocused,
-  setIsSearchFocused,
-  shoppingListCount,
-  onShowShoppingList,
-  onShowMealPlanner,
-  onShowUnitConverter,
-  onShowProfile,
-  onShowAuth,
-  onPrefetch,
-  isLoaded,
-  recipeCount = 0,
-  cookCount = 0,
-  topRecipe = null,
-}) => {
-  // Initialize from the DOM: an inline script in index.html applies the saved
-  // theme class before paint, so the DOM is the source of truth here.
-  const [theme, setTheme] = useState<'light' | 'dark'>(() =>
-    document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-  );
-
-  useEffect(() => {
-    try {
-      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-      if (savedTheme) {
-        setTheme(savedTheme);
-        document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-      }
-    } catch (e) {
-      console.warn('LocalStorage blocked', e);
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    try {
-      localStorage.setItem('theme', newTheme);
-    } catch (e) {
-      console.warn('LocalStorage write blocked', e);
-    }
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-  };
-
-  return (
-    <header className={`relative z-10 transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-2 sm:pt-7">
-        {/* Top Navigation */}
-        <nav className="flex justify-between items-center gap-3">
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/30 -rotate-3">
-              <ChefHat className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
-            </div>
-            <span className="font-serif font-bold text-base sm:text-xl tracking-tight text-foreground truncate">
-              The <em className="not-italic text-[hsl(var(--accent))]">Ge-winning</em>
-              <span className="hidden lg:inline"> Family Cookbook</span>
-            </span>
-          </div>
-
-          {/* Tools & Auth */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            <div className="flex bg-card rounded-full p-0.5 sm:p-1 border border-border shadow-sm">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={toggleTheme}
-                      aria-label="Switch theme"
-                      className="relative h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all border-none"
-                    >
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={theme}
-                          initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
-                          animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                          exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {theme === 'light' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                        </motion.div>
-                      </AnimatePresence>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Switch Theme</TooltipContent>
-                </Tooltip>
-
-                {[
-                  { id: 'list', icon: <ShoppingCart className="w-5 h-5" />, onClick: onShowShoppingList, label: 'Shopping List', count: shoppingListCount, mobile: false, prefetch: 'shopping' },
-                  { id: 'plan', icon: <Calendar className="w-5 h-5" />, onClick: onShowMealPlanner, label: 'Meal Planner', mobile: true },
-                  { id: 'unit', icon: <UtensilsCrossed className="w-5 h-5" />, onClick: onShowUnitConverter, label: 'Unit Converter', mobile: false }
-                ].map((tool) => (
-                  <Tooltip key={tool.id}>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={tool.onClick}
-                        onMouseEnter={() => tool.prefetch && onPrefetch && onPrefetch(tool.prefetch)}
-                        aria-label={tool.label}
-                        className={`relative h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all group border-none ${!tool.mobile ? 'hidden md:flex' : 'flex'}`}
-                      >
-                        {tool.icon}
-                        {tool.count > 0 && (
-                          <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] text-[10px] flex items-center justify-center rounded-full font-bold border-none">
-                            {tool.count}
-                          </Badge>
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{tool.label}</TooltipContent>
-                  </Tooltip>
-                ))}
-              </TooltipProvider>
-            </div>
-
-            {user ? (
-              <Button
-                variant="ghost"
-                onClick={onShowProfile}
-                onMouseEnter={() => onPrefetch && onPrefetch('profile')}
-                className="flex items-center gap-2 bg-card hover:bg-muted border border-border px-3 sm:px-4 py-1.5 rounded-full transition-all group h-auto shadow-sm"
-              >
-                <div className="text-right hidden sm:block">
-                  <div className="text-foreground font-semibold text-xs">{userProfile.name}</div>
-                  <div className="text-[hsl(var(--accent))] text-[10px] font-medium">Lvl {userProfile.level} Chef</div>
-                </div>
-                <Avatar className="w-8 h-8 border-none shadow-inner">
-                  <AvatarImage src={userProfile.avatarUrl} />
-                  <AvatarFallback className="bg-primary text-xs text-primary-foreground border-none font-bold">
-                    {userProfile.avatar}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            ) : (
-              <Button
-                onClick={onShowAuth}
-                className="px-5 sm:px-6 py-2 bg-foreground text-background rounded-full hover:bg-[hsl(var(--accent))] hover:text-[hsl(var(--accent-foreground))] transition-all font-bold text-sm shadow-md border-none"
-              >
-                Sign In
-              </Button>
-            )}
-          </div>
-        </nav>
-
-        {/* Editorial hero */}
-        <div className={`max-w-4xl pt-10 sm:pt-16 pb-4 transform transition-all duration-700 delay-150 ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-          <h1 className="font-serif text-[2.6rem] leading-[1.02] sm:text-6xl md:text-7xl font-semibold text-foreground tracking-tight">
-            Recipes worth{' '}
-            <span className="relative inline-block whitespace-nowrap">
-              arguing about
-              <svg className="absolute left-0 -bottom-[0.08em] w-full h-[0.24em]" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M2 8 C 40 2, 80 10, 120 5 S 180 4, 198 7" fill="none" stroke="hsl(var(--primary))" strokeWidth="5" strokeLinecap="round" />
-              </svg>
-            </span>{' '}
-            at the table.
-          </h1>
-
-          {(recipeCount > 0 || cookCount > 0) && (
-            <p className="font-hand text-2xl sm:text-[1.7rem] leading-snug text-muted-foreground mt-6 -rotate-1 origin-left max-w-xl">
-              {recipeCount} recipes from {cookCount} cooks
-              {topRecipe ? (
-                <>
-                  {' '}— and <span className="text-[hsl(var(--accent))] font-semibold">{topRecipe.author}'s {topRecipe.title.toLowerCase()}</span> is currently in the lead. Somebody step up.
-                </>
-              ) : (
-                <> — and counting.</>
-              )}
-            </p>
-          )}
-
-          {/* Search Bar */}
-          <div className={`max-w-2xl mt-8 sm:mt-10 transform transition-transform duration-300 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'}`}>
-            <div className={`relative flex items-center bg-card rounded-2xl border border-border overflow-hidden shadow-[0_10px_30px_-12px_rgba(29,42,68,0.18)] transition-shadow ${isSearchFocused ? 'ring-2 ring-primary/60' : ''}`}>
-              <div className="pl-5 text-muted-foreground">
-                <Search className="w-5 h-5" strokeWidth={1.75} />
-              </div>
-              <Input
-                type="text"
-                placeholder="Search the family binder..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-                className="w-full px-4 py-5 bg-transparent text-foreground placeholder:text-muted-foreground/70 text-base outline-none border-none h-auto focus-visible:ring-0"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear search"
-                  className="mr-3 p-2 bg-muted hover:bg-border rounded-full text-foreground transition-all w-8 h-8"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
+export default function Header(p: any) {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const [imageFailed, setImageFailed] = useState(false);
+  const recipe: Recipe | undefined = p.spotlight;
+  const browse = () => document.getElementById('binder')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+  const theme = () => { const next = !dark; setDark(next); document.documentElement.classList.toggle('dark', next); try { localStorage.setItem('theme', next ? 'dark' : 'light'); } catch {} };
+  return <header className="showcase-header">
+    <a href="#binder" className="skip-link">Skip to recipes</a>
+    <div className="topline"><span>The Ge-winning Family Cookbook</span><span>Made with love & butter · Frisco, TX</span></div>
+    <nav className="masthead" aria-label="Main navigation">
+      <a className="wordmark" href={window.location.pathname} aria-label="FamBam home"><BookOpen strokeWidth={1.5}/><span>FamBam<span className="brand-dot">.</span></span></a>
+      <div className="nav-destinations"><button onClick={browse} className="nav-active">The cookbook</button><button onClick={p.onShowMealPlanner}>Meal planner</button><button onClick={p.onShowShoppingList}>Shopping list {p.shoppingListCount > 0 && <span className="nav-count">{p.shoppingListCount}</span>}</button></div>
+      <div className="nav-tools"><Button variant="ghost" size="icon" onClick={theme} aria-label={dark ? 'Use paper theme' : 'Use midnight theme'}>{dark ? <Sun size={19}/> : <Moon size={19}/>}</Button><Button onClick={p.user ? p.onShowProfile : p.onShowAuth} className="sign-in">{p.user ? p.userProfile.name : 'Family sign in'}<ArrowUpRight size={16}/></Button></div>
+    </nav>
+    <div className="editorial-spread">
+      <div className="intro-copy">
+        <div className="edition-label"><span className="tiny-rule"/> OUR FAMILY, ONE RECIPE AT A TIME</div>
+        <h1>Good food.<br/>Great <em>arguments.</em></h1>
+        <p className="intro-description">The recipes we keep coming back to. The people who make them ours. Pull up a chair.</p>
+        <div className="hero-search"><Search size={21}/><input aria-label="Search the family cookbook" placeholder="What are you craving?" value={p.searchQuery} onChange={e=>p.setSearchQuery(e.target.value)} onKeyDown={e=>{if(e.key === 'Enter') browse();}}/>{p.searchQuery ? <button onClick={()=>p.setSearchQuery('')} aria-label="Clear search"><X size={18}/></button> : <kbd aria-hidden="true">⌘ K</kbd>}<button className="search-go" onClick={browse} aria-label="Show matching recipes"><ArrowRight size={19}/></button></div>
+        <div className="intro-actions"><button className="text-action" onClick={browse}>Open the cookbook <ArrowRight size={17}/></button><button className="text-action secondary-action" disabled={!p.recipeCount} onClick={p.onSurprise}><Shuffle size={16}/> Pick dinner for me</button></div>
+        <div className="family-count"><span className="mini-monogram">G</span><div><strong>{p.recipeCount || '—'} recipes. {p.cookCount || '—'} family cooks.</strong><span>One very well-loved binder.</span></div><span className="hand-note">A little messy. A lot of love.</span></div>
       </div>
-    </header>
-  );
-};
-
-export default Header;
+      <div className="spotlight-wrap">
+        <div className="spotlight-tab">FROM OUR KITCHENS</div>
+        {recipe ? <article className="spotlight-card">
+          <div className="spotlight-photo">{!imageFailed && /^(http|data:)/.test(recipe.image || '') ? <img src={recipe.image} alt={recipe.title} fetchPriority="high" onError={()=>setImageFailed(true)}/> : <div className="index-card-lines spotlight-placeholder"><span className="font-hand">{recipe.title}</span><BookOpen size={48}/></div>}<span className="spotlight-label"><span/> THE FAMILY PICK</span><button className="photo-arrow" onClick={()=>p.onOpenRecipe(recipe)} aria-label={`Open ${recipe.title}`}><ArrowUpRight size={25}/></button></div>
+          <div className="spotlight-caption"><div className="recipe-eyebrow">FROM {recipe.author.toUpperCase()}'S KITCHEN</div><button onClick={()=>p.onOpenRecipe(recipe)} className="spotlight-title">{recipe.title}</button><div className="spotlight-meta"><span><Clock size={14}/>{/^\d+$/.test(String(recipe.cookTime)) ? `${recipe.cookTime} min` : recipe.cookTime}</span><span>{recipe.category}</span><span>Serves {recipe.servings}</span></div></div>
+        </article> : <div className="spotlight-card spotlight-loading"><BookOpen size={50}/><p className="font-hand">Opening the family binder…</p></div>}
+        <span className="spotlight-note">Passed around. Passed down.</span>
+      </div>
+    </div>
+    <div className="tool-ribbon"><span><BookOpen size={18}/><strong>A little help in the kitchen</strong></span><button onClick={p.onShowMealPlanner}><CalendarDays size={17}/> Plan the week <ArrowUpRight size={15}/></button><button onClick={p.onShowShoppingList}><ShoppingBag size={17}/> Make a grocery list <ArrowUpRight size={15}/></button><button onClick={p.onShowUnitConverter}><SlidersHorizontal size={17}/> Convert measurements <ArrowUpRight size={15}/></button></div>
+  </header>;
+}

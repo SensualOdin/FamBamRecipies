@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { scaleIngredient } from '../../lib/scaleIngredient';
 import { motion } from 'framer-motion';
 import {
   Share2, Printer, Clock, Users, Flame,
   Timer as TimerIcon, ShoppingCart, BookOpen,
-  Plus, Minus, Check, ChefHat, Eye, ArrowLeft
+  Plus, Minus, Check, ChefHat, Eye, ArrowLeft, Star
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { subscribeToRecipePresence } from '../../lib/supabase';
@@ -28,6 +30,7 @@ const hasPhoto = (r: Recipe) =>
 
 const RecipePage: React.FC<RecipePageProps> = ({ recipe, onBack, onAddToShoppingList, onMarkAsCooked, user }) => {
   const setModal = useStore(state => state.setModal);
+  const [actionError, setActionError] = useState('');
   const [activeTab, setActiveTab] = useState('ingredients');
   const [showShareNotification, setShowShareNotification] = useState(false);
   const [showCookConfirm, setShowCookConfirm] = useState(false);
@@ -63,7 +66,7 @@ const RecipePage: React.FC<RecipePageProps> = ({ recipe, onBack, onAddToShopping
       setShowShareNotification(true);
       setTimeout(() => setShowShareNotification(false), 3000);
     } catch {
-      // Clipboard unavailable — nothing sensible to do
+      setActionError('Could not copy the link. You can copy this page’s address from your browser.');
     }
   };
 
@@ -88,7 +91,7 @@ const RecipePage: React.FC<RecipePageProps> = ({ recipe, onBack, onAddToShopping
       setCookNotes('');
       setCookRating(0);
     } catch (error) {
-      console.error('Error marking as cooked:', error);
+      setActionError('Your cooking note could not be saved. Please try again.');
     } finally {
       setIsMarkingCooked(false);
     }
@@ -109,32 +112,13 @@ const RecipePage: React.FC<RecipePageProps> = ({ recipe, onBack, onAddToShopping
 
   const adjustedServings = Math.round(Number(recipe.servings) * servingMultiplier);
 
-  const parseIngredient = (ingredient: string) => {
-    const match = ingredient.match(/^([\d./]+\s*(?:cups?|tbsp|tsp|lbs?|oz|g|kg|ml|l)?)\s+(.+)$/i);
-    if (match) {
-      const amount = match[1];
-      const rest = match[2];
-      const numMatch = amount.match(/^([\d./]+)/);
-      if (numMatch) {
-        const numStr = numMatch[1];
-        let num: number | string;
-        if (numStr.includes('/')) {
-          const [numerator, denominator] = numStr.split('/').map(Number);
-          num = (numerator / denominator) * servingMultiplier;
-        } else {
-          num = parseFloat(numStr) * servingMultiplier;
-        }
-        if (typeof num === 'number' && num % 1 !== 0) num = num.toFixed(2);
-        return amount.replace(numMatch[1], String(num)) + ' ' + rest;
-      }
-    }
-    return ingredient;
-  };
+  const parseIngredient = (ingredient: string) => scaleIngredient(ingredient, servingMultiplier);
 
   if (!recipe) return null;
 
   return (
     <div className="min-h-screen bg-background pb-28 sm:pb-16 animate-in fade-in duration-300">
+      {actionError && <div role="alert" className="p-4 bg-secondary text-foreground flex items-center justify-between gap-4"><p>{actionError}</p><button onClick={()=>setActionError('')}>Dismiss</button></div>}
       {/* Top bar */}
       <div className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
@@ -424,29 +408,9 @@ const RecipePage: React.FC<RecipePageProps> = ({ recipe, onBack, onAddToShopping
         </Tabs>
       </div>
 
-      {/* Cook Confirm Overlay */}
-      {showCookConfirm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-center justify-center p-6 animate-in fade-in duration-300" onClick={() => setShowCookConfirm(false)}>
-          <div className="bg-card border border-border rounded-2xl p-10 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
-            <div className="w-20 h-20 bg-[hsl(var(--accent))]/15 rounded-2xl flex items-center justify-center mb-6 mx-auto"><span className="font-hand text-3xl text-[hsl(var(--accent))] -rotate-3">yum!</span></div>
-            <h3 className="font-serif text-2xl font-semibold text-foreground mb-4 text-center">How was it?</h3>
-            <div className="flex justify-center gap-3 mb-8">
-              {[1, 2, 3, 4, 5].map(s => (
-                <button key={s} onClick={() => setCookRating(s)} className={`text-3xl transition-transform hover:scale-125 ${s <= cookRating ? 'grayscale-0' : 'grayscale opacity-30'}`}>⭐</button>
-              ))}
-            </div>
-            <Textarea value={cookNotes} onChange={(e) => setCookNotes(e.target.value)} placeholder="Any notes for next time?" className="w-full p-5 bg-muted rounded-xl border-none focus-visible:ring-2 focus-visible:ring-primary outline-none transition-all resize-none mb-6 min-h-[100px]" />
-            <div className="flex gap-4">
-              <Button variant="ghost" onClick={() => setShowCookConfirm(false)} className="flex-1 h-14 bg-muted text-muted-foreground rounded-full font-bold hover:bg-border border-none transition-all">Later</Button>
-              <Button onClick={handleCookSubmit} disabled={isMarkingCooked} className="flex-1 h-14 bg-[hsl(var(--accent))] text-white rounded-full font-bold shadow-md hover:bg-[hsl(var(--accent))]/90 border-none transition-all disabled:opacity-60">
-                {isMarkingCooked ? 'Saving…' : 'Finish!'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {recipe.story && <section className="max-w-3xl mx-auto px-6 py-9 mb-8"><p className="text-sm font-bold text-muted-foreground mb-3">From {recipe.author}'s kitchen</p><h2 className="font-serif text-3xl mb-5">The story behind the recipe</h2><blockquote className="font-hand text-2xl leading-relaxed border-l-4 border-primary pl-6">{recipe.story}</blockquote></section>}
+      <Dialog open={showCookConfirm} onOpenChange={setShowCookConfirm}><DialogContent className="max-w-md rounded-xl p-8"><DialogTitle className="font-serif text-3xl text-center">How was it?</DialogTitle><DialogDescription className="text-center">Leave a note for the next time this hits the table.</DialogDescription><div className="flex justify-center gap-3 py-4" role="group" aria-label="Recipe rating">{[1,2,3,4,5].map(s=><button key={s} onClick={()=>setCookRating(s)} aria-label={s+' star'+(s===1?'':'s')} aria-pressed={cookRating===s} className="text-primary p-1"><Star size={30} fill={s<=cookRating?'currentColor':'none'}/></button>)}</div><label htmlFor="cooking-notes" className="font-semibold text-sm">Notes for next time</label><Textarea id="cooking-notes" value={cookNotes} onChange={e=>setCookNotes(e.target.value)} placeholder="What would you keep or change?"/>{actionError && <p role="alert">{actionError}</p>}<div className="flex gap-3 mt-3"><Button variant="outline" onClick={()=>setShowCookConfirm(false)} className="flex-1">Later</Button><Button onClick={handleCookSubmit} disabled={isMarkingCooked} className="flex-1">{isMarkingCooked?'Saving…':'Save cooking note'}</Button></div></DialogContent></Dialog>
     </div>
   );
 };
-
 export default RecipePage;

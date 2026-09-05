@@ -1,7 +1,8 @@
 import React, { useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion, LayoutGroup } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Plus, BookOpen } from 'lucide-react';
+import './showcase.css';
 
 // Components
 import RecipeGrid from './components/recipe/RecipeGrid';
@@ -79,13 +80,13 @@ export default function FamilyCookbook() {
 
   // Custom Hooks
   const { user: authUser, signOut } = useAuth();
-  const { recipes: dbRecipes, isLoading: recipesLoading, toggleFavorite, createRecipe, updateRecipe } = useRecipes();
+  const { recipes: dbRecipes, isLoading: recipesLoading, isError: recipesError, toggleFavorite, createRecipe, updateRecipe } = useRecipes();
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
-  const categories = categoriesData || ['All'];
+  const categories = categoriesData?.length ? categoriesData : ['All', ...new Set(dbRecipes.map(r => r.category).filter(Boolean))];
 
   // Combine DB recipes with initial ones if DB is empty
   const allRecipes = useMemo(() => {
-    return dbRecipes.length > 0 ? dbRecipes : (initialRecipes as unknown as Recipe[]);
+    return dbRecipes;
   }, [dbRecipes]);
 
   // Save error state
@@ -98,6 +99,8 @@ export default function FamilyCookbook() {
   }, [saveError]);
 
   // Debounce search (local state for immediate input feedback, then update store)
+  const [toast, setToast] = React.useState('');
+  useEffect(() => { if(toast) {const timer=setTimeout(()=>setToast(''),3500);return ()=>clearTimeout(timer)} },[toast]);
   const [localSearch, setLocalSearch] = React.useState(searchQuery);
   useEffect(() => {
     const timer = setTimeout(() => setFilter('searchQuery', localSearch), 300);
@@ -110,8 +113,8 @@ export default function FamilyCookbook() {
       const searchTerms = searchQuery.toLowerCase();
       const matchesSearch = !searchQuery || 
                            recipe.title.toLowerCase().includes(searchTerms) ||
-                           recipe.description.toLowerCase().includes(searchTerms) ||
-                           recipe.author.toLowerCase().includes(searchTerms) ||
+                           (recipe.description || '').toLowerCase().includes(searchTerms) ||
+                           (recipe.author || '').toLowerCase().includes(searchTerms) ||
                            recipe.tags?.some(t => t.toLowerCase().includes(searchTerms)) ||
                            recipe.ingredients.some(i => i.toLowerCase().includes(searchTerms));
       const matchesCategory = selectedCategory === 'All' || recipe.category === selectedCategory;
@@ -175,6 +178,7 @@ export default function FamilyCookbook() {
 
   const handleMarkAsCooked = async (recipeId: string | number, notes: string | null = null, rating: number | null = null) => {
     const { error } = await markRecipeAsCooked(user?.id || null, recipeId, notes, rating);
+    if (error) throw error;
     if (!error) {
       // Refresh queries
       queryClient.invalidateQueries({ queryKey: ['profile', user?.id] });
@@ -202,10 +206,12 @@ export default function FamilyCookbook() {
       const ingredients = item.ingredients.map((ing: string) => ({ ...parseIngredientForList(ing), checked: false, id: crypto.randomUUID() }));
       setShoppingList((prev: any[]) => [...prev, ...ingredients]);
     }
+    setToast('Ingredients added to your shopping list');
     // Deliberately no navigation — the list badge in the nav ticks up,
     // and jumping to a different page mid-recipe would be jarring.
   }, [setShoppingList]);
 
+  const clearAllFilters = useCallback(() => {setLocalSearch('');resetFilters();}, [resetFilters]);
   const shoppingListCount = useMemo(() => shoppingList.filter(i => !i.checked).length, [shoppingList]);
 
   // Recipe writes require a signed-in user (RLS) — prompt sign-in instead of
@@ -357,6 +363,7 @@ export default function FamilyCookbook() {
         </div>
       )}
       <CommandPalette />
+      {toast && <div className="status-toast" role="status">{toast}</div>}
       
       <MobileNav
         showFavoritesOnly={showFavoritesOnly}
@@ -435,30 +442,19 @@ export default function FamilyCookbook() {
         recipeCount={allRecipes.length}
         cookCount={cookCount}
         topRecipe={topRecipe}
+        spotlight={allRecipes.find(r => r.title.includes('Creamy Tomato Soup')) || pickFeatured(allRecipes)}
+        onOpenRecipe={setSelectedRecipe}
+        onSurprise={() => { const pool=allRecipes.filter(r=>r.category==='Main Dishes'); const choices=pool.length?pool:allRecipes; if(choices.length) setSelectedRecipe(choices[Math.floor(Math.random()*choices.length)]); }}
       />
 
-      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pb-28 sm:pb-20 z-20">
+      <main id="binder" className="binder-main">
         <CooksRow
           recipes={allRecipes}
           selectedAuthor={selectedAuthor}
           onAuthorClick={(name) => setFilter('selectedAuthor', name)}
         />
 
-        {featuredRecipe && (
-          <section className="mt-8">
-            <div className="flex items-baseline gap-4 mb-5">
-              <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground tracking-tight">On the table this week</h2>
-              <div className="flex-1 border-b-2 border-dotted border-border -translate-y-1.5" />
-              <span className="font-hand text-lg text-muted-foreground -rotate-1 hidden sm:block">worth a try ↓</span>
-            </div>
-            <FeaturedRecipe
-              recipe={featuredRecipe}
-              onOpen={setSelectedRecipe}
-              onPrefetch={() => prefetchModal('recipe')}
-            />
-          </section>
-        )}
-
+        <div className="collection-header"><div><h2>The whole binder<span className="brand-dot">.</span></h2><p>Something for every craving. Someone behind every recipe.</p></div><button className="add-tradition" onClick={handleOpenAddRecipe}><Plus size={17}/> Add a Tradition</button></div>
         <LayoutGroup>
           <FilterSection
             categories={categories}
@@ -473,48 +469,19 @@ export default function FamilyCookbook() {
             setSelectedDifficulty={(val: string) => setFilter('selectedDifficulty', val)}
             showFavoritesOnly={showFavoritesOnly}
             setShowFavoritesOnly={(val: boolean) => setFilter('showFavoritesOnly', val)}
-            onResetFilters={resetFilters}
+            onResetFilters={clearAllFilters}
             isLoaded={true}
             initialRecipes={initialRecipes}
           />
 
-          <div className="flex items-baseline gap-4 mb-8 px-1">
-            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground tracking-tight shrink-0">
-              {showFavoritesOnly ? 'The saved stack' : selectedAuthor ? `${selectedAuthor}'s recipes` : (selectedCategory === 'All' ? 'The whole binder' : selectedCategory)}
-            </h2>
-            <Badge variant="secondary" className="px-2.5 py-0.5 bg-muted text-muted-foreground rounded-full text-xs font-bold border-none translate-y-[-2px]">
-              {filteredRecipes.length}
-            </Badge>
-            <div className="flex-1 border-b-2 border-dotted border-border -translate-y-1.5 hidden sm:block" />
-            {selectedAuthor ? (
-              <button
-                onClick={() => setFilter('selectedAuthor', null)}
-                className="font-hand text-lg text-[hsl(var(--accent))] -rotate-1 shrink-0 hidden sm:flex items-center gap-1 hover:underline"
-              >
-                back to everyone <X className="w-4 h-4" />
-              </button>
-            ) : (
-              <span className="font-hand text-lg text-muted-foreground -rotate-1 shrink-0 hidden sm:block">
-                {sortBy === 'newest' ? 'newest first' : sortBy === 'oldest' ? 'oldest first' : sortBy === 'popular' ? 'most cooked first' : 'a to z'}
-              </span>
-            )}
-          </div>
-          {selectedAuthor && (
-            <div className="sm:hidden mb-6 px-1">
-              <button
-                onClick={() => setFilter('selectedAuthor', null)}
-                className="font-hand text-lg text-[hsl(var(--accent))] flex items-center gap-1"
-              >
-                back to everyone <X className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
+          <div className="binder-results-heading" aria-live="polite"><span>{filteredRecipes.length} {showFavoritesOnly ? 'saved recipes' : selectedAuthor ? 'recipes from '+selectedAuthor : selectedCategory === 'All' ? 'family recipes' : selectedCategory.toLowerCase()+' recipes'}{searchQuery ? ' matching “'+searchQuery+'”' : ''}</span>{hasActiveFilters && <button onClick={clearAllFilters}>Clear filters ×</button>}</div>
+          {recipesError && <div role="alert" className="p-6 border border-border rounded-xl mb-6"><h3 className="font-serif text-xl">The binder couldn't load.</h3><p className="mt-2 mb-4">Check your connection and try again.</p><button onClick={()=>queryClient.invalidateQueries({queryKey:['recipes']})} className="text-action">Try again</button></div>}
           <RecipeGrid 
             recipes={filteredRecipes}
             isLoading={recipesLoading}
             onRecipeClick={setSelectedRecipe}
             onToggleFavorite={(id: string | number) => {
+              if (!user) { setModal('auth', true); return; }
               const recipe = allRecipes.find(r => r.id === id);
               if (user && recipe) {
                 toggleFavorite({ userId: user.id, recipeId: id, isFavorite: !recipe.isFavorite });
@@ -531,15 +498,11 @@ export default function FamilyCookbook() {
               setModal('addRecipe', true);
             }}
             onPrefetch={() => prefetchModal('recipe')}
-            onClearFilters={resetFilters}
+            onClearFilters={clearAllFilters}
           />
         </LayoutGroup>
 
-        <footer className="text-center pt-4 pb-6">
-          <p className="font-hand text-xl sm:text-2xl text-muted-foreground">
-            Made with love &amp; butter in Frisco, TX — <span className="text-[hsl(var(--accent))] font-semibold">Gewinning</span> since forever.
-          </p>
-        </footer>
+        <footer className="site-footer"><span className="wordmark"><BookOpen size={24}/> FamBam<span className="brand-dot">.</span></span><p>Made with love & butter in Frisco, TX — Gewinning since forever.</p></footer>
       </main>
       </>
       )}
@@ -596,10 +559,10 @@ export default function FamilyCookbook() {
           <KitchenMode
             recipe={selectedRecipe}
             onClose={() => setModal('kitchenMode', false)}
-            onFinish={() => {
-              handleMarkAsCooked(selectedRecipe.id);
-              setModal('kitchenMode', false);
-              setSelectedRecipe(null);
+            onFinish={async () => {
+              if (!user) {setModal('kitchenMode',false);setModal('auth',true);return;}
+              try {await handleMarkAsCooked(selectedRecipe.id);setModal('kitchenMode',false);setToast('Another one for the family table. Cooking recorded!');}
+              catch {setSaveError('Your cooking record could not be saved. Please try again.');}
             }}
           />
         )}

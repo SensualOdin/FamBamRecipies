@@ -22,8 +22,7 @@ export async function fetchRecipes(): Promise<any[]> {
     .order('created_at', { ascending: false });
   
   if (error) {
-    console.error('Error fetching recipes:', error);
-    return [];
+    throw error;
   }
   
   return data;
